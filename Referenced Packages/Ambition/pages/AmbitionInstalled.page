@@ -1,0 +1,4 @@
+<apex:page controller="ambition.AmbitionController" action="{!setupPage}" sidebar="false" showHeader="false" standardStylesheets="false">
+    <apex:includeScript value="{!$Resource.ambition__jqueryJs}"/>
+    <c:AmbitionIframe url="{!iframeUrl}" />
+</apex:page>

@@ -1,0 +1,546 @@
+<apex:page docType="html-5.0" sidebar="true" controller="dupcheck.dc3ControllerAudit" title="Audit - Duplicate Check for Salesforce" action="{!janitor}" tabstyle="dc3Search__tab">
+  
+	<apex:stylesheet value="{!URLFOR($Resource.dupcheck__slds, '/assets/styles/salesforce-lightning-design-system-vf.min.css')}" />
+	<apex:stylesheet value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/style/dupcheckApp.css" />
+
+	<apex:includeScript value="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" />
+	<apex:includeScript value="//ajax.googleapis.com/ajax/libs/angularjs/1.3.11/angular.min.js" />
+	<apex:includeScript value="//ajax.googleapis.com/ajax/libs/angularjs/1.3.11/angular-sanitize.min.js" />
+    <apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/plauti-ng-slds.min.js" />
+
+	<apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.js" />
+	<apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.ng.app.js" />
+	<apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.ng.directives.js" />
+	<apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.ng.services.js" />
+	<apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.ng.audit.js" />
+
+	<div id="dataStore" data-sf-get-audit-data="{!$RemoteAction.dc3ControllerAudit.getAuditData}" data-sf-related="{!$RemoteAction.dc3ControllerAudit.getRelatedTypeAhead}" data-sf-delete-audit="{!$RemoteAction.dc3ControllerAudit.doDeleteAudit}" />
+	
+	<c:dc3Welcome version="LIGHTNING"/>
+	
+	<div class="plauti dc-body" ng-app="dcApp" ng-controller="auditController">
+		<div class="slds-page-header" role="banner">
+			<div class="slds-grid slds-wrap">
+				<div class="slds-col slds-size--1-of-1 slds-medium-size--2-of-6 slds-large-size--2-of-6">
+					<div class="slds-media">
+						<div class="slds-media__figure">
+							<img class="slds-icon slds-icon--large " ng-src="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheckAssets,'/dupcheckAssets'))}/lightning/app/app_icon_48.png" />
+						</div>
+						<div class="slds-media__body">
+							<p class="slds-text-heading--label">Duplicate Check</p>
+							<div class="slds-grid">
+								<h1 class="slds-text-heading--medium slds-m-right--small slds-truncate slds-align-middle">Audit</h1>
+
+							</div>
+						</div> 
+					</div>
+				</div>
+				<div class="slds-col slds-size--1-of-1 slds-medium-size--4-of-6 slds-large-size--4-of-6 slds-align-bottom">
+					<div class="slds-grid slds-float--right">
+						<div class="slds-button-group " role="group" >
+							<button class="slds-button slds-not-selected slds-button--icon-border-filled " ng-click="doRefresh();" ng-if="!meta.loadingData">
+								<img class="slds-button__icon " ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/utility/refresh_120.png" />
+							</button>
+							<button class="slds-button slds-not-selected slds-button--icon-border-filled " ng-click="meta.ModalFilter = true" ng-if="!meta.loadingData">
+								<img class="slds-button__icon " ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/utility/filter_120.png" />
+							</button>
+							<button class="slds-button slds-button--icon-border-filled" ng-click="meta.ModalDelete = true;" ng-if="!meta.loadingData">
+								<img class="slds-button__icon " ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/utility/delete_120.png" />
+							</button>
+							
+						</div>
+						<div class="slds-button-group slds-float--right slds-button-space-left" role="group">
+							<c:dc3WelcomeLink version="LIGHTNING" helpLink="https://support.duplicatecheck.com/article/usage-guide/dc-audit?utm_source=dcApp&utm_medium=app&utm_campaign=help_link"/>
+						</div>
+					</div>
+				</div>
+				
+			</div>
+		</div>
+		
+        <div class="slds-notify slds-notify--alert slds-theme--alert-texture" role="alert" ng-if="data.deleteActive">
+            <h2>
+                Deletion of Audit Logs is active. 
+            </h2>
+        </div>
+        
+        
+		<div class="slds-grid slds-wrap slds-m-top--medium" ng-if="{!NOT(license.features.auditLogging)}">
+			<div class="slds-col--padded slds-size--1-of-1">
+				<div class="slds-card slds-card--empty ">
+					<div class="slds-card__body slds-p-horizontal--small">
+						<h3 class="slds-text-heading--small slds-p-top--large slds-p-bottom--large">You're not licensed to use this feature.</h3>
+						<button class="slds-button slds-button--neutral slds-button--small slds-m-bottom--x-large" onClick="dcNavigate('{!$Page.dc3License}','')">Show License</button>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div ng-if="{!license.features.auditLogging}">
+			<div>
+				<div class="slds-grid slds-wrap slds-m-top--medium" ng-if="(!data.auditList || data.auditList.length == 0) && !meta.loadingData">
+					<div class="slds-col--padded slds-size--1-of-1">
+						<div class="slds-card slds-card--empty ">
+							<div class="slds-card__body slds-p-horizontal--small">
+								<h3 class="slds-text-heading--small slds-p-top--large slds-p-bottom--large">No Audit Logging Available</h3>
+							</div>
+
+						</div>
+					</div>
+				</div>
+                <script type="text/ng-template" id="SetForMerge">
+                	<div>Set For Merge: 
+                    	<a href="#" ng-click="openObject(audit.{!managed}User__c)" ng-bind-html="audit.{!managed}User__r.Name" ng-if="audit.{!managed}User__c"></a>
+                        prepared <span ng-bind-html="audit.data.objectList.length"/> 
+                        <span ng-bind-html="data.objectMeta[audit.data.objectPrefix].LabelPlural" />    
+                            to be merged.
+                    </div>
+					<ul class="slds-list--horizontal slds-wrap">
+                    	<li class="slds-m-right--large" ng-if="audit.{!managed}User__c"> 
+	                        <span class="slds-text-title" ng-bind-html="data.objectMeta['005'].Label" /> 
+							<span class="slds-text-body--small"><a href="#" ng-click="openObject(audit.{!managed}User__c)" ng-bind-html="audit.{!managed}User__r.Name"></a></span>
+                    	</li>
+                    	<li class="slds-m-right--large" ng-if="audit.data.jobId"> 
+	                        <span class="slds-text-title"> 
+								DC Job 
+							</span>						
+							<span class="slds-text-body--small"><a href="#" ng-click="openUrl('{!$Page.dc3BatchDetail}?id=' + audit.data.jobId)" ng-bind-html="data.recordMap[audit.data.jobId]"></a></span>
+                    	</li>
+                    	<li class="slds-m-right--large" ng-if="audit.data.groupId"> 
+                        	<span class="slds-text-title">
+								Group
+							</span>						
+							<span class="slds-text-body--small" ng-bind-html="data.recordMap[audit.data.groupId]"></span>
+                    	</li>
+					</ul>
+                </script>
+                <script type="text/ng-template" id="Direct">
+                	<div>
+                       Direct: Direct Processing detected the 
+                       <span ng-if="audit.data.feature == 'onInsert'">insert</span> 
+                       <span ng-if="audit.data.feature == 'onUpdate'">update</span> 
+                       <span ng-if="audit.data.feature == 'onApi'">API call</span>
+                       <span ng-if="audit.data.feature == 'onWeb2Lead'">web2lead insert</span>
+                       <span ng-if="audit.data.feature == 'onUpload'">unique import</span> 
+                       for 
+
+						<span ng-bind-html="data.objectMeta[audit.data.objectPrefix].Label" />
+                	   	<span ng-if="audit.{!managed}ObjectId__c"/><a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]"/>
+                        <span ng-if="audit.data.directProcessSucces">&nbsp;and started an automatic convert/merge</span>
+                        <span ng-if="!audit.data.directProcessSucces">&nbsp;and did not find any duplicate</span>.
+                    </div>
+
+					<ul class="slds-list--horizontal slds-wrap">
+
+                    	<li class="slds-m-right--large" ng-if="audit.{!managed}ObjectId__c"> 
+                        	<span class="slds-text-title" ng-bind-html="data.objectMeta['00Q'].Label" /> 
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]"></a>
+							</span>
+                  	  	</li>
+
+					</ul>
+                         
+                </script>
+                
+                <script type="text/ng-template" id="DirectProcess">
+                	Direct Process: Direct Processing started via
+                       <span ng-if="audit.data.feature == 'onInsert'">insert</span> 
+                       <span ng-if="audit.data.feature == 'onUpdate'">update</span> 
+                       <span ng-if="audit.data.feature == 'onApi'">API call</span>
+                       <span ng-if="audit.data.feature == 'onWeb2Lead'">web2lead insert</span>
+                       <span ng-if="audit.data.feature == 'onUpload'">unique import</span> 
+                       and
+
+
+                	<div ng-if="!audit.data.directProcessSucces">
+                       failed to process the <span ng-bind-html="data.objectMeta[audit.data.objectPrefix].Label" />&nbsp;
+                	  <span ng-if="audit.{!managed}ObjectId__c"/><a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]"/>
+                    </div>
+                    <div ng-if="audit.data.directProcessSucces && audit.data.isMerge">
+                        merged the <span ng-bind-html="data.objectMeta[audit.data.objectPrefix].Label" />&nbsp;
+                	   <span ng-if="audit.{!managed}ObjectId__c"/><a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]"/>
+                    </div>
+                    <div ng-if="audit.data.directProcessSucces && audit.data.isConvert">
+                       converted the <span ng-bind-html="data.objectMeta[audit.data.objectPrefix].Label" />&nbsp;
+                	   <span ng-if="audit.{!managed}ObjectId__c"/><a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]"/>
+                    </div>
+
+					<ul class="slds-list--horizontal slds-wrap">
+					
+        	            <li class="slds-m-right--large" ng-if="audit.{!managed}ObjectId__c"> 
+            	             <span class="slds-text-title" ng-bind-html="data.objectMeta['00Q'].Label" /> 
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]"></a>
+							</span>
+                    	</li>
+                         
+					<ul>
+	
+                </script>
+                
+                <script type="text/ng-template" id="Delta">
+                	<div>
+                       Unique Import: Import detected; DC Job started for imported records.
+                    </div>
+
+
+					<ul class="slds-list--horizontal slds-wrap">
+
+                    <li class="slds-m-right--large" ng-if="audit.data.jobId"> 
+                        <span class="slds-text-title">DC Job</span> 
+						<span class="slds-text-body--small">
+							<a href="#" ng-click="openUrl('{!$Page.dc3BatchDetail}?id=' + audit.data.jobId)" ng-bind-html="data.recordMap[audit.data.jobId]"></a>
+						</span>
+                    </ul>
+
+					</ul>
+                         
+                </script>
+                
+                <script type="text/ng-template" id="Web2Lead">
+                	<div>
+                        Web2Lead: New <span ng-bind-html="audit.data.preventionStatus | lowercase " ng-show="(audit.data.preventionStatus == 'UNIQUE' || audit.data.preventionStatus == 'DUPLICATE') && audit.data.directProcessSucces == false"/> <span ng-bind-html="data.objectMeta['00Q'].Label" /> added via Web2Lead
+                        <span ng-if="audit.data.directProcessSucces"> and directly processed via DC Direct Processing</span>.
+                    </div>
+
+					<ul class="slds-list--horizontal slds-wrap">
+
+	                    <li class="slds-m-right--large" ng-if="audit.{!managed}User__c"> 
+    	                    <span ng-bind-html="data.objectMeta['005'].Label" /> <span class="slds-m-left--xx-small"><a href="#" ng-click="openObject(audit.{!managed}User__c)" ng-bind-html="audit.{!managed}User__r.Name"></a></span>
+        	            </li>
+            	            
+                	    <li class="slds-m-right--large" ng-if="audit.{!managed}ObjectId__c"> 
+                    	     <span ng-bind-html="data.objectMeta['00Q'].Label" /> <span class="slds-m-left--xx-small"><a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]"></a></span>
+    	                </li>
+	                    
+        	            <li class="slds-m-right--large" ng-if="audit.data.groupData"> 
+            	             <span class="slds-text-title">DC Job</span>  
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openUrl('{!$Page.dc3BatchDetail}?id=' + audit.data.groupData.{!managed}dcJob__c)" ng-bind-html="data.recordMap[audit.data.groupData.{!managed}dcJob__c]"></a>
+							</span>
+                	    </li>
+					<ul>                    
+     
+                </script>
+                
+                
+                <script type="text/ng-template" id="Merge">
+					
+					<div>
+						Merge: <a href="#" ng-click="openObject(audit.{!managed}User__c)" ng-bind-html="audit.{!managed}User__r.Name" ng-if="audit.{!managed}User__c"></a> merged <span ng-bind-html="audit.data.loserObjects.length" /> <span ng-bind-html="(audit.data.loserObjects.length < 2 ? data.objectMeta[audit.data.objectPrefix].Label : data.objectMeta[audit.data.objectPrefix].LabelPlural)" /> into <a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]" />.
+					</div>
+
+					<ul class="slds-list--horizontal slds-wrap">
+
+						<li class="slds-m-right--large" ng-if="audit.{!managed}User__c"> 
+							<span class="slds-text-title ng-bind-html="data.objectMeta['005'].Label" /> 
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openObject(audit.{!managed}User__c)" ng-bind-html="audit.{!managed}User__r.Name"></a>
+							</span>
+						</span>
+ 	
+						<li class="slds-m-right--large" ng-if="audit.{!managed}ObjectId__c"> 
+							<span class="slds-text-title ng-bind-html="data.objectMeta[audit.data.objectPrefix].Label" /> 
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]"></a>
+							</span>
+						</span> 
+	
+						<li class="slds-m-right--large"
+							<span class="slds-text-body--small slds-m-right--large">
+							</span>
+						</li>
+
+					</ul>			
+	
+				</script>
+
+				<script type="text/ng-template" id="Convert">
+					<div>Convert: 
+						<a href="#" ng-click="openObject(audit.{!managed}User__c)" ng-bind-html="audit.{!managed}User__r.Name" ng-if="audit.{!managed}User__c"></a> 
+						converted <a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]"></a> 
+						into
+						<span ng-if="audit.data.contactId"><a href="#" ng-click="openObject(audit.data.contactId)" ng-bind-html="data.recordMap[audit.data.contactId]"></a>,&nbsp;</span> 
+						<span ng-if="audit.data.accountId"><a href="#" ng-click="openObject(audit.data.accountId)" ng-bind-html="data.recordMap[audit.data.accountId]"></a></span>
+											
+					</div>
+
+					<ul class="slds-list--horizontal slds-wrap">
+		
+						<li class="slds-m-right--large" ng-if="audit.{!managed}User__c"> 
+							<span class="slds-text-title" ng-bind-html="data.objectMeta['005'].Label" /> 
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openObject(audit.{!managed}User__c)" ng-bind-html="audit.{!managed}User__r.Name"></a>
+							</span>
+						</li>
+										
+						<li class="slds-m-right--large" ng-if="audit.{!managed}ObjectId__c"> 
+							<span class="slds-text-title" ng-bind-html="data.objectMeta['00Q'].Label" /> 
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]"></a>
+							</span>
+						</li>
+										
+						<li class="slds-m-right--large" ng-if="audit.data.accountId"> 
+							<span class="slds-text-title" ng-bind-html="data.objectMeta['001'].Label" /> 
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openObject(audit.data.accountId)" ng-bind-html="data.recordMap[audit.data.accountId]"></a>
+							</span>
+						</li>
+										
+						<li class="slds-m-right--large" ng-if="audit.data.contactId"> 
+							<span class="slds-text-title" ng-bind-html="data.objectMeta['003'].Label" /> 
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openObject(audit.data.contactId)" ng-bind-html="data.recordMap[audit.data.contactId]"></a>
+							</span>
+						</li>
+										
+						<li class="slds-m-right--large" ng-if="audit.data.opportunityId"> 
+							<span class="slds-text-title" ng-bind-html="data.objectMeta['006'].Label" /> 
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openObject(audit.data.opportunityId)" ng-bind-html="data.recordMap[audit.data.opportunityId]"></a>
+							</span>
+						</li>
+										
+						<li class="slds-m-right--large" ng-if="audit.data.taskId"> 
+							<span class="slds-text-title" ng-bind-html="data.objectMeta['00T'].Label" /> 
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openObject(audit.data.taskId)" ng-bind-html="data.recordMap[audit.data.taskId]"></a>
+							</span>
+						</li>
+					</ul>
+	
+				</script>
+				<script type="text/ng-template" id="Prevention">
+
+					<div>Prevention: 
+						<a href="#" ng-click="openObject(audit.{!managed}User__c)" ng-bind-html="audit.{!managed}User__r.Name" ng-if="audit.{!managed}User__c"></a> 
+						disabled the duplicate prevention when <span ng-bind-html="audit.data.isEdit ? 'updating' : 'creating'"/> 
+                        
+                        <span ng-if="audit.{!managed}ObjectId__c">
+                            <a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]"></a>.
+                        </span>
+                        <span ng-if="audit.{!managed}ObjectId__c == null">
+                        	a new <span ng-bind-html="data.objectMeta[audit.data.objectPrefix].Label" />.
+                        </span>
+                            
+					</div>	
+
+					<ul class="slds-list--horizontal slds-wrap">				
+						<li class="slds-m-right--large" ng-if="audit.{!managed}User__c"> 
+							<span class="slds-text-title" ng-bind-html="data.objectMeta['005'].Label" /> 
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openObject(audit.{!managed}User__c)" ng-bind-html="audit.{!managed}User__r.Name"></a>
+							</span>
+						</li>
+							
+						<li class="slds-m-right--large" ng-if="audit.{!managed}ObjectId__c"> 
+							<span class="slds-text-title" ng-bind-html="data.objectMeta[audit.data.objectPrefix].Label" /> 
+							<span class="slds-text-body--small">
+								<a href="#" ng-click="openObject(audit.{!managed}ObjectId__c)" ng-bind-html="data.recordMap[audit.{!managed}ObjectId__c]"></a>
+							</span>
+						</li>
+					</ul>
+
+				</script>
+				
+                <div aria-hidden="false" role="dialog" class="slds-modal " ng-class="{'slds-fade-in-open': meta.ModalDelete}">
+					<div class="slds-modal__container">
+						<div class="slds-modal__header">
+							<h2 class="slds-text-heading--medium">Delete Audit Logs</h2>
+							<button class="slds-button slds-button--icon-inverse slds-modal__close" ng-click="meta.ModalDelete = false;">
+								<img class="slds-button__icon slds-button__icon--large" src="{!URLFOR($Resource.slds,'')}/assets/icons/action/close_120.png" /> <span class="slds-assistive-text">Close</span>
+							</button>
+						</div>
+						<div class="slds-modal__content">
+							<p>
+                                All Audit Logs older than now will be deleted. Deletion will be asynchronous, which means that it could take some before you'll see the deletion of the autdit logs. 
+                            </p>
+						</div>
+						<div class="slds-modal__footer">
+							<div class="slds-grid">
+								<div class="slds-col slds-text-align--left">
+									<button class="slds-button slds-button--neutral" ng-click="meta.ModalDelete = false;" ng-disabled="meta.loadingDelete">Cancel</button>
+								</div>
+								<div class="slds-col slds-text-align--right">
+									<button class="slds-button slds-button--neutral slds-button--brand" ng-click="doDeleteAudit()" ng-hide="meta.loadingDelete">Delete</button>
+                                    <button class="slds-button slds-button--neutral slds-button--brand" disabled="disabled" ng-show="meta.loadingDelete">
+                                    	<div class="slds-spinner--small" ><img src="{!URLFOR($Resource.slds,'')}/assets/images/spinners/slds_spinner_inverse.gif" alt="Loading..." /></div>
+                                    </button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="slds-backdrop " ng-class="{'slds-backdrop--open': meta.ModalDelete}"></div>
+                
+				<div aria-hidden="false" role="dialog" class="slds-modal " ng-class="{'slds-fade-in-open': meta.ModalFilter}">
+					<div class="slds-modal__container">
+						<div class="slds-modal__header">
+							<h2 class="slds-text-heading--medium">Filter Audit Logs</h2>
+							<button class="slds-button slds-button--icon-inverse slds-modal__close" ng-click="meta.ModalFilter = false;">
+								<img class="slds-button__icon slds-button__icon--large" src="{!URLFOR($Resource.slds,'')}/assets/icons/action/close_120.png" /> <span class="slds-assistive-text">Close</span>
+							</button>
+						</div>
+						<div class="slds-modal__content">
+							<div class="slds-form--stacked slds-m-around--small">
+								<div class="slds-grid slds-no-wrap">
+									<div class="slds-col--padded slds-size--1-of-1 slds-medium-size--1-of-1 slds-large-size--1-of-2">
+										<div class="slds-form-element">
+											<label class="slds-form-element__label" for="startDate">Start Date</label>
+											<div class="slds-form-element__control">
+												<plauti-datetimepicker date-format="dd MMMM yyyy" name="startDate" ng-model="filter.startDate" start-year="1991" end-year="2099" svg-path="{!URLFOR($Resource.slds,'')}/assets/icons/utility-sprite/svg/symbols.svg" is-meridian-format="true" min-step="1">
+												</plauti-datetimepicker>
+    			
+											</div>
+										</div>
+									</div>
+									<div class="slds-col--padded slds-size--1-of-1 slds-medium-size--1-of-1 slds-large-size--1-of-2">
+										<div class="slds-form-element">
+											<label class="slds-form-element__label" for="endDate">End Date</label>
+											<div class="slds-form-element__control">
+												<plauti-datetimepicker date-format="dd MMMM yyyy" name="endDate" ng-model="filter.endDate" start-year="1991" end-year="2099" svg-path="{!URLFOR($Resource.slds,'')}/assets/icons/utility-sprite/svg/symbols.svg" is-meridian-format="true" min-step="1">
+												</plauti-datetimepicker>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="slds-grid slds-no-wrap slds-m-top--medium">
+									<div class="slds-col--padded slds-size--1-of-1 slds-medium-size--1-of-1 slds-large-size--1-of-2">
+										<div class="slds-form-element">
+											<label class="slds-form-element__label" for="userId">User</label>
+											<div class="slds-form-element__control">
+												<plauti-typeahead id="userId" typeahead-min-length="2" typeahead-wait-ms="1" options="lookupData['userId']" typeahead-options-method="getLookup('User',searchText,'userId');" ng-model="filter.userId" ng-model-display="referenceData['userId']" name-attr="name" value-attr="id" typeahead-select-on-blur="true" svg-path="{!URLFOR($Resource.slds,'')}/assets/icons/utility-sprite/svg/symbols.svg"></plauti-typeahead>
+											</div>
+										</div>
+									</div>
+									<div class="slds-col--padded slds-size--1-of-1 slds-medium-size--1-of-1 slds-large-size--1-of-2">
+										<div class="slds-form-element">
+											<label class="slds-form-element__label" for="auditType">Audit Type</label>
+											<div class="slds-form-element__control">
+												 <div class="slds-select_container">
+													<select id="auditType" class="slds-select" ng-model="filter.auditType">
+														<option value="Merge">Merge</option>
+														<option value="Convert">Convert</option>
+														<option value="Prevention">Prevention</option>
+	                                                    <option value="Direct">Direct</option>
+														<option value="DirectProcess">Direct Processing</option>
+	                                                    <option value="Web2Lead">Web 2 Lead</option>
+	                                                    <option value="Delta">Unique Import</option>
+	                                                    <option value="SetForMerge">Set For Merge</option>
+													</select>
+												</div>
+												
+											</div>
+										</div>
+									</div>
+								</div>
+								<div class="slds-grid slds-no-wrap slds-m-top--medium">
+									<div class="slds-col--padded slds-size--1-of-1 slds-medium-size--1-of-1 slds-large-size--1-of-2">
+										<div class="slds-form-element">
+											<label class="slds-form-element__label" for="prefix">Object</label>
+											<div class="slds-form-element__control">
+												 <div class="slds-select_container">
+													<select id="prefix" class="slds-select" ng-model="filter.objectPrefix" ng-options="object.Prefix as object.Label for object in data.objectList | filter:{isAccessible:true, isQueryable:true} | orderBy:'Label'">
+	                                                </select>
+                                                </div>
+											</div>
+										</div>
+									</div>
+									<div class="slds-col--padded slds-size--1-of-1 slds-medium-size--1-of-1 slds-large-size--1-of-2">
+										<div class="slds-form-element">
+											<label class="slds-form-element__label" for="recordId">Record Id</label>
+											<div class="slds-form-element__control">
+												<input id="recordId" class="slds-input" ng-model="filter.recordId" type="text" maxlength="18"/>
+											</div>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+						<div class="slds-modal__footer">
+							<div class="slds-grid">
+								<div class="slds-col slds-text-align--left">
+									<button class="slds-button slds-button--neutral" ng-click="meta.ModalFilter = false;">Cancel</button>
+								</div>
+								<div class="slds-col slds-text-align--right">
+									<button class="slds-button slds-button--neutral" ng-click="clearFilter();">Clear Filter</button>
+									<button class="slds-button slds-button--neutral slds-button--brand" ng-click="applyFilter()">Apply</button>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="slds-backdrop " ng-class="{'slds-backdrop--open': meta.ModalFilter}"></div>
+				
+				<!-- timeline -->
+				<ul class="slds-m-top--medium">
+					<li ng-repeat="audit in data.auditList" ng-init="audit.data = data.auditData[audit.Id]">
+						<span class="slds-assistive-text">Task</span>
+						<div class="slds-media">
+							<div class="slds-media__body">
+								<div class="slds-media slds-media--timeline slds-timeline__media--task dc-audit-{{audit.{!managed}TypeString__c | lowercase}}">
+									<div class="slds-media__figure slds-timeline__icon dc-audit-media" ng-switch="audit.{!managed}TypeString__c">
+										<div class="slds-icon_container">
+											<img ng-switch-when="Merge" class="slds-icon slds-icon-standard-orders" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/standard/orders_120.png" /> 
+	                                        <img ng-switch-when="SetForMerge" class="slds-icon slds-icon-standard-orders" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/standard/orders_120.png" /> 
+	                                        <img ng-switch-when="Convert" class="slds-icon slds-icon-standard-goals" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/standard/goals_120.png" /> 
+	                                        <img ng-switch-when="Prevention" class="slds-icon slds-icon-standard-coaching" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/standard/coaching_120.png" />
+	                                        <img ng-switch-when="Web2Lead" class="slds-icon slds-icon-standard-lead" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/standard/lead_120.png" />
+											<img ng-switch-when="Delta" class="slds-icon slds-icon-standard-file" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/standard/file_120.png" />
+											<img ng-switch-when="Direct" class="slds-icon slds-icon-standard-home" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/standard/flow_120.png" />
+											<img ng-switch-when="DirectProcess" class="slds-icon slds-icon-standard-home" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/standard/process_120.png" />
+										</div>
+                                    </div>
+                                    
+									<div class="slds-media__body">
+										<div class="" ng-include="audit.{!managed}TypeString__c" >
+										</div>
+										
+										<div class=" slds-text-align--left slds-x-small-show-only">
+											<p class="slds-timeline__date" ng-bind-html="audit.{!managed}AuditDate__c | date:'medium'"></p>
+											<p class="slds-timeline__date slds-text-body--small" ng-bind-html="audit.Name"></p>
+										</div>
+										<div class=" slds-text-align--left slds-small-show-only">
+											<p class="slds-timeline__date" ng-bind-html="audit.{!managed}AuditDate__c | date:'medium'"></p>
+											<p class="slds-timeline__date slds-text-body--small" ng-bind-html="audit.Name"></p>
+										</div>
+										<div class=" slds-text-align--left slds-medium-show-only">
+											<p class="slds-timeline__date" ng-bind-html="audit.{!managed}AuditDate__c | date:'medium'"></p>
+											<p class="slds-timeline__date slds-text-body--small" ng-bind-html="audit.Name"></p>
+										</div>										
+										
+									</div>
+								</div>
+							</div>
+							<div class="slds-media__figure slds-media__figure--reverse slds-col--padded">
+								<div class=" slds-text-align--right slds-large-show">
+									<p class="slds-timeline__date" ng-bind-html="audit.{!managed}AuditDate__c | date:'medium'"></p>
+									<p class="slds-timeline__date slds-text-body--small" ng-bind-html="audit.Name"></p>
+								</div>
+							</div>
+						</div>
+					</li>
+				</ul>
+				
+                <div class="slds-grid slds-grid--align-center" ng-if="!meta.loadingData">
+                    <div class="slds-col">
+                        <button class="slds-button slds-button--brand" ng-click="getMore();" ng-if="data.isMore">
+                            Load more...
+                        </button>
+                    </div>
+                </div>
+				<div ng-if="meta.loadingData" class="slds-m-around--large">
+					<div class="slds-grid slds-grid--align-center">
+						<div class="slds-spinner--large">
+							<img src="{!URLFOR($Resource.slds,'')}/assets/images/spinners/slds_spinner_brand.gif" alt="Loading..." />
+						</div>
+					</div>
+				</div>				
+				
+				
+			</div>
+		</div>
+
+	</div>
+</apex:page>

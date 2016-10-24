@@ -1,0 +1,447 @@
+<apex:page controller="rkpi2.SearchResultsController" standardStylesheets="false" sidebar="false" tabStyle="RK_Search__tab">
+    
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" />
+    <apex:includeScript value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js" />
+    
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/jquery-ui.min.js" />
+    
+    <apex:includeScript value="{!URLFOR($Resource.rkpi2__rk_search_styles, 'rk_search_styles/rk_search_js.js')}" />
+
+    
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css" />
+    
+    <apex:stylesheet value="{!URLFOR($Resource.rkpi2__jqueryui, 'jqueryui/jquery-ui.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.rkpi2__rk_search_styles, 'rk_search_styles/rk_bootstrap.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.rkpi2__rk_search_styles, 'rk_search_styles/rk_search_styles.css')}" />
+
+    
+    <apex:outputPanel rendered="{! !searchEnabled }">
+    	RainKing Native Application is not enabled.
+    </apex:outputPanel>
+    
+    <apex:outputPanel rendered="{! searchEnabled }">
+    
+	    <style>
+	       .no-results {
+	        	font-family: "PT Sans",Arial,sans-serif;
+				font-weight: bold;
+				color: #304762;
+	    		font-size: 2em;
+	        }
+	        .modal-body-gray {
+	        	background-color:#f5f5f5;
+	        }
+	        </style>
+	    
+	    <script>
+	        $j = jQuery.noConflict();
+	
+	        $j(document).ready(function ($) {
+	            var searchId = getParameterByName('id');
+	            
+	            //LOAD SAVE SEARCH RESULTS
+	            var max = 100;
+	            var offset = 1;
+	            var sortBy = 'name';
+	
+	            var sortOrder = 'asc';
+	            var thisPage = 1;
+	            var filter = 'all'; 
+	
+	            getResults(offset, max, thisPage, sortBy, sortOrder, filter);
+	        });
+	        
+	        function handleGetSavedSearchData(results, event) {
+	        	if (results.IsSavedSearch == 'true') {
+		        	$j("#save_search_name_hidden").val(results.Name);
+	    	    	$j("#save_search_description_hidden").val(results.Description);
+	        	}
+	        	$j("#save_search_id").val(results.Id);
+	        	
+	        	$j("#save-search").click(function() {
+					var name = $j("#save_search_name_hidden").val();
+					var desc = $j("#save_search_description_hidden").val();
+					$j("#save_search_name").val(name);
+					$j("#save_search_description").val(desc);
+				});   
+	        }
+	        
+	        function sortGrid(col) {
+	        	       	
+	        	$j("#spinner").show();
+			    $j("#results").hide('fade');
+			    
+			    var maxNumPerPage = parseInt($j("#max").val());
+	        	$j("#offset").val(1);
+	        	$j("#sortBy").val(col); 
+	        	var sortOrder = 'asc';
+	        	       	
+	        	if ($j("#sortOrder").val() == 'asc') {
+	        		sortOrder = 'desc';
+	        	}
+	        	$j("#sortOrder").val(sortOrder); 
+	        	if (col == 'last_name') {
+	        		col = 'last_name,first_name';	
+	        	}
+	        	
+	        	var filter = $j('#filterType').val();
+			    getResults(1, maxNumPerPage, 1, col, sortOrder, filter); 
+			}
+	        
+	        function gotoPage(pageToLoad) {
+	        	$j("#spinner").show();
+			    $j("#results").hide('fade');
+	        	
+	        	var maxNumPerPage = parseInt($j("#max").val());
+	        	var offset = (pageToLoad * maxNumPerPage) - maxNumPerPage + 1;
+	        	var sortBy = $j("#sortBy").val(); 
+	        	var sortOrder = $j("#sortOrder").val(); 
+	
+	        	$j("#offset").val(offset);
+	        	$j("#thisPage").val(pageToLoad);
+	        	
+	        	var filter = $j('#filterType').val();
+	        	
+	        	getResults(offset, maxNumPerPage, pageToLoad, sortBy, sortOrder, filter); 
+	        }
+	        
+	        function resultsLoaded() {
+		    
+			    var searchId = getParameterByName('id');
+			    var offset = parseInt($j("#offset").val());
+			    var sortBy = $j("#sortBy").val(); 
+	        	var sortOrder = $j("#sortOrder").val(); 
+	        	var totalRecords = parseInt($j("#total-count").val());
+	        	var maxNumPerPage = parseInt($j("#max").val());
+	        	var thisPage = parseInt($j("#thisPage").val());
+	        	var totalPages = parseInt($j("#totalPages").val());
+	        	
+	        	var prev = thisPage-1;
+	        	var next = thisPage+1;
+	        		        	
+	        	$j(".previousPage").html('<a href="#" onclick="gotoPage('+ prev +')" aria-label="Previous"><span aria-hidden="true">&laquo;</span></a>');
+	        	$j(".paginate1").show().html('<a href="#" onclick="gotoPage(1)" aria-label="Previous"><span aria-hidden="true">1</span></a>');
+	        	$j(".paginate5").show().html('<a href="#" onclick="gotoPage('+totalPages+')" aria-label="Previous"><span aria-hidden="true">'+ totalPages +'</span></a>');
+	         	$j(".nextPage").html('<a href="#" onclick="gotoPage('+ next +')"  aria-label="Next"><span aria-hidden="true">&raquo;</span></a>');
+	 			
+	        	var minus1 = thisPage-1;
+	       		var plus1 = thisPage+1;
+	       		
+	       		var totalMinus1 = totalPages-1;
+	       		var totalMinus2 = totalPages-2;
+	        	
+	        	if (thisPage < 3) {
+	        		$j(".paginate-blank1").hide();
+	        		if (totalPages > 1) {
+	        			$j(".paginate2").show().html('<a href="#" onclick="gotoPage(2)" aria-label="Previous"><span aria-hidden="true">2</span></a>');
+	        			if (totalPages == 2 && thisPage == 2) {
+	        				$j(".nextPage").html('<a><span >&raquo;</span></a>').addClass("disabled");
+		        			$j(".nextPage a").css("background","transparent");
+	        			}
+	        		}
+	        		if (totalPages > 3) {
+	        			$j(".paginate3").show().html('<a href="#" onclick="gotoPage(3)" aria-label="Previous"><span aria-hidden="true">3</span></a>');
+	        		}
+	        		$j(".paginate4").hide();
+	        		$j(".paginate-blank2").show();
+	        		
+	        		if (thisPage == 1) {
+	        			$j(".paginate1 a").css("background-color","#304762").css("color","#ffffff");
+	        			$j(".previousPage").html('<a><span >&laquo;</span></a>').addClass("disabled");
+		        		$j(".previousPage a").css("background","transparent");
+	        		} else {
+	        			$j(".paginate2 a").css("background-color","#304762").css("color","#ffffff");
+	        		} 
+	        	} else if (thisPage >= 3 && thisPage < (totalPages-2)) {
+	        		$j(".paginate-blank1").show();
+	        		$j(".paginate2").show().html('<a href="#" onclick="gotoPage('+minus1+')" aria-label="Previous"><span aria-hidden="true">'+ minus1 +'</span></a>');
+	        		
+	        		if (totalPages > 3) {
+	        			$j(".paginate3").show().html('<a href="#" onclick="gotoPage('+thisPage+')" aria-label="Previous"><span aria-hidden="true">'+ thisPage +'</span></a>');
+	        			$j(".paginate3 a").css("background-color","#304762").css("color","#ffffff");
+	        		}
+	        		if (totalPages > 4) {
+	        			$j(".paginate4").show().html('<a href="#" onclick="gotoPage('+plus1+')" aria-label="Previous"><span aria-hidden="true">'+ plus1 +'</span></a>');
+	        		}
+	        		if (totalPages > 5) {
+		        		$j(".paginate-blank2").show();
+	    			}
+	        	} else {
+	        		$j(".paginate-blank1").show();
+	        		$j(".paginate2").hide();
+	        		if (totalPages > 3) {
+	        			$j(".paginate3").show().html('<a href="#" onclick="gotoPage('+totalMinus2+')" aria-label="Previous"><span aria-hidden="true">'+totalMinus2+'</span></a>');
+	        		}
+	        		$j(".paginate4").show().html('<a href="#" onclick="gotoPage('+totalMinus1+')" aria-label="Previous"><span aria-hidden="true">'+totalMinus1+'</span></a>');
+	        		
+	        		$j(".paginate-blank2").hide();	
+	        		
+	        		if (thisPage == totalPages) {
+	        			$j(".paginate5 a").css("background-color","#304762").css("color","#ffffff");
+	        			$j(".nextPage").html('<a><span >&raquo;</span></a>').addClass("disabled");
+		        		$j(".nextPage a").css("background","transparent");
+	        		} else if (thisPage == (totalPages-2)) {
+	        			$j(".paginate3 a").css("background-color","#304762").css("color","#ffffff");
+	        		} else if (thisPage == (totalPages-1)) {
+	        			$j(".paginate4 a").css("background-color","#304762").css("color","#ffffff");
+	        		}
+	        	}
+	        	
+	        	if (totalPages <= 5) {
+	        		$j(".paginate-blank1").hide();
+	        		$j(".paginate-blank2").hide();
+	        	}
+	        	
+	        	if (totalPages == 1) {
+	        		$j(".paginate2").hide();
+	        		$j(".paginate3").hide();
+	        		$j(".paginate4").hide();
+	        		$j(".paginate5").hide();
+	        		$j(".nextPage").html('<a><span >&raquo;</span></a>').addClass("disabled");
+	        		$j(".nextPage a").css("background","transparent");
+	        		$j(".pagination").hide();
+	        	}
+	        	
+	        	if (totalPages == 2) {
+	        		$j(".paginate3").hide();
+	        		$j(".paginate4").hide();
+	        		$j(".paginate5").hide();
+	        	}
+	        	
+	        	Visualforce.remoting.Manager.invokeAction(
+	            	'{!$RemoteAction.SearchResultsController.updateSavedSearch}', 
+	            	searchId,totalRecords,$j("#filterType").val(),
+		            handleUpdateSavedSearch
+	        	);        	
+	
+	        	
+	        	$j(".start-row").html(offset);
+	
+	        	if (totalRecords <= (thisPage * maxNumPerPage)) {
+	        		$j(".end-row").html(totalRecords)
+	        	} else {
+	        		$j(".end-row").html(offset + maxNumPerPage-1);
+	        	}
+	        	
+	        	//Add the sort indicator icon
+	        	$j(".grid th").removeClass("asc").removeClass("desc").removeClass("sorted");
+	        	var theId = $j("#sortBy").val();
+	        	var order = $j("#sortOrder").val();
+	        	$j("#"+$j("#sortBy").val()).addClass("sorted").addClass($j("#sortOrder").val());
+	        	
+	        	
+	        	//Enable / Disable the import buttons based on permissions
+	        	if ($j("#search-type").val() == 'Company') {   		
+	        		if ($j("#accountImportEnabled").val() == 'false') {
+		        		$j(".import-to").hide();
+		        		$j(".import-accounts-tag-check").hide();
+		        		$j(".import-result-cols").hide();
+		        		$j("#imports-disabled").show();
+	    			} else {
+	    				$j(".import-to").show();
+	    				$j(".import-accounts-tag-check").show();
+	    				$j(".import-result-cols").show();
+	    				$j("#imports-disabled").hide();
+	    			}
+	        	} else {
+	        		if ($j("#leadImportEnabled").val() == 'false') {
+		        		$j(".import-leads-tag-check").hide();
+	    			} else {
+	    				$j(".import-leads-tag-check").show();
+	    			}
+	    			if ($j("#contactImportEnabled").val() == 'false') {
+		        		$j(".import-contacts-tag-check").hide();
+	    			} else {
+	    				$j(".import-contacts-tag-check").show();
+	    			}	
+	    			if ($j("#leadImportEnabled").val() == 'false' && $j("#contactImportEnabled").val() == 'false') {
+	    				$j(".import-to").hide();
+	    				$j(".import-result-cols").hide();
+	    				$j("#imports-disabled").show();
+	    			}
+	        	}
+	        	Visualforce.remoting.Manager.invokeAction(
+	            	'{!$RemoteAction.SearchResultsController.getSavedSearchData}', 
+	            	searchId,
+		            handleGetSavedSearchData
+	        	); 	  
+	        }
+	        
+	        function handleUpdateSavedSearch(result, event) {	 
+			    if (result == false) {
+			    	alert('Error updating Saved Search row count');
+			    }
+			    		    		    
+			    var max = $j("#max").val();
+			    if ($j("#total-count").val() == 0) {
+			    	$j("#no-results").show('fade');
+			    	if ($j("#filterType").val() != 'all'){
+			    		$j("#clearFilterLink").show();
+			    	}
+			    } else {
+			    	$j("#results").show('fade');
+			    }
+			    
+			    $j("#spinner").hide();
+			    
+			    
+			    $j('select[name=numPerPage] option[value="' + max + '"]').prop('selected', true);	
+	
+			    
+			}
+			
+			function filterSearch(filter) {
+				$j("#spinner").show();
+			    $j("#results").hide('fade');
+			    
+			    var maxNumPerPage = parseInt($j("#max").val());
+	        	$j("#offset").val(1);
+	        	var sortBy = $j("#sortBy").val(); 
+	        	var sortOrder = $j("#sortOrder").val(); 
+	
+			    getResults(1, maxNumPerPage, 1, sortBy, sortOrder, filter); 
+			}
+			
+			function clearFilter() {
+				$j("#spinner").show();
+			    $j("#results").hide('fade');
+			    $j("#no-results").hide('fade');
+			    
+			    var maxNumPerPage = parseInt($j("#max").val());
+	        	$j("#offset").val(1);
+	        	var sortBy = $j("#sortBy").val(); 
+	        	var sortOrder = $j("#sortOrder").val(); 
+	
+			    getResults(1, maxNumPerPage, 1, sortBy, sortOrder, 'all'); 
+			}
+			
+			function refineSearchLink() {
+				var href = "/apex/SearchCompany";
+			    var searchId = getParameterByName('id');
+			    
+			    if ($j("#search-type").val() == 'Company') {
+			    	href = "/apex/SearchCompany?id=" + searchId;
+	            } else {
+	            	href = "/apex/SearchPeople?id=" + searchId;
+	            }
+	            
+	            location.href=href;
+			}
+			
+	    </script>
+	    <div class="rk rkBodyContainer">      
+	        <apex:outputPanel rendered="{! !searchEnabled }"> 
+	            <apex:pageMessage summary="RainKing Search is not enabled." severity="error" strength="3" />
+	        </apex:outputPanel>
+	        
+	        <apex:outputPanel rendered="{! searchEnabled }"> 
+	            <apex:form >
+	                <apex:actionFunction name="getResults" action="{! getSearchResults }" rerender="resultsOut" oncomplete="resultsLoaded()" >
+	                	<apex:param id="offset" name="offset" value="" />
+	                	<apex:param id="max" name="max" value="" />
+	                	<apex:param id="thisPage" name="thisPage" value="" />
+	                	<apex:param id="sortBy" name="sortBy" value="" />
+	                	<apex:param id="sortOrder" name="sortOrder" value="" />
+	                	<apex:param id="filter" name="filter" value="" />
+	                </apex:actionFunction> 
+									
+	            </apex:form> 
+	            <div class="row-fluid">
+	                <apex:outputPanel id="resultsOut">
+	                	<input type="hidden" id="offset" name="offset" value="{! offset }" />
+						<input type="hidden" id="max" name="max" value="{! max }" />
+						<input type="hidden" id="sortBy" name="sortBy" value="{! sortBy }" />
+						<input type="hidden" id="sortOrder" name="sortOrder" value="{! sortOrder }" />
+						<input type="hidden" id="thisPage" name="thisPage" value="{! thisPage }" />
+						<input type="hidden" id="totalPages" name="totalPages" value="{! totalPages }" />
+						<input type="hidden" id="search-type" name="searchType" value="{! searchType }" />
+						<input type="hidden" id="importIds" name="importIds" value="{! importIds }" />
+						<input type="hidden" id="baseUrl" name="baseUrl" value="{! baseUrl }" />
+						<input type="hidden" id="leadImportEnabled" name="leadImportEnabled" value="{! leadImportEnabled }" />
+						<input type="hidden" id="contactImportEnabled" name="contactImportEnabled" value="{! contactImportEnabled }" />
+						<input type="hidden" id="accountImportEnabled" name="accountImportEnabled" value="{! accountImportEnabled }" />
+						<input type="hidden" id="filterType" name="filterType" value="{! filterType }" />
+						<input type="hidden" id="save_search_name_hidden" />
+						<input type="hidden" id="save_search_description_hidden" />
+						<input type="hidden" id="save_search_id" />
+						<input type="hidden" id="tag-mapped-lead" value="{! tagMapSettingsLead }" />
+						<input type="hidden" id="tag-mapped-contact" value="{! tagMapSettingsContact }" />
+						<input type="hidden" id="tag-mapped-account" value="{! tagMapSettingsAccount }" />
+						
+	                    <div id="results" style="display:none;">                        
+	                        <apex:outputPanel rendered="{! NOT(ISNULL(companyRows)) }">
+	                        	<input type="hidden" name="total-count" id="total-count" value="{! companyData.totalCount }" />
+	                            <c:resultsSidebar filterType="{! filterType }" type="{! searchType }" totalCount="{! companyData.totalCount }" totalCountString="{! companyData.totalCountString }" />
+	                            <c:resultsContent data="{! companyRows }" type="{! searchType }" totalCount="{! companyData.totalCount }" totalCountString="{! companyData.totalCountString }" />
+	                        </apex:outputPanel>
+	                        <apex:outputPanel rendered="{! NOT(ISNULL(contactRows)) }">
+	                            <input type="hidden" name="total-count" id="total-count" value="{! contactData.totalCount }" />
+	                            <c:resultsSidebar filterType="{! filterType }" type="{! searchType }" totalCount="{! contactData.totalCount }" totalCountString="{! contactData.totalCountString }" />
+	                            <c:resultsContent data="{! contactRows }" type="{! searchType }" totalCount="{! contactData.totalCount }" totalCountString="{! contactData.totalCountString }" />
+	                        </apex:outputPanel>
+	                    </div>
+	                    <div id="no-results" style="display:none;height:400px;width:100%;text-align:center;margin-top:100px;">
+	                    	<span class="no-results">No results found...</span>
+	                    	<br/><br/>
+	                    	<span id="clearFilterLink" style="display:none"><a onclick="clearFilter()" style="cursor:pointer;">Clear Filter</a> | </span><a onclick="refineSearchLink()" style="cursor:pointer;">Refine Search</a> | <a href="/apex/SearchDashboard">Search Dashboard</a>
+	                    </div>
+	                    <div id="spinner"><div id="spinner-box"><img src="{!$Resource.spinner}"  /><div style="font-style:italic;color:#696969;text-align:center;padding-top:10px;">Loading RainKing Data...</div></div></div>
+	                </apex:outputPanel>
+	            </div>	                        
+	        </apex:outputPanel>    
+	    </div>
+	    
+	    <!-- MODAL --> 
+        <c:saveSearchModal ></c:saveSearchModal>    
+	    
+	    <div class="modal fade" id="inProgressModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true" data-backdrop="static" data-keyboard="false">
+	  		<div class="modal-dialog">
+	    		<div class="modal-content">
+	      			<div class="modal-header">
+	        			<h4 class="modal-title" id="importing-modal-title"></h4>
+	      			</div>
+	      			<div id="import-modal" class="modal-body modal-body-gray" style="text-align:center">
+	        			<div class="importing-tag" style="text-align:center;margin-top:10px;">
+	        				<span style="font-size:11px;">Enter a tag value to better track campaigns, etc.</span>
+	        				<input type="text" id="tagValue" placeholder="Enter a tag value" style="margin-bottom:10px;width: 275px;" /><br />
+	        				<button class="btn-warning import-leads disabled" style="display:none;">Continue Importing</button>
+							<button class="btn-warning import-contacts disabled" style="display:none;">Continue Importing</button>
+							<button class="btn-warning import-accounts disabled" style="display:none;">Continue Importing</button>
+	        			</div>
+	        			<div class="importing-spinner" style="display:none;">
+		        			<br/><br/>
+		        			<img src="{! $Resource.spinner }" />
+	    	    			<br/><br/>
+	        				<div id="import-modal-status">
+	        					Communicating with RainKing...
+	        				</div>
+	        				<br/><br/>
+	        			</div>
+	      			</div>
+	      			<div class="modal-footer" style="display:none;">
+	        			<button id="close-import-modal" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	      			</div> 
+	   			</div>
+	  		</div>
+		</div>
+		
+		<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-hidden="true">
+	  		<div class="modal-dialog">
+	    		<div class="modal-content">
+	      			<div class="modal-header">
+        				<h4 class="modal-title">Import Exception</h4>
+	        			<button data-dismiss="modal" class="close">x</button>
+	      			</div>
+	      			<div class="modal-body" id="exception-msg">
+	        			
+	      			</div>
+	      			<div class="modal-footer">
+	        			<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+	      			</div> 
+	   			</div>
+	  		</div>
+		</div>
+	</apex:outputPanel>
+</apex:page>

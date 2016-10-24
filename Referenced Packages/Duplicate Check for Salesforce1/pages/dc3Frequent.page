@@ -1,0 +1,197 @@
+<apex:page docType="html-5.0" controller="dupcheck.dc3ControllerFrequent" cache="false" Title="Frequent Words - Duplicate Check for Salesforce" sidebar="false" action="{!janitor}" tabstyle="dc3Setup__tab">
+
+    <apex:stylesheet value="{!URLFOR($Resource.dupcheck__slds, '/assets/styles/salesforce-lightning-design-system-vf.min.css')}" />
+    <apex:stylesheet value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/style/dupcheckApp.css" /> 
+	
+  	<apex:includeScript value="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" />
+    <apex:includeScript value="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular.min.js" />
+    <apex:includeScript value="//ajax.googleapis.com/ajax/libs/angularjs/1.4.9/angular-sanitize.min.js" />
+    <apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/plauti-ng-slds.min.js" />
+	
+    <apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.js" />
+    <apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.ng.directives.js" />
+    <apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.ng.services.js" />
+    <apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.ng.frequent.js" /> 
+    
+    <c:dc3Welcome version="LIGHTNING"/>
+    
+	<div class="plauti dc-frequent-body" id="dataStore" ng-app="dcApp" ng-controller="rootController" data-sf-back-url="{!URLFOR($Page.dc3Setup, null)}" data-sf-add-words="{!$RemoteAction.dc3ControllerFrequent.addWords}" data-sf-fetch-words="{!$RemoteAction.dc3ControllerFrequent.fetchWords}" data-sf-delete-word="{!$RemoteAction.dc3ControllerFrequent.deleteWords}">
+                                                                   
+		<div ng-if="{!NOT(license.features.frequentWords)}">
+			<div class="slds-page-header" role="banner">
+				<div class="slds-grid slds-wrap">
+					<div class="slds-col slds-has-flexi-truncate ">
+						<div class="slds-media">
+							<div class="slds-media__figure">
+								<img class="slds-icon slds-icon--large slds-icon-action-close" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/action/close_120.png" />
+							</div>
+						<div class="slds-media__body">
+							<p class="slds-text-heading--label">Error</p>
+								<div class="slds-grid">
+									<h1 class="slds-text-heading--medium slds-m-right--small slds-truncate slds-align-middle" title="Record Title">No Access</h1>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="slds-grid slds-wrap slds-m-top--medium" ng-if="{!NOT(license.features.frequentWords)}">
+				<div class="slds-col--padded slds-size--1-of-1">
+					<div class="slds-card slds-card--empty slds-m-bottom--x-large">
+						<div class="slds-card__body slds-p-horizontal--small">
+							<h3 class="slds-text-heading--small slds-p-top--large slds-p-bottom--large">You're not licensed to use this feature.</h3>
+							<button class="slds-button slds-button--neutral slds-button--small slds-m-bottom--x-large" onClick="dcNavigate('{!$Page.dc3License}')">
+								Show License
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+    
+    
+    	<div ng-if="{!license.features.frequentWords}" >
+    		<div class="slds-page-header" role="banner">
+    			<div class="slds-grid slds-wrap">
+    				<div class="slds-col slds-size--1-of-1 slds-medium-size--4-of-6 slds-large-size--4-of-6">
+                    	<div class="slds-media">
+                        	<div class="slds-media__figure">
+                            	<img class="slds-icon slds-icon--large" ng-src="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheckAssets,'/dupcheckAssets'))}/lightning/app/app_icon_48.png" />
+                        	</div>
+                        	<div class="slds-media__body">
+                            	<p class="slds-text-heading--label">Duplicate Check</p>
+                            	<div class="slds-grid">
+                                	<h1 class="slds-text-heading--medium slds-m-right--small slds-truncate slds-align-middle">Frequent Words</h1>
+                            	</div>
+                        	</div>
+                    	</div>
+                	</div>
+        			<div class="slds-col slds-size--1-of-1 slds-medium-size--2-of-6 slds-large-size--2-of-6 ">
+            			<div class="slds-grid slds-float--right">
+  
+							<button class="slds-button slds-not-selected slds-button--icon-border-filled" ng-click="openUrl('{!URLFOR($Page.dc3Setup, null)}')">
+				            	<img class="slds-button__icon" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/utility/back_120.png" />
+							</button>                			
+                			
+                			<div class="slds-button-group slds-float--right slds-button-space-left" role="group">
+                    			<c:dc3WelcomeLink version="LIGHTNING" helpLink="https://support.duplicatecheck.com/article/usage-guide/dc-frequent-words?utm_source=dcApp&utm_medium=app&utm_campaign=help_link"/>
+							</div>
+                		</div>
+            		</div>
+        		</div>
+        	</div> 
+        	       	
+			
+    	
+  		  	<plauti-tabset class="dc-frequent-words-scoped" scoped="true" active-tab="{!frequentTypes[0]}"> 
+        		<apex:repeat value="{!frequentTypes}" var="word">
+          			<plauti-tab title="{!word}" name="{!word}" template-url="wordTemplate" /> 
+           		</apex:repeat>
+         	</plauti-tabset>
+
+		  	<script type="text/ng-template" id="wordTemplate">  
+				<div class="slds-tabs__content slds-show" ng-controller="pageController">
+
+					<div ng-if="isLoading" class="slds-m-around--large">
+						<div class="slds-grid slds-grid--align-center">
+							<div class="slds-spinner--large">
+								<img src="{!URLFOR($Resource.slds,'')}/assets/images/spinners/slds_spinner_brand.gif" alt="Loading..." />
+							</div>
+						</div>
+					</div>
+
+					
+						<div ng-if="!isLoading" class="slds-col--padded">
+						 <div class="slds-grid slds-m-top--small">
+							<div class="slds-size--1-of-1 slds-medium-size--1-of-6">
+    							<button class="slds-button slds-button--brand" type="button" ng-click="toggleModal()">Add</button>
+							</div>
+							<div class="slds-size--1-of-1 slds-medium-size--4-of-6">
+							</div>
+							<div class="slds-size--1-of-1 slds-medium-size--1-of-6 slds-m-right--x-small">
+								<input class="slds-input" type="text" placeholder="filter words.." autofocus="autofocus" ng-model="input.inputFilter"/>
+							</div> 
+						</div>
+						
+						<div class="dc-frequent-words-grid"> <!--  slds-grid--frame -->
+							<div class="slds-m-top--medium"> <!-- slds-pill__container -->
+								<div class="dc-frequent-words-nfwf" ng-if="data.length < 1">
+                    	    		<h3 class="slds-text-heading--small slds-p-bottom--large slds-m-left--x-small">No Frequent Words Found</h3>
+								</div>
+								<div ng-if="data.length > 0">
+									
+									<div class="slds-m-around--xx-small slds-pill slds-no-flex" ng-repeat="fw in data | filter:input.inputFilter | orderBy:'word'">		
+    									<span class="slds-pill__label slds-m-around--xx-small slds-truncate" ng-bind-html="fw.word" >
+    									</span>
+    									<button class="slds-button slds-button--icon-bare slds-pill__remove" ng-if="fw.recordId" ng-click="deleteWord(fw.recordId)"> 
+	      									<svg aria-hidden="true" class="slds-button__icon">
+												<use xlink:href="{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+      										</svg>
+      										<span class="slds-assistive-text">
+      											Remove
+      										</span>
+    									</button>	
+									</div>
+									<div class="slds-m--bottom-large"> 
+									</div>
+								</div>
+							</div>
+						</div>
+
+						<div ng-show="modalStatus">
+							<div class="slds-modal slds-fade-in-open" aria-hidden="false" role="dialog">
+								<div class="slds-modal__container">
+									<div class="slds-modal__header">
+										<button class="slds-button slds-button--icon-inverse slds-modal__close" ng-click="toggleModal()">
+											<svg aria-hidden="true" class="slds-button__icon slds-button__icon--large">
+												<use xlink:href="{!URLFOR($Resource.slds, '/assets/icons/utility-sprite/svg/symbols.svg#close')}"></use>
+											</svg>
+											<span class="slds-assistive-text">Close</span>
+										</button>
+										<h2 class="slds-text-heading--medium">Add Frequent Word</h2>
+        								<p class="slds-m-top--x-small">
+											Words can be added either one at a time or in a CSV (comma separated values) format:
+											<p>1. WORD</p>
+											<p>2. THIS,IS,A,WORD</p>
+										</p>
+									</div>
+									<div class="slds-modal__content slds-p-around--medium">
+										<div class="slds-form-element">
+    										<div class="slds-form-element__label">
+      											<label class="slds-align-middle">Word(s)</label>
+    										</div> 
+    										<div class="slds-form-element__control">
+      											<textarea class="slds-textarea" rows="3" placeholder="Input New Frequent Word(s)..." ng-model="input.wordString"/>
+    										</div>
+  										</div>
+									</div>
+									<div class="slds-modal__footer">
+										<button class="slds-button slds-button--neutral" ng-click="toggleModal()">Cancel</button> <!-- ng-disabled="input.wordString.length == 0 || angular.isUndefined(input.wordString)" -->
+										<button class="slds-button slds-button--neutral slds-button--brand" ng-click="addWord()" ng-if="!isLoading" ng-disabled="input.wordString.length < 1">Add to list</button>
+										<button class="slds-button slds-button--neutral slds-button--brand" disabled="" ng-if="isLoading">
+											<div class="slds-grid slds-grid--align-space">
+ 												<div class="slds-spinner_container">
+    												<div class="slds-spinner--brand slds-spinner slds-spinner--medium" aria-hidden="false" role="alert">
+      													<div class="slds-spinner__dot-a"></div>
+      													<div class="slds-spinner__dot-b"></div>
+    												</div>
+  												</div>
+        	       		                 		<div class="slds-m-left--small">
+            	   	    	             		Adding...
+                	        		      		</div>
+											</div>			
+										</button>
+									</div>
+								</div>
+							</div>
+							<div class="slds-backdrop slds-backdrop--open">
+							</div>
+							</div>
+						</div>
+					</div>
+		 	</script>  
+				
+		</div>
+	</div>
+
+</apex:page>

@@ -1,0 +1,7 @@
+<messaging:emailTemplate subject="{!$Label.Subject_Content_Completed}" recipientType="User" relatedToType="lmscons__Transcript_Line__c" language="{!recipient.LanguageLocaleKey}">
+<messaging:plainTextEmailBody >
+{!$Label.Hello} {!recipient.FirstName},
+
+{!$Label.You_ve_completed} {!relatedTo.Content_Title__c} - {!relatedTo.lmscons__Training_Content__r.Description__c}.
+</messaging:plainTextEmailBody>
+</messaging:emailTemplate>

@@ -1,0 +1,13 @@
+<apex:page controller="IR_SendPostMortem" >
+  <apex:form >
+      <apex:pageBlock >
+          Issue Description: 
+          <apex:inputTextArea value="{!issueDescText}" />
+          Root Cause:
+          <apex:inputTextArea value="{!rootCauseText}" />
+          Preventative Measures:
+          <apex:inputTextArea value="{!preventativeText}" />
+          <apex:commandButton action="{!save}" value="save"/>
+      </apex:pageBlock>
+  </apex:form>
+</apex:page>

@@ -1,0 +1,27 @@
+<apex:page standardController="skyplatform__Message_Stream__c" extensions="skyplatform.MessageStreamController" action="{!start}" sidebar="true">
+    <apex:form id="form">
+
+		<apex:sectionHeader title="Message Stream" subTitle="New Message Stream" description="Creates a new Message Stream" /> 
+
+        <apex:pageBlock id="topBlock"  >
+           	<apex:pageMessages id="pm"/>
+
+				<apex:pageBlockButtons location="top" > 
+                	<apex:commandButton value="Save" action="{!save}" />
+                	<apex:commandButton value="Cancel" action="{!cancel}" />
+               </apex:pageBlockButtons> 
+
+           	<apex:pageBlockSection columns="2">
+           		<apex:inputField value="{!messageStream.skyplatform__Is_Personal__c}" />
+           		<apex:outputField value="{!messageStream.skyplatform__Contact__c}" />
+           		<apex:outputField value="{!messageStream.skyplatform__Lead__c}" />
+           		<apex:outputField value="{!messageStream.skyplatform__User_Phone__c}" />
+           		<apex:selectList value="{!messageStream.skyplatform__External_Phone__c}" size="1" >
+           			<apex:selectOptions value="{!phoneNumbers}" />
+           		</apex:selectList>
+
+           	</apex:pageBlockSection> 
+        </apex:pageBlock>
+           	               
+    </apex:form>
+</apex:page>

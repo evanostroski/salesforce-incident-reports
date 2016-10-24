@@ -1,0 +1,52 @@
+<apex:page standardController="clzV5__Clarizen_Project__c" extensions="clzV5.clzNewProjectController" action="{!Redirect}">
+<!--apex:page standardController="Clarizen_Project__c" extensions="clzNewProjectController" action="{!Redirect}"-->
+    <apex:form >
+        <apex:pageBlock title="Create Project">
+            <apex:selectRadio value="{!createOption}" layout="pageDirection">
+                <apex:selectOption itemValue="{!createNew}" itemLabel="Create New Project" title="Create New Project in Salesforce and link it to a new Clarizen project"/> 
+                <apex:selectOption itemValue="{!linkToExisting}" itemLabel="Link to an existing Clarizen Project" title="Link to an existing Clarizen project"/>
+            </apex:selectRadio><p/>
+
+            <p/>
+            <apex:commandButton action="{!Next}" value="Next"/>
+            <apex:commandButton action="{!Cancel}" value="Cancel"/>
+            <p/>
+        </apex:pageBlock>
+
+        <center>
+            <div id="statusMessageDiv" style="z-index:1000; visibility:hidden;background-color: InactiveCaption; border-color: Blue; border-style: solid;
+                border-width: 5px; width: 30em; height: 100px;">
+                <p id="statusMessage" style="text-align:left; padding-left:30px; font-size:15px;">Unable to connect to Clarizen. Please check your login details in the Clarizen Setup page.</p>
+                <input type="button"  id="btnCancel" Value="Cancel" onclick="cancelOperation()"/>
+                <input type="button" id="btnContinue" Value="Continue" onclick="continueOperation()"/>
+            </div>  
+        </center>  
+        <!--input type="button" onclick="debugger;" value="Debug"/-->
+        
+        <script type="text/javascript">
+            function cancelOperation()
+            {
+                debugger;
+                window.location = '/'+'{!ClarizenProjectsListPage}';
+            }
+            
+            function continueOperation()
+            {
+                document.getElementById('statusMessageDiv').style.visibility = 'hidden';
+            }
+            
+            function showClarizenIsNotAliveMessage(message)
+            {
+                //document.getElementById('statusMessageDiv').style.visibility = 'visible';
+                var answer = confirm(message + '\n' + "Do you want to continue creating a new project without syncing it to Clarizen?")
+                if (!answer)
+                    cancelOperation();
+            }
+            
+            if (!{!ClarizenConnectionStatus.Success})
+            {
+                showClarizenIsNotAliveMessage('{!ClarizenConnectionStatus.StatusMessage}');
+            }
+        </script>
+     </apex:form>
+</apex:page>

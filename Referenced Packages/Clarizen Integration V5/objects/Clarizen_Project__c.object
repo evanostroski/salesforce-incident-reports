@@ -1,0 +1,1200 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>CancelEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <content>clzNewProject</content>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Visualforce</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>SaveEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <content>clzViewProject2</content>
+        <skipRecordTypeSelect>false</skipRecordTypeSelect>
+        <type>Visualforce</type>
+    </actionOverrides>
+    <allowInChatterGroups>false</allowInChatterGroups>
+    <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <deprecated>false</deprecated>
+    <description>Salesforce - Clarizen Projects custom object</description>
+    <enableActivities>false</enableActivities>
+    <enableBulkApi>true</enableBulkApi>
+    <enableFeeds>false</enableFeeds>
+    <enableHistory>true</enableHistory>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+    <fields>
+        <fullName>CLZ_ActualCost__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Actual cost of the porject</description>
+        <externalId>false</externalId>
+        <label>Actual Cost</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_ActualEffort__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Actual Effort</label>
+        <length>60</length>
+        <required>false</required>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_ActualRevenue__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Actual revenue</description>
+        <externalId>false</externalId>
+        <label>Actual Revenue</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_Billable__c</fullName>
+        <defaultValue>true</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Billable</label>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_BudgetStatus__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Budget Status</label>
+        <picklist>
+            <picklistValues>
+                <fullName>Not Active</fullName>
+                <color>#DDDDDD</color>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Off Track</fullName>
+                <color>#FF0000</color>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>On Track</fullName>
+                <color>#33CC00</color>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>At Risk</fullName>
+                <color>#FFCC33</color>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_CPI__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Cost Performance Index =  Earned Value / Actual Cost</description>
+        <externalId>false</externalId>
+        <label>CPI</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_Campaign__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Campaign</label>
+        <referenceTo>Campaign</referenceTo>
+        <relationshipLabel>Clarizen Projects</relationshipLabel>
+        <relationshipName>Clarizen_Projects</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_Clarizen_Template__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <description>Template used to create a project</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Template used to create a project</inlineHelpText>
+        <label>Clarizen Template</label>
+        <referenceTo>Clarizen_Template__c</referenceTo>
+        <relationshipLabel>Clarizen Projects</relationshipLabel>
+        <relationshipName>Clarizen_Projects</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_ClosingNotes__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Closing Notes</label>
+        <length>2000</length>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>LongTextArea</type>
+        <visibleLines>5</visibleLines>
+    </fields>
+    <fields>
+        <fullName>CLZ_CostVariance__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Cost Variance = Earned value - Actual Cost</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Cost Variance = Earned value - Actual Cost</inlineHelpText>
+        <label>Cost Variance</label>
+        <precision>14</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_Customer__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Account</label>
+        <referenceTo>Account</referenceTo>
+        <relationshipLabel>Clarizen Projects</relationshipLabel>
+        <relationshipName>Clarizen_Projects</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_Description__c</fullName>
+        <deprecated>false</deprecated>
+        <description>description</description>
+        <externalId>false</externalId>
+        <label>Description</label>
+        <length>2000</length>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>LongTextArea</type>
+        <visibleLines>5</visibleLines>
+    </fields>
+    <fields>
+        <fullName>CLZ_DueDate__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Finish date of the project</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Finish date of the project</inlineHelpText>
+        <label>Due Date</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_EAC__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Estimate At Complete = Actual Cost + Estimate To Complete</description>
+        <externalId>false</externalId>
+        <label>EAC</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>1</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_ETC__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Estimate To Complete = (Budgeted Cost - EV)/(CPI*SPI)</description>
+        <externalId>false</externalId>
+        <label>ETC</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>1</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_EarnedValue__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Earned value or Budgeted Cost of Work Performed (BCWP) - completed work expressed in terms of the Budgeted Cost</description>
+        <externalId>false</externalId>
+        <label>Earned Value (EV)</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_HoldingNotes__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Holding Notes</label>
+        <length>2000</length>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>LongTextArea</type>
+        <visibleLines>5</visibleLines>
+    </fields>
+    <fields>
+        <fullName>CLZ_Importance__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Importance of the project</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Project importance</inlineHelpText>
+        <label>Importance</label>
+        <picklist>
+            <picklistValues>
+                <fullName>Critical</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>High</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Low</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Normal</fullName>
+                <default>true</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_IssuesCount__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Issues Count</label>
+        <precision>4</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_N_ProjectManager__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <description>V3 users should use CLZ_ProjectManager field in clarizen project layout.
+V2 users should use CLZ_N_ProjectManager field.</description>
+        <externalId>false</externalId>
+        <label>Project Manager (Clarizen Resource)</label>
+        <lookupFilter>
+            <active>true</active>
+            <filterItems>
+                <field>Clarizen_Resource__c.CLZ_State__c</field>
+                <operation>equals</operation>
+                <value>Active</value>
+            </filterItems>
+            <isOptional>true</isOptional>
+        </lookupFilter>
+        <referenceTo>Clarizen_Resource__c</referenceTo>
+        <relationshipLabel>Clarizen Projects</relationshipLabel>
+        <relationshipName>Clarizen_Projects</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_Parent__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Parent Project</label>
+        <referenceTo>Clarizen_Project__c</referenceTo>
+        <relationshipLabel>Clarizen Child Projects</relationshipLabel>
+        <relationshipName>Clarizen_Child_Projects</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_PercentCompleted__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Percentage of work completion</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Project completion</inlineHelpText>
+        <label>% Completed</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Percent</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_PercentProfitability__c</fullName>
+        <deprecated>false</deprecated>
+        <description>((Actual Revenue - Actual Cost) / Actual Revenue) * 100</description>
+        <externalId>false</externalId>
+        <label>% Profitability</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Percent</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_PlannedBudget__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Cost planned for the project</description>
+        <externalId>false</externalId>
+        <label>Budgeted Cost</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_PlannedRevenue__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Revenue planned for the project</description>
+        <externalId>false</externalId>
+        <label>Expected Revenue</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_Profitability__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Difference between actual revenue and actual cost</description>
+        <externalId>false</externalId>
+        <label>Profit</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_ProjectManager__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <description>V3 users should use CLZ_ProjectManager field in clarizen project layout.
+V2 users should use CLZ_N_ProjectManager field.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>A deprecated field. Maps to Salesforce User object. 
+New field (Project Manager) repleaces this field and maps to a new Clarizen Resource object.</inlineHelpText>
+        <label>Project Manager (User)</label>
+        <referenceTo>User</referenceTo>
+        <relationshipName>Clarizen_Projects</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_ProjectType__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Type of the Clarizen project; represents phase in the sales process</description>
+        <externalId>false</externalId>
+        <label>Project Type</label>
+        <picklist>
+            <picklistValues>
+                <fullName>Pilot</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Quotation</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Fulfillment</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Campaign</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Other</fullName>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_REAC__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Revenue Estimated At Complete = Actual Revenue + Revenue Estimated To Complete</description>
+        <externalId>false</externalId>
+        <label>Revenue EAC</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>1</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_RETC__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Revenue Estimated To Complete = (Expected Revenue - REV)/(RPI*SPI)</description>
+        <externalId>false</externalId>
+        <label>Revenue ETC</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>1</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_RPI__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Revenue performance index =  Revenue Earned Value / Actual Revenue</description>
+        <externalId>false</externalId>
+        <label>RPI</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>1</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_RTCPI__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Revenue To Complete Performance Index = (Revenue Estimated At Complete - REV)/(Expected Revenue-Actual Revenue)</description>
+        <externalId>false</externalId>
+        <label>RTCPI</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>1</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_RemainingEffort__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Remaining Effort</label>
+        <length>60</length>
+        <required>false</required>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_RevenueEarnedValue__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Revenue Earned Value = Completed work expressed in terms of expected revenue</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Revenue Earned Value = Completed work expressed in terms of expected revenue</inlineHelpText>
+        <label>Revenue EV</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Currency</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_SPI__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Schedule performance index =  Earned Value / (Budgeted Cost * Expected Progress)</description>
+        <externalId>false</externalId>
+        <label>SPI</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_SYSID__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Clarizen Object ID number - can be displayed in Clarizen grid views if system setting is selected.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Clarizen Object ID number for your organization. Used by InterAct.</inlineHelpText>
+        <label>ID</label>
+        <length>255</length>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_StartDate__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Start date of the project</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Start date of the project</inlineHelpText>
+        <label>Start Date</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_State__c</fullName>
+        <deprecated>false</deprecated>
+        <description>State of the project</description>
+        <externalId>false</externalId>
+        <label>State</label>
+        <picklist>
+            <picklistValues>
+                <fullName>Draft</fullName>
+                <default>true</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Active</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Completed</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Canceled</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>On Hold</fullName>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_TCPI__c</fullName>
+        <deprecated>false</deprecated>
+        <description>To Complete Performance Index = (Estimate At Complete - EV)/(Budgeted Cost-Actual Cost)</description>
+        <externalId>false</externalId>
+        <label>TCPI</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>1</scale>
+        <trackHistory>true</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CLZ_TrackStatus__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Status of the project</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Status of the project</inlineHelpText>
+        <label>Track Status</label>
+        <picklist>
+            <picklistValues>
+                <fullName>On Track</fullName>
+                <color>#33CC00</color>
+                <default>true</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>At Risk</fullName>
+                <color>#FFCC33</color>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Off Track</fullName>
+                <color>#FF0000</color>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>Not Active</fullName>
+                <color>#DDDDDD</color>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>CLZ_Work__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Planned Work for the Project</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Total Work = Actual Effort + Remaining Effort</inlineHelpText>
+        <label>Work</label>
+        <length>60</length>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>CPI_Group__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF( CLZ_CPI__c &lt; 0.75,&quot;&lt;0.75&quot;, IF(CLZ_CPI__c &gt;= 0.75 &amp;&amp; CLZ_CPI__c &lt;= 0.95, &quot;0.75 to 0.95&quot;, IF(CLZ_CPI__c &gt;1 , &quot;&gt;1&quot;,null) ) )</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>CPI Group</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Clarizen_ID__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>true</externalId>
+        <label>Clarizen Project ID</label>
+        <length>100</length>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Clarizen_SyncFlag__c</fullName>
+        <defaultValue>0</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Clarizen_SyncFlag</label>
+        <precision>4</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Completed_Group__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Sets the % Completed Group according to % Completed</description>
+        <externalId>false</externalId>
+        <formula>IF( CLZ_PercentCompleted__c &lt; 25/100,&quot;&lt;25%&quot;, IF(CLZ_PercentCompleted__c &lt;= 50/100 &amp;&amp; CLZ_PercentCompleted__c &gt;= 26/100, &quot;26% to 50%&quot;, IF(CLZ_PercentCompleted__c &lt;= 75/100 &amp;&amp; CLZ_PercentCompleted__c &gt;= 51/100, &quot;51% to 75%&quot;, IF(CLZ_PercentCompleted__c &lt;= 100/100&amp;&amp; CLZ_PercentCompleted__c &gt;= 76/100, &quot;76% to 100%&quot;, null) ) ))</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>% Completed Group</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Completed_color__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>% Completed color</label>
+        <picklist>
+            <picklistValues>
+                <fullName>&lt;25%</fullName>
+                <color>#FF0000</color>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>26% to 50%</fullName>
+                <color>#FF9900</color>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>51% to 75%</fullName>
+                <color>#F3D904</color>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>76% to 100%</fullName>
+                <color>#33CC00</color>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>Days_Late__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>Today()- DATEVALUE( CLZ_DueDate__c)</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Days Late</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>LastSyncStatus__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>LastSyncStatus</label>
+        <picklist>
+            <picklistValues>
+                <fullName>none</fullName>
+                <default>true</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>sync to clarizen start</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>sync to clarizen end</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>error while sync to clarizen</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>sync from clarizen start</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>sync from clarizen end</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>error while sync from clarizen</fullName>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>Last_Synch_Time__c</fullName>
+        <deprecated>false</deprecated>
+        <description>keeps last time an object was synchronized with Clarizen</description>
+        <externalId>false</externalId>
+        <label>Last Synch Time</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Opportunity__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Opportunity</label>
+        <referenceTo>Opportunity</referenceTo>
+        <relationshipLabel>Clarizen Projects</relationshipLabel>
+        <relationshipName>Clarizen_Projects</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Pipeline_Current__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF( CLZ_StartDate__c &gt; now() ,&quot;&gt;today&quot;, IF( CLZ_StartDate__c &lt; now() &amp;&amp; ISPICKVAL( CLZ_State__c , &quot;Active&quot; ) &amp;&amp; CLZ_PercentCompleted__c &lt;50/100 ,&quot;&lt;50%+active+started&quot;, IF( CLZ_StartDate__c &lt; now() &amp;&amp; ISPICKVAL( CLZ_State__c , &quot;Active&quot; ) &amp;&amp; CLZ_PercentCompleted__c &gt;50/100 ,&quot;&gt;50%+active+started&quot;, null)))</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Pipeline + Current</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Pipeline_Current_color__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Pipeline + Current color</label>
+        <picklist>
+            <picklistValues>
+                <fullName>&gt;today</fullName>
+                <color>#666666</color>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>&lt;50%+active+started</fullName>
+                <color>#FF9900</color>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>&gt;50%+active+started</fullName>
+                <color>#33CC00</color>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>RoadmapURL__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>RoadmapURL</label>
+        <length>500</length>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>LongTextArea</type>
+        <visibleLines>2</visibleLines>
+    </fields>
+    <fields>
+        <fullName>SPI_Colors__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>SPI Colors</label>
+        <picklist>
+            <picklistValues>
+                <fullName>&lt;0.75</fullName>
+                <color>#FF0000</color>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>0.75 to 0.95</fullName>
+                <color>#FFCC33</color>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>&gt;0.95</fullName>
+                <color>#33CC00</color>
+                <default>false</default>
+            </picklistValues>
+            <sorted>false</sorted>
+        </picklist>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>SPI_Group__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF(  CLZ_SPI__c  &lt; 0.75,&quot;&lt;0.75&quot;, IF(CLZ_SPI__c  &gt;= 0.75 &amp;&amp; CLZ_SPI__c  &lt;= 0.95, &quot;0.75 to 0.95&quot;, IF(CLZ_SPI__c  &gt;= 0.95 , &quot;&gt;0.95&quot;,null) ) )</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>SPI Group</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Work_Hours__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>IF( CONTAINS( CLZ_Work__c , &quot;Hours&quot;) , VALUE(LEFT(CLZ_Work__c, LEN(CLZ_Work__c)-6)) , VALUE( CLZ_Work__c))</formula>
+        <formulaTreatBlanksAs>BlankAsZero</formulaTreatBlanksAs>
+        <label>Work Hours</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>2</scale>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>clzIsSynced__c</fullName>
+        <defaultValue>false</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Is Synced</label>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>clzLastSynchObject__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Last Synch Object</label>
+        <referenceTo>Clarizen_Synch__c</referenceTo>
+        <relationshipLabel>Clarizen Projects</relationshipLabel>
+        <relationshipName>Clarizen_Projects</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>clzSyncWithClarizen__c</fullName>
+        <defaultValue>true</defaultValue>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Sync with Clarizen</label>
+        <trackHistory>false</trackHistory>
+        <trackTrending>false</trackTrending>
+        <type>Checkbox</type>
+    </fields>
+    <label>Clarizen Project</label>
+    <listViews>
+        <fullName>All</fullName>
+        <columns>Clarizen_ID__c</columns>
+        <columns>CLZ_Parent__c</columns>
+        <columns>Opportunity__c</columns>
+        <columns>NAME</columns>
+        <columns>CLZ_TrackStatus__c</columns>
+        <columns>CLZ_State__c</columns>
+        <columns>CREATED_DATE</columns>
+        <columns>CLZ_StartDate__c</columns>
+        <columns>CLZ_DueDate__c</columns>
+        <columns>CLZ_PercentCompleted__c</columns>
+        <columns>CLZ_Customer__c</columns>
+        <columns>CLZ_N_ProjectManager__c</columns>
+        <columns>CREATEDBY_USER</columns>
+        <columns>UPDATEDBY_USER</columns>
+        <columns>LAST_UPDATE</columns>
+        <filterScope>Everything</filterScope>
+        <filters>
+            <field>NAME</field>
+            <operation>notEqual</operation>
+        </filters>
+        <label>All</label>
+    </listViews>
+    <listViews>
+        <fullName>my_View</fullName>
+        <columns>NAME</columns>
+        <columns>CLZ_Description__c</columns>
+        <columns>CLZ_TrackStatus__c</columns>
+        <columns>CLZ_Importance__c</columns>
+        <columns>CLZ_StartDate__c</columns>
+        <columns>CLZ_DueDate__c</columns>
+        <columns>CLZ_PercentCompleted__c</columns>
+        <columns>CLZ_ProjectManager__c</columns>
+        <filterScope>Everything</filterScope>
+        <filters>
+            <field>Opportunity__c</field>
+            <operation>contains</operation>
+            <value>air</value>
+        </filters>
+        <label>my View</label>
+    </listViews>
+    <nameField>
+        <label>Name</label>
+        <trackHistory>false</trackHistory>
+        <type>Text</type>
+    </nameField>
+    <pluralLabel>Clarizen Projects</pluralLabel>
+    <searchLayouts>
+        <customTabListAdditionalFields>CREATED_DATE</customTabListAdditionalFields>
+        <excludedStandardButtons>Accept</excludedStandardButtons>
+        <searchFilterFields>NAME</searchFilterFields>
+        <searchResultsAdditionalFields>CREATED_DATE</searchResultsAdditionalFields>
+    </searchLayouts>
+    <sharingModel>ReadWrite</sharingModel>
+    <validationRules>
+        <fullName>PrecentIsLowerThen100</fullName>
+        <active>true</active>
+        <errorConditionFormula>OR(
+  (CLZ_PercentCompleted__c &gt; 1), 
+  (CLZ_PercentCompleted__c &lt; 0)
+)</errorConditionFormula>
+        <errorDisplayField>CLZ_PercentCompleted__c</errorDisplayField>
+        <errorMessage>% Complete should be between 0-100</errorMessage>
+    </validationRules>
+    <validationRules>
+        <fullName>StartIsBeforeEnd</fullName>
+        <active>true</active>
+        <errorConditionFormula>CLZ_StartDate__c &gt; CLZ_DueDate__c</errorConditionFormula>
+        <errorDisplayField>CLZ_DueDate__c</errorDisplayField>
+        <errorMessage>The project due date should not be before the start date.</errorMessage>
+    </validationRules>
+    <validationRules>
+        <fullName>StateIsOnlyDraftOrActive</fullName>
+        <active>true</active>
+        <errorConditionFormula>AND
+(
+  ISBLANK(Id) ,
+  NOT(ISPICKVAL(CLZ_State__c,&quot;Active&quot;)), 
+  NOT( ISPICKVAL(CLZ_State__c,&quot;Draft&quot;))
+)</errorConditionFormula>
+        <errorDisplayField>CLZ_State__c</errorDisplayField>
+        <errorMessage>State can be Active or Draft</errorMessage>
+    </validationRules>
+    <validationRules>
+        <fullName>check_template_type</fullName>
+        <active>true</active>
+        <errorConditionFormula>AND
+(
+  NOT(ISBLANK( CLZ_Clarizen_Template__c )),
+  CLZ_Clarizen_Template__r.TypeName__c &lt;&gt; &quot;Project&quot;
+)</errorConditionFormula>
+        <errorDisplayField>CLZ_Clarizen_Template__c</errorDisplayField>
+        <errorMessage>Template TypeName should be &quot;Project&quot;</errorMessage>
+    </validationRules>
+    <webLinks>
+        <fullName>Add_Clarizen_Project</fullName>
+        <availability>online</availability>
+        <displayType>massActionButton</displayType>
+        <encodingKey>UTF-8</encodingKey>
+        <height>600</height>
+        <linkType>url</linkType>
+        <masterLabel>Add Clarizen Project</masterLabel>
+        <openType>sidebar</openType>
+        <protected>false</protected>
+        <requireRowSelection>true</requireRowSelection>
+        <url>www.clarizen.com</url>
+    </webLinks>
+    <webLinks>
+        <fullName>From_Existing</fullName>
+        <availability>online</availability>
+        <displayType>massActionButton</displayType>
+        <linkType>javascript</linkType>
+        <masterLabel>From Existing</masterLabel>
+        <openType>onClickJavaScript</openType>
+        <protected>false</protected>
+        <requireRowSelection>false</requireRowSelection>
+        <url>alert(&quot;Open From Existing&quot;);</url>
+    </webLinks>
+    <webLinks>
+        <fullName>Go_to_project_in_Clarizen</fullName>
+        <availability>online</availability>
+        <description>On click the project is opened in Clarizen</description>
+        <displayType>link</displayType>
+        <encodingKey>UTF-8</encodingKey>
+        <hasMenubar>false</hasMenubar>
+        <hasScrollbars>true</hasScrollbars>
+        <hasToolbar>false</hasToolbar>
+        <height>600</height>
+        <isResizable>true</isResizable>
+        <linkType>url</linkType>
+        <masterLabel>View Project in Clarizen (Obsolete)</masterLabel>
+        <openType>newWindow</openType>
+        <position>none</position>
+        <protected>false</protected>
+        <showsLocation>false</showsLocation>
+        <showsStatus>false</showsStatus>
+        <url>www.clarizen.com{!Clarizen_Project__c.Name}</url>
+    </webLinks>
+    <webLinks>
+        <fullName>New_Activity_Request</fullName>
+        <availability>online</availability>
+        <displayType>massActionButton</displayType>
+        <encodingKey>UTF-8</encodingKey>
+        <height>600</height>
+        <linkType>url</linkType>
+        <masterLabel>New Activity Request</masterLabel>
+        <openType>sidebar</openType>
+        <protected>false</protected>
+        <requireRowSelection>true</requireRowSelection>
+        <url>www.clarizen.com</url>
+    </webLinks>
+    <webLinks>
+        <fullName>View_in_Clarizen</fullName>
+        <availability>online</availability>
+        <displayType>button</displayType>
+        <encodingKey>UTF-8</encodingKey>
+        <hasMenubar>true</hasMenubar>
+        <hasScrollbars>true</hasScrollbars>
+        <hasToolbar>true</hasToolbar>
+        <height>600</height>
+        <isResizable>true</isResizable>
+        <linkType>url</linkType>
+        <masterLabel>View in Clarizen</masterLabel>
+        <openType>newWindow</openType>
+        <position>fullScreen</position>
+        <protected>false</protected>
+        <showsLocation>true</showsLocation>
+        <showsStatus>true</showsStatus>
+        <url>https://app2.clarizen.com/clarizen/View/?id={!Clarizen_Project__c.Clarizen_ID__c}&amp;type=Project</url>
+    </webLinks>
+</CustomObject>

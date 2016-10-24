@@ -30,6 +30,7 @@ trigger IR_SendResolvedEmail on Incident_Report__c (after update) {
             resolvedEmail.Email_Body__c += 'The network operations team at Gigya has identified a service ' +
               'interruption potentially impacting your service. \n\n' +
               'Event start date and time: ' + incident.Start_Time__c + '\n\n' +
+              'Event end date and time: ' + incident.End_Time__c + '\n\n' +
               'Data center(s) impacted: ' + incident.Affected_Data_Centers__c + '\n\n' +
               'Current status: Resolved \n\n' +
               'Impacted APIs: \n';

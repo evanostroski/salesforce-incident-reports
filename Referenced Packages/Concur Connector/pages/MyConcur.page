@@ -1,0 +1,261 @@
+<apex:page controller="ConcurConnect.MyConcurController" title="My Concur" sidebar="false" tabstyle="My_Concur__tab">
+    <apex:includeScript value="{!$Resource.ConcurConnect__SSOScript}" />
+    
+  <apex:sectionHeader title="{!$Label.concurconnect__myconcur_title}" />
+  <apex:pageMessages id="pageMsgs" />
+  <apex:form >
+  
+    <!-- Admin Redirection Section -->
+    <apex:pageblock title="{!$Label.concurconnect__myconcur_adminredirectsection_title}" rendered="{!showAdminSetupTabRedirectionMessage}">
+      <apex:pageblocksection >
+        <apex:outputpanel >
+            {!$Label.concurconnect__myconcur_adminredirectsection_text}
+        </apex:outputpanel>
+      </apex:pageblocksection>
+    </apex:pageblock>
+  
+     
+    <!-- Authentication Section -->
+    <apex:pageBlock title="{!$Label.concurconnect__myconcur_authsection_title}"  rendered="{!showUserOAuth}">
+        <apex:pageBlockSection rendered="{!showAccessIsRevokedOrExpiredMessage}"> 
+            <apex:outputPanel >
+                {!$Label.concurconnect__myconcur_authsection_text_3}
+            </apex:outputPanel>             
+        </apex:pageBlockSection>    
+        <apex:pageBlockSection >            
+            <apex:outputPanel >
+                {!$Label.myconcur_authsection_text_1}
+                <br/>
+                <br/>
+                {!$Label.myconcur_authsection_text_2}
+                <br/>
+                <br/>
+                <apex:commandButton id="userStart" value="{!$Label.concurconnect__myconcur_authsection_button}" action="{!authorizeUser}" />            
+            </apex:outputPanel>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+    
+    <!-- App Not Configured Section -->
+    
+    <apex:pageBlock title="{!$Label.concurconnect__myconcur_appnotconfiguredsection_title}" rendered="{!showAppNotConfigured}">
+      <apex:pageBlockSection >
+        <apex:outputPanel >
+            {!$Label.myconcur_appnotconfiguredsection_text_1}
+            <br/><br/>
+            {!$Label.myconcur_appnotconfiguredsection_text_2}
+            <br/><br/>
+            {!$Label.myconcur_appnotconfiguredsection_text_3}
+            <br/>
+            <apex:dataList value="{!administrators}" var="administrator" id="adminList">
+              <apex:outputText value="{!administrator.name}  ({!administrator.email})"/>
+            </apex:dataList>
+        </apex:outputPanel>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+  
+    <!-- Trip Sync Section -->
+    
+    <apex:pageBlock title="{!$Label.concurconnect__myconcur_tripsyncsection_title}" rendered="{!showMyConcur}">    
+        <apex:outputPanel >
+          <apex:pageblockTable id="tripTable" value="{!trips}" var="trip" >
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_tripsyncsection_columnheader_tripname}">
+              <apex:outputLink value="{!trip.detailsUrl}">{!trip.name}</apex:outputLink>
+            </apex:column>
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_tripsyncsection_columnheader_locator}" value="{!trip.locator}" />
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_tripsyncsection_columnheader_startdate}" value="{!trip.startDatetime}" />
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_tripsyncsection_columnheader_enddate}" value="{!trip.endDatetime}" />
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_tripsyncsection_columnheader_action}">  
+              <apex:commandButton id="btnShare" value="{!$Label.concurconnect__myconcur_tripsyncsection_button_share}" action="{!URLFOR($Action.Trip__c.share, trip.id)}" />
+            </apex:column>
+          </apex:pageblockTable>
+          <br/>
+          <apex:ActionStatus id="tripStatus" >
+            <apex:facet name="start">
+                <apex:image value="/img/loading.gif" />
+            </apex:facet>
+            <apex:facet name="stop">
+                <apex:commandButton id="btnRefresh" value="{!$Label.concurconnect__myconcur_tripsyncsection_button_refresh}" action="{!refreshData}" rerender="tripTable,pageMsgs" status="tripStatus" />
+            </apex:facet>
+          </apex:ActionStatus>
+        </apex:outputPanel>
+    </apex:pageBlock>  
+      
+      <!-- This field is required to retrieve the SSO URL from the controller. From here it is passed
+      to the javascript function which will xml-decode the URL and open it in a new window or tab.-->
+      <apex:outputLabel id="sso" value="{!SSOURL}" rendered="true" style="visibility: hidden;" />
+      
+      <!-- My Active Reports Section -->
+      <apex:pageBlock title="{!$Label.concurconnect__myconcur_activereportssection_title}" rendered="{!showMyConcur}">  
+       <apex:commandButton action="{!requestSSOURL}"
+                    reRender="sso"
+                    oncomplete="doSSO('{!$Component.sso}');" 
+                    value="{!$Label.concurconnect__myconcur_myactivereportssection_button_view}">                          
+        </apex:commandButton>             
+        <apex:commandButton action="{!requestSSOURL}"
+                    reRender="sso"
+                    oncomplete="doSSO('{!$Component.sso}');" 
+                    value="{!$Label.concurconnect__myconcur_myactivereports_section_button_new}">   
+                    <apex:param name="newReportParam" value="yes" assignTo="{!newReport}"/>    
+        </apex:commandButton>    
+        <br/><br/>          
+        <apex:outputPanel >
+            
+          <apex:pageblockTable id="activereportstable" value="{!activeReportsList}" var="trip1" >
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_activereportssection_columnheader_reportname}">
+              <apex:outputText >{!trip1.name}</apex:outputText>
+            </apex:column>
+            
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_activereportssection_columnheader_comments}">
+                  <apex:outputText >{!trip1.comments}</apex:outputText>
+            </apex:column>
+             <apex:column headerValue="{!$Label.concurconnect__myconcur_activereportssection_columnheader_reportdate}">
+                 <apex:outputText value="{0,date,MM/d/yyyy}">
+                     <apex:param value="{!trip1.reportDate}" />
+                 </apex:outputText>
+            </apex:column>
+             <apex:column headerValue="{!$Label.concurconnect__myconcur_activereportssection_columnheader_reporttotal}">
+                  <apex:outputText value="{0,number,###,###,###.00}">
+                      <apex:param value="{!trip1.reportTotal}" />
+                 </apex:outputText>
+                 <apex:outputText > {!trip1.reportCurrency}</apex:outputText>
+            </apex:column> 
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_activereportssection_columnheader_action}">                            
+                <apex:commandButton action="{!requestSSOURL}"
+                    reRender="sso"
+                    oncomplete="doSSO('{!$Component.sso}');" 
+                    value="{!$Label.concurconnect__myconcur_activereportssection_button_concur}">
+                    <apex:param name="reportKeyParam" value="{!trip1.reportKey}" assignTo="{!reportKeyChosen}"/>
+                    <apex:param name="reportToApproveParam" value="{!trip1.toApprove}" assignTo="{!reportToApprove}"/>                            
+                </apex:commandButton>
+              </apex:column>
+          </apex:pageblockTable>
+          
+        </apex:outputPanel>
+          <!--
+         <br/>
+          <apex:ActionStatus id="activereportStatus" >
+            <apex:facet name="start">
+                <apex:image value="/img/loading.gif" />
+            </apex:facet>
+            <apex:facet name="stop">
+                <apex:commandButton id="btnRefresh" value="{!$Label.myconcur_activereportssection_button_refresh}" action="{!refreshData}" rerender="activereportstable,pageMsgs" status="activereportStatus" />
+                <apex:commandButton id="btnRefresh" value="{!$Label.myconcur_activereportssection_button_refresh}" action="{!refreshActiveReports}" rerender="activereportstable,pageMsgs" status="activereportStatus" />
+              </apex:facet>
+          </apex:ActionStatus>
+          -->
+    </apex:pageBlock>  
+     
+      <!-- My Card Charges Section -->
+      
+      <apex:pageBlock title="{!$Label.concurconnect__myconcur_mycardchargessection_title}" rendered="{!showMyConcur}">          
+        <apex:commandButton action="{!requestSSOURL}"
+                    reRender="sso"
+                    oncomplete="doSSO('{!$Component.sso}');" 
+                    value="{!$Label.concurconnect__myconcur_mycardchargessection_button_view}">   
+                    <apex:param name="cardChargesParam" value="yes" assignTo="{!cardCharges}"/>    
+        </apex:commandButton>         
+        <br/><br/>
+        <apex:outputPanel >
+          <apex:pageblockTable id="mycardchargestable" value="{!cardChargesList}" var="card1" >
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_mycardchargessection_columnheader_cardnumber}">
+              <apex:outputText >{!card1.cardnumber}</apex:outputText>
+            </apex:column> 
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_mycardchargessection_columnheader_merchant}">
+                  <apex:outputText >{!card1.merchant}</apex:outputText>
+            </apex:column>
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_mycardchargessection_columnheader_expense}">
+                  <apex:outputText >{!card1.expense}</apex:outputText>
+            </apex:column>
+              <apex:column headerValue="{!$Label.concurconnect__myconcur_mycardchargessection_columnheader_transactiondate}">
+                 <apex:outputText value="{0,date,MM/d/yyyy}">
+                     <apex:param value="{!card1.reportDate}" />
+                 </apex:outputText>
+            </apex:column>
+             <apex:column headerValue="{!$Label.concurconnect__myconcur_mycardchargessection_columnheader_amount}">
+                  <!--- <apex:outputText >{!card1.reportTotal}</apex:outputText> --->
+                  <apex:outputText value="{0,number,###,###,###.00}">
+                      <apex:param value="{!card1.reportTotal}" />
+                 </apex:outputText>
+                 <apex:outputText > {!card1.reportCurrency}</apex:outputText>
+            </apex:column> 
+          </apex:pageblockTable>
+          
+        </apex:outputPanel>
+         <!--
+          <br/>
+          <apex:ActionStatus id="mycardchargesStatus" >
+            <apex:facet name="start">
+                <apex:image value="/img/loading.gif" />
+            </apex:facet>
+            <apex:facet name="stop"> 
+                <apex:commandButton id="btnRefresh" value="{!$Label.myconcur_mycardchargessection_button_refresh}" action="{!refreshData}" rerender="mycardchargestable,pageMsgs" status="mycardchargesStatus" />
+                <apex:commandButton id="btnRefresh" value="{!$Label.myconcur_mycardchargessection_button_refresh}" action="{!refreshCardCharges}" rerender="mycardchargestable,pageMsgs" status="mycardchargesStatus" />                
+              </apex:facet>
+          </apex:ActionStatus>          
+          -->
+    </apex:pageBlock> 
+      
+      
+      
+      <!-- My Report Approvals Section -->
+      
+      <apex:pageBlock title="{!$Label.concurconnect__myconcur_myreportapprovalssection_title}" rendered="{!showMyConcur}"> 
+        <apex:commandButton action="{!requestSSOURL}"
+                    reRender="sso"
+                    oncomplete="doSSO('{!$Component.sso}');" 
+                    value="{!$Label.concurconnect__myconcur_myreportapprovalssection_button_view}">   
+                    <apex:param name="approvalReportsParam" value="yes" assignTo="{!approvalReports}"/>    
+        </apex:commandButton>    
+        <br/><br/>            
+        <apex:outputPanel >
+          <apex:pageblockTable id="myreportapprovalstable" value="{!activeReportsToApproveList}" var="trip1" >
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_myreportapprovalssection_columnheader_employeename}">
+              <!-- <apex:outputText >{!trip1.firstName} {!trip1.lastName}</apex:outputText> --->
+                    <apex:outputText >{!trip1.firstName}</apex:outputText> 
+            </apex:column>
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_myreportapprovalssection_columnheader_reportname}">
+              <apex:outputText >{!trip1.name}</apex:outputText>
+            </apex:column>
+            
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_myreportapprovalssection_columnheader_comments}">
+                  <apex:outputText >{!trip1.comments}</apex:outputText> 
+            </apex:column>
+             <apex:column headerValue="{!$Label.concurconnect__myconcur_myreportapprovalssection_columnheader_reportdate}">
+                 <apex:outputText value="{0,date,MM/d/yyyy}">
+                     <apex:param value="{!trip1.reportDate}" />
+                 </apex:outputText>
+            </apex:column> 
+             <apex:column headerValue="{!$Label.concurconnect__myconcur_myreportapprovalssection_columnheader_reporttotal}">
+                 <!---  <apex:outputText >{!trip1.reportTotal}</apex:outputText> --->
+                  <apex:outputText value="{0,number,###,###,###.00}">
+                      <apex:param value="{!trip1.reportTotal}" />
+                 </apex:outputText>
+                 <apex:outputText > {!trip1.reportCurrency}</apex:outputText>
+            </apex:column> 
+            <apex:column headerValue="{!$Label.concurconnect__myconcur_myreportapprovalssection_columnheader_action}">
+              <apex:commandButton action="{!requestSSOURL}"
+                    reRender="sso"
+                    oncomplete="doSSO('{!$Component.sso}');" 
+                    value="{!$Label.concurconnect__myconcur_myreportapprovalssection_button_concur}">              
+                    <apex:param name="reportKeyParam" value="{!trip1.reportKey}" assignTo="{!reportKeyChosen}"/>
+                    <apex:param name="reportToApproveParam" value="{!trip1.toApprove}" assignTo="{!reportToApprove}"/> 
+              </apex:commandButton>
+              <!--<apex:commandButton id="btnConcur2" value="{!$Label.concurconnect__myconcur_myreportapprovalssection_button_concur}" action="{!syncData}" />-->
+            </apex:column>
+          </apex:pageblockTable>                                                           
+        </apex:outputPanel>
+         <!-- 
+          <br/> 
+          <apex:ActionStatus id="toapprovereportStatus" >
+            <apex:facet name="start">
+                <apex:image value="/img/loading.gif" />
+            </apex:facet> 
+            <apex:facet name="stop">
+                <apex:commandButton id="btnRefresh" value="{!$Label.myconcur_myreportapprovalssection_button_refresh}" action="{!refreshData}" rerender="myreportapprovalstable,pageMsgs" status="toapprovereportStatus" />
+                <apex:commandButton id="btnRefresh" value="{!$Label.myconcur_myreportapprovalssection_button_refresh}" action="{!refreshToApproveReports}" rerender="myreportapprovalstable,pageMsgs" status="toapprovereportStatus" />
+              </apex:facet>
+          </apex:ActionStatus> 
+          -->
+    </apex:pageBlock>
+  </apex:form>  
+</apex:page>

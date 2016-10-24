@@ -1,0 +1,145 @@
+<apex:page sidebar="false" showHeader="false" standardStylesheets="false" controller="XactlyExpress.XactlySMBPlanController">
+	<!-- Custom Cursor Loader -->
+   <c:XactlySMBCursor />
+   <!-- Custom Cursor Loader -->
+	<apex:form id="SaveAsplanForm"> 
+
+	<apex:inputHidden value="{!errorMsg}"  id="errorMsgId" />
+		<div style="width:480px;height:auto;">
+		
+                       <div id="saveAsPlan">
+                         <div class="backgrounds1 header_div_11" style="height:15px;margin-left:15px;margin-right:11px;background-repeat:repeat-x;">
+						    <div class="img-topLeftOrange backgrounds2 header_div_top_left" style="float: left;margin-left:-15px;width:18px;height:15px"></div>
+						    <div class="img-topRightOrange backgrounds2 header_div_top_right" style="width:18px;height:15px;float:right;margin-right:-18px;"></div>
+						    <div style="clear:both"></div>
+						</div>
+                           <div style="width:100%;border-right:2px solid #D49761;border-left:2px solid #D49761;background-color:#FFF;">
+                               <div style="margin-left:20px;margin-right:20px;">
+                                   
+									<apex:outputPanel layout="block" styleClass="btn_close_lbox_wrapper" style="margin-top:0px;">
+	                    				<apex:outputLink styleClass="a_btn_close_lbox" value="javascript:;" disabled="false" onclick="window.parent.jQuery.superbox.close();">
+	                    					<apex:outputPanel layout="block" styleClass="btn_close_lbox">
+	                    						&nbsp;
+	                    					</apex:outputPanel>
+	                    				</apex:outputLink>
+									</apex:outputPanel>
+
+                                   <apex:outputText value="{!$Label.xactlyexpress__SaveAs} {!$Label.xactlyexpress__Plan}" styleClass="PNovaBlackTitle1" />
+                                   
+                                   <br/><br/>
+                                   
+                                   <div class="grayBoxTop">
+                                   		<div class="grayBox_l"><img class="img-bgroundbox" src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_roundbox1_c_1.png')}" /></div>
+                                   		<div class="grayBox_r"><img class="img-bgroundbox" src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_roundbox1_c_2.png')}" /></div>
+                                   </div>
+                                   
+                                   <div class="grayBoxBody">
+                                   		
+                                   		<div style="width:auto;height:30px;max-height:30px;">
+                                    		<div style="float:left">
+                                   				<apex:outputText value="{!$Label.xactlyexpress__nameForNewQuota}" styleClass="PNovaSemiBold18c3">
+                                   					<apex:param name="credit" value="{!$Label.xactlyexpress__Plan}" />
+                                   				</apex:outputText>
+                                   			</div>
+                                   		
+                                   			<div style="float:left;margin-left:20px;">
+                                   				<apex:inputField style="margin:0px;" value="{!SaveAsPlan.name}" id="newPlanName" />
+                                   			</div>
+                                   			<div style="width:3px;height:23px;background-color:#ff0000;float:left;">&nbsp;</div>
+                                   		</div>
+                                   		
+                                   		<br/><br/><br/>
+                                   		<div style="float:left;">
+                                   			<apex:outputText value="{!$Label.xactlyexpress__EffectiveDates}" styleClass="PNovaSemiBold18c3" />
+                                   		</div>
+                                   		<div style="float:left;margin-left:8px;">
+                                   
+	        								<apex:selectList id="fiscalyearselect" value="{!SaveAsPlan.XactlyExpress__XCFiscalYearSettingsID__c}" onchange="waitOn();updateFiscalYear();" multiselect="false" size="1" required="false">
+	            								<apex:selectOptions value="{!FiscalYearOptionsSaveAs}"/>
+	            							</apex:selectList> 
+	            							&nbsp;&nbsp;
+	            							<apex:selectList value="{!saveasplanStartDate}" id="startDate" multiselect="false" size="1">
+	            								<apex:selectOptions value="{!SaveAsperiodsOptionsStart}" />
+	            							</apex:selectList>
+	            							&nbsp;&nbsp;
+	            							<apex:selectList value="{!saveasplanEndDate}" id="endDate" multiselect="false" size="1">
+	            									<apex:selectOptions value="{!SaveAsPeriodsOptionsEnd}" />
+	            							</apex:selectList>
+	            							
+                                   		</div>
+
+                                   <br/><br/>
+                                   
+                                   </div>
+
+                                   <div class="grayBoxBottom">
+                                   		<div class="grayBox_l"><img class="img-bgroundbox" src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_roundbox1_c_3.png')}" /></div>
+                                   		<div class="grayBox_r"><img class="img-bgroundbox" src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_roundbox1_c_4.png')}" /></div>
+                                   </div>
+                                   
+                                   <br/><br/>
+                                   
+                                   <div style="width:240px;margin-left:auto;margin-right:auto;">
+                                   
+													<apex:outputPanel layout="block" styleClass="btn_silver_wrapper" onmouseover="btnSilverOver(this);" onmouseout="btnSilverOut(this);" onclick="waitOn();this.disabled=true;planSaveAs();this.onclick='';">
+	                    								<apex:outputPanel layout="inline" styleClass="btn_silver">
+		                    								<apex:outputPanel layout="inline" styleClass="btn_silver_r">
+	                    										<apex:outputText styleClass="a_btn_silver a_btn_silver_blue" value="{!$Label.xactlyexpress__saveClose}" />
+		                    								</apex:outputPanel>         									
+	                    								</apex:outputPanel>
+													</apex:outputPanel>
+                                   
+													<apex:outputPanel layout="block" styleClass="btn_silver_wrapper" onmouseover="btnSilverOver(this);" onmouseout="btnSilverOut(this);" onclick="window.parent.jQuery.superbox.close();">
+	                    								<apex:outputPanel layout="inline" styleClass="btn_silver">
+		                    								<apex:outputPanel layout="inline" styleClass="btn_silver_r">
+	                    										<apex:outputText styleClass="a_btn_silver a_btn_silver_gray" value="{!$Label.xactlyexpress__cancelClose}" />
+		                    								</apex:outputPanel>         									
+	                    								</apex:outputPanel>
+													</apex:outputPanel>
+						
+                                   </div>
+                                   
+                                   <div style="clear:both"></div>
+                               </div>
+                           </div>
+                          <div class="backgrounds1 header_div_10" style="height:15px;margin-left:15px;margin-right:11px;background-repeat:repeat-x;">
+							    <div class="img-topLeftOrange backgrounds2 header_div_bottom_left" style="float: left;margin-left:-15px;width:18px;height:15px"></div>
+							    <div class="img-topRightOrange backgrounds2 header_div_bottom_right" style="width:18px;height:15px;float:right;margin-right:-18px;"></div>
+							    <div style="clear:both"></div>
+							</div>
+                       </div>
+	
+		</div>
+		
+        <apex:actionFunction action="{!saveasupdateFiscalYear}" name="updateFiscalYear" rerender="startDate, endDate" oncomplete="setLastEndDate(true);waitOff();"/>
+        <apex:actionFunction action="{!planSaveAs}" name="planSaveAs" rerender="errorMsgId" oncomplete="waitOff();saveAsCheck();window.parent.jQuery.superbox.close();" />
+	</apex:form>
+	    
+    <c:XactlySMBFooterScript isChatterEnabled="{!isChatterEnabled}" loadHeaderJs="false" loadPerformantJs="true" /> 
+	<apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'pages/css/XactlySMBPlanSaveAsPopup.css')}" />
+
+    <div class="hidden">
+        <input type="hidden" id="orgName" value="{!URLENCODE($Organization.Name)}" />
+        <input type="hidden" id="orgId" value="{!URLENCODE($Organization.Id)}" />
+        <input type="hidden" id="currentUserProfile" value="{!URLENCODE(currentUserProfile)}" />
+        <input type="hidden" id="currentUserName" value="{!URLENCODE($User.FirstName + ' ' + $User.LastName)}" />
+    </div>
+        
+    <script>
+    jQuery(document).ready(function(){
+        setTimeout("loadAnltc('XactlySMBPlanSaveAsPopup.php')", 1000);
+    });
+	function setLastEndDate(o){            
+    	if('{!JSENCODE(planEndDate)}'==''){
+        	jQuery('select[id$="endDate"]').get(0).selectedIndex = jQuery('select[id$="endDate"]').get(0).length - 1;
+        }
+        if(o){
+        	jQuery('select[id$="endDate"]').get(0).selectedIndex = jQuery('select[id$="endDate"]').get(0).length - 1;
+        }
+    }
+    
+    function saveAsCheck(){
+        window.parent.planSaveAsCheck(jQuery('input[id$="errorMsgId"]').val(), jQuery('input[id$="newPlanName"]').val());
+    }
+    </script>
+</apex:page>

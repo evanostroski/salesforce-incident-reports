@@ -1,0 +1,184 @@
+<apex:page docType="html-5.0" controller="dupcheck.dc3ControllerLicense" cache="false" Title="License - Duplicate Check for Salesforce" sidebar="false" action="{!janitor}" tabstyle="dc3Setup__tab">
+
+  	<apex:stylesheet value="{!URLFOR($Resource.dupcheck__slds, '/assets/styles/salesforce-lightning-design-system-vf.min.css')}" />
+	<apex:stylesheet value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/style/dupcheckApp.css" />
+	
+	<apex:includeScript value="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" />
+	<apex:includeScript value="//ajax.googleapis.com/ajax/libs/angularjs/1.3.11/angular.min.js" />
+	<apex:includeScript value="//ajax.googleapis.com/ajax/libs/angularjs/1.3.11/angular-sanitize.min.js" />
+	
+	<apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/plauti-ng-slds.min.js" />
+	<apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.js" />
+	<apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.ng.directives.js" />
+	<apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.ng.services.js" />
+	<apex:includeScript value="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheck__dupcheckAssets,'/dupcheckAssets'))}/lightning/js/dupcheck.ng.license.js" /> 
+	
+	<c:dc3Welcome version="LIGHTNING"/> 
+	
+	<div class="plauti" id="dataStore" ng-app="dcApp" ng-controller="licenseController" data-sf-get-license="{!$RemoteAction.dc3ControllerLicense.getLicense}" data-sf-refresh-license="{!$RemoteAction.dc3ControllerLicense.refreshLicense}">
+		
+		<div class="slds-page-header dc-header-padding" role="banner">
+			<div class="slds-grid slds-wrap">
+				<div class="slds-col slds-size--1-of-1 slds-medium-size--2-of-6 slds-large-size--2-of-6">
+					<div class="slds-media">
+						<div class="slds-media__figure">
+							<img class="slds-icon slds-icon--large slds-m-bottom--xxx-small dc-logo-positioning" ng-src="{!IF(isDev,AssetsUrl,URLFOR($Resource.dupcheckAssets,'/dupcheckAssets'))}/lightning/app/app_icon_48.png" />
+						</div> 
+						<div class="slds-media__body">
+							<p class="slds-text-heading--label">Duplicate Check</p>
+							<div class="slds-grid">
+								<h1 class="slds-text-heading--medium slds-m-right--small slds-truncate slds-align-middle">License</h1>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="slds-col slds-size--1-of-1 slds-medium-size--4-of-6 slds-large-size--4-of-6 ">
+					<div class="slds-grid slds-float--right">
+																
+						<button class="slds-button slds-button--brand" ng-if="data.information.editionLabel != 'Premium'" ng-click="openUrl('https://www.duplicatecheck.com/pricing?utm_source=dcApp&utm_medium=app&utm_campaign=dcJob_upgradeNow', '')">Get Trial</button>
+
+              			<button class="slds-button slds-button--neutral dc-color--info" ng-disabled="meta.isLoading" ng-click="retrieveLicense('refresh')">Refresh License</button>
+
+						<button class="slds-button slds-not-selected slds-button--icon-border-filled" ng-click="openUrl('{!$Page.dc3Setup}')">
+                			<img class="slds-button__icon " ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/utility/back_120.png" />
+              			</button>
+					
+						<div class="slds-button-group slds-button-space-left">	           			 
+                    		<c:dc3WelcomeLink version="LIGHTNING" helpLink="https://support.duplicatecheck.com/article/setup-guide/dc-license?utm_source=dcApp&utm_medium=app&utm_campaign=help_link"/>         
+						</div>	
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		
+		<div ng-if="meta.isLoading" class="slds-m-around--large">
+			<div class="slds-grid slds-grid--align-center">
+				<div class="slds-spinner--large">
+					<img src="{!URLFOR($Resource.slds,'')}/assets/images/spinners/slds_spinner_brand.gif" alt="Loading..." />
+				</div>
+			</div>
+		</div>
+		
+		
+		
+		<div ng-if="!meta.isLoading" class="slds-m-bottom--medium">
+		
+			<div class="slds-grid slds-wrap">
+			
+				<h3 class="slds-section__title slds-size--1-of-1 slds-m-top--medium slds-col--padded slds-no-flex">General Information</h3>
+	
+			
+				<div class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-m-top--medium slds-col--padded slds-no-flex">
+					<label class="slds-form-element__label">License Edition</label>	
+					<div class="slds-form-element__control slds-has-divider--bottom">
+						<span class="slds-form-element__static" ng-bind-html="data.information.editionLabel"></span>
+					</div>	
+				</div>
+				
+				<div class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-m-top--medium slds-col--padded slds-no-flex">
+					<label class="slds-form-element__label">License End</label>	
+					<div class="slds-form-element__control slds-has-divider--bottom">
+						<span class="slds-form-element__static" ng-if="!data.information.licenseEnd">Never</span>
+						<span class="slds-form-element__static" ng-if="data.information.licenseEnd" ng-bind-html="data.information.licenseEnd | date:'dd MMMM yyyy'"></span>
+					</div>	
+				</div>		
+				
+				
+				<div ng-if="{!maxRecordCount > 0}" class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-m-top--medium slds-col--padded slds-no-flex">
+					<label class="slds-form-element__label">Salesforce Record Count</label>	
+					<div class="slds-form-element__control slds-has-divider--bottom">
+						<span>{!maxRecordCount}</span>
+					</div>	
+				</div>				
+				
+				
+				<div class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-m-top--medium slds-col--padded slds-no-flex">
+					<label class="slds-form-element__label">Record Limit</label>	
+					<div class="slds-form-element__control slds-has-divider--bottom">
+						<span ng-bind-html="data.information.recordLimit | number:0"></span>
+					</div>	
+				</div>									
+	
+				<div class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-m-top--medium slds-col--padded slds-no-flex">
+					<label class="slds-form-element__label">Organization Id</label>	
+					<div class="slds-form-element__control slds-has-divider--bottom">
+						<span>{!CASESAFEID($Organization.Id)}</span>
+					</div>	
+				</div>
+				
+				<div class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-m-top--medium slds-col--padded slds-no-flex">
+					<label class="slds-form-element__label">Organization Type</label>	
+					<div class="slds-form-element__control slds-has-divider--bottom">
+						<span ng-bind-html="(data.information.isSandbox ? 'Sandbox' : 'Production')"></span>
+					</div>	
+				</div>		
+												
+	
+				<div class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-m-top--medium slds-col--padded slds-no-flex">
+					<label class="slds-form-element__label">Sandbox Licenses</label>	
+					<div class="slds-form-element__control slds-has-divider--bottom">
+						<span ng-bind-html="data.features.sandboxCount"></span>
+					</div>	
+				</div>	
+				
+				
+				<div class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-m-top--medium slds-col--padded slds-no-flex">
+					<label class="slds-form-element__label">Scenario Limit</label>	
+					<div class="slds-form-element__control slds-has-divider--bottom">
+						<span ng-bind-html="data.features.scenarioCount"></span>
+					</div>	
+				</div>
+				
+				
+				<div ng-if="data.information.isTrial" class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-m-top--medium slds-col--padded slds-no-flex">
+					<div class="slds-form-element">
+					<label class="slds-form-element__label">Trial</label>
+						<div class="slds-form-element__control">
+							<label class="slds-checkbox">	
+								<input type="checkbox" disabled="disabled" ng-model="meta.trialCheckbox"/>
+								<span class="slds-checkbox--faux"></span>
+							</label>						
+						</div>
+					</div>
+				</div>					
+					
+			</div>
+				
+			<div class="slds-grid slds-wrap slds-m-bottom--large slds-m-top--medium">
+				<div class="{{data.lockedSize == 0 ? 'slds-size--1-of-1 slds-medium-size--1-of-1 slds-large-size--1-of-1' : 'slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2'}}">	
+					<div class="slds-grid slds-wrap">
+						<h3 class="slds-section__title slds-size--1-of-1 slds-m-top--x-large slds-col--padded slds-no-flex slds-m-bottom--small">Licensed Features</h3>			
+					
+						<div ng-repeat="(field, value) in data.available" class="{{data.lockedSize == 0 ? 'slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-4' : 'slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-3'}} slds-no-flex slds-m-top--small slds-col--padded">
+							<label class="slds-form-element__label">{{field | valueToLabel}}</label>
+				
+							<!--  
+							<img class="slds-icon--x-small" ng-if="data.features.field" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/utility/check_60.png"></img>
+							<img class="slds-icon--x-small" ng-if="!data.features.field" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/utility/close_60.png"></img> 
+							-->
+						</div>	
+					</div>		
+				</div>	
+						
+				<div ng-if="data.lockedSize != 0" class="slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-2">
+					<div class="slds-grid slds-wrap">
+  						<h3 class="slds-section__title slds-size--1-of-1 slds-m-top--x-large slds-col--padded slds-no-flex slds-m-bottom--small">Not Licensed Functions</h3>
+						
+						<div ng-repeat="(field, value) in data.locked" class="slds-no-flex slds-size--1-of-1 slds-medium-size--1-of-2 slds-large-size--1-of-3 slds-m-top--small slds-col--padded">
+							<label class="slds-form-element__label">{{field | valueToLabel}}</label>
+							<!--  
+							<img class="slds-icon--x-small" ng-if="data.features.field" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/utility/check_60.png"></img>
+							<img class="slds-icon--x-small" ng-if="!data.features.field" ng-src="{!URLFOR($Resource.slds,'')}/assets/icons/utility/close_60.png"></img> 
+							-->							 
+						</div>	
+					</div>
+				</div>
+			</div>
+		</div>		
+				
+				
+	</div>
+	
+	
+</apex:page>

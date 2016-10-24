@@ -1,0 +1,76 @@
+<apex:page controller="infer2.InferConfigController" action="{!loadSettings}">
+  <style>
+    .infer-section { margin: 20px 0; }
+    .infer-section h3 {}
+    .infer-section p.details { margin: 1.3em 0; }
+    .infer-textarea { width: 500px; height: 10em; }
+  </style>
+  <apex:sectionHeader title="Infer Scoring"/>
+  <apex:form >
+    <apex:pageBlock title="Bucket Settings">
+      <apex:pageBlockButtons >
+        <apex:commandButton action="{!save}" value="Save"/>
+        <apex:commandButton action="{!cancel}" value="Cancel"/>
+      </apex:pageBlockButtons>
+      <apex:pageMessages ></apex:pageMessages>
+      <div class="infer-section">
+        <p class="details">
+          Infer by default writes scores from 0 to 100 into the "Infer: Score" field, where a higher score indicates higher likelihood of winning.
+          We have found, however, that it is often more effective to put that numeric score into a few buckets that are easier for your sales reps to
+          understand.  Here, you can define what those buckets should be called, and what the thresholds for each bucket should be.
+        </p>
+        <apex:pageBlockSection >
+          <apex:inputField value="{!inferSettings.infer2__Score_Bucket_1_Label__c}" label="Best Bucket Name"/>
+          <apex:inputField value="{!inferSettings.infer2__Score_Bucket_1_Threshold__c}" label="Best Bucket Threshold"/>
+          <apex:inputField value="{!inferSettings.infer2__Score_Bucket_2_Label__c}" label="Second Bucket Name"/>
+          <apex:inputField value="{!inferSettings.infer2__Score_Bucket_2_Threshold__c}" label="Second Bucket Threshold"/>
+          <apex:inputField value="{!inferSettings.infer2__Score_Bucket_3_Label__c}" label="Third Bucket Name"/>
+          <apex:inputField value="{!inferSettings.infer2__Score_Bucket_3_Threshold__c}" label="Third Bucket Threshold"/>
+          <apex:inputField value="{!inferSettings.infer2__Score_Bucket_4_Label__c}" label="Worst Bucket Name"/>
+        </apex:pageBlockSection>
+      </div>
+    </apex:pageBlock>
+    <apex:pageBlock title="Reporting Settings">
+      <apex:pageBlockButtons >
+        <apex:commandButton action="{!save}" value="Save"/>
+        <apex:commandButton action="{!cancel}" value="Cancel"/>
+      </apex:pageBlockButtons>
+      <div class="infer-section">
+        <h3>Threshold for "Goodness"</h3>
+        <p class="details">
+          Some Infer dashboards and reports will display volumes for leads or opportunities that are considered "Good".
+          You can define a threshold here for what "Good" means.
+        </p>
+        <apex:pageBlockSection >
+          <apex:inputField value="{!inferSettings.infer2__Good_Threshold__c}"/>
+        </apex:pageBlockSection>
+      </div>
+      <div class="infer-section">
+        <h3>Open Lead Statuses</h3>
+        <p class="details">
+          Some Infer dashboards and reports need to know which leads are considered "open" and being worked on, rather than rejected,
+          nurtured or inactive.  Please list the names of the "open" lead statuses, one on each line:
+        </p>
+        <apex:inputTextarea value="{!openStatuses}" styleClass="infer-textarea"/>
+      </div>
+    </apex:pageBlock>
+    <apex:pageBlock title="Advanced Settings">
+      <apex:pageBlockButtons >
+        <apex:commandButton action="{!save}" value="Save"/>
+        <apex:commandButton action="{!cancel}" value="Cancel"/>
+      </apex:pageBlockButtons>
+      <div class="infer-section">
+        <h3>Enable Infer Triggers for Creating Score Objects</h3>
+        <p class="details">
+          Enabling these triggers means that your sales reps will be less likely to see an edit conflict when Infer pushes in a new score.  You should only enable these for entities that Infer is actually scoring.
+        </p>
+        <apex:pageBlockSection >
+          <apex:inputField value="{!inferSettings.infer2__Enable_Lead_Scoring__c}" label="Enable auto-create score objects for leads"/>
+          <apex:inputField value="{!inferSettings.infer2__Enable_Contact_Scoring__c}" label="Enable auto-create score objects for contacts"/>
+          <apex:inputField value="{!inferSettings.infer2__Enable_Account_Scoring__c}" label="Enable auto-create score objects for accounts"/>
+          <apex:inputField value="{!inferSettings.infer2__Enable_Opportunity_Scoring__c}" label="Enable auto-create score objects for opportunities"/>
+        </apex:pageBlockSection>
+      </div>
+    </apex:pageBlock>
+  </apex:form>
+</apex:page>

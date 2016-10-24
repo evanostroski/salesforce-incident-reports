@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomTab xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Displays travel and expense information from Concur.</description>
+    <label>My Concur</label>
+    <mobileReady>false</mobileReady>
+    <motif>Custom227: TV Widescreen</motif>
+    <page>MyConcur</page>
+</CustomTab>

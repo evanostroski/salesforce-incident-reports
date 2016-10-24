@@ -1,0 +1,48 @@
+<apex:page controller="XactlyExpress.XactlySMBHandleMessages" sidebar="false" showHeader="false" standardStylesheets="false">
+    <c:XactlySMBCursor />
+    <title>{!$Label.cannotaccessXactlyExpress}</title>
+       
+<style>
+.mainContent{overflow: visible !important;}
+.pageContent{overflow: visible !important;}
+.header{background:none !important;}
+.topHeader{margin-left:-1px !important;}
+.headerComponentDropdown{float: left; margin-top: -8px;}
+.headerComponentInfo{float: left; margin-right: 15px; margin-top: -3px;}
+.shadowContainer{*margin-left:none !important;}
+.shadowFooter{*margin-left: -1037px !important;}
+#shadowContainerFooter{*margin-left: -1037px !important;}
+</style>       
+       
+    <!-- PAGE WRAPPER -->  
+    <div class="pageContent" id="pContent" style="padding:0px" >
+        <apex:form >
+            <apex:outputPanel layout="block" styleClass="header">
+                <c:XactlySMBSalesRepHeader id="salesRepHeaderComp" lastClosedPeriod="{!lastClosedPeriod}" isEmulatedManager="{!isEmulatedManager}" isManager="false" isSalesAdmin="false" isAdmin="false"  isActive="{!isActive}" nbrSeparator="{!nbrSeparator}" nbrDecimal="{!nbrDecimal}" currentUserOrSlected="{!currentUserOrSlected}" emulatingUserURLAppend="{!emulatingUserURLAppend}" dealsLabel="{!currentSettings.dealsPluralCap}" selected="1" hlabel="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ac mi eget est semper feugiat."/>
+            </apex:outputPanel>
+
+            <div id="shadowContainer" class="shadowContainer">
+            <apex:outputPanel style="padding-bottom:30px;padding-top:50px;" layout="block" styleClass="mainContent" rendered="{!isActive}">
+                <div style="padding-top: 40px;">
+                    <h2 style="text-align: center;">{!title}</h2>
+                </div>
+                <div style="width: 510px; margin: 0px auto auto auto; padding-top: 40px;">
+                    <apex:outputText style="color: red;" escape="false" value="{!$Label.xactlyexpress__LoginIssuesMessage}"/>
+                </div>
+            </apex:outputPanel>
+            
+            </div>
+            <!-- FOOTER  -->
+            <c:XactlySMBFooter isReadOnlyAdmin="{!isReadOnlyAdmin}" packageVersion="{!packageVersion}" showPrevious="false" showNext="false" showSave="false" showRefresh="false" showExport="false"/>
+        </apex:form>
+    </div>
+    
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'components/css/XactlySMBExpressDropdown.css')}" /> 
+    <apex:outputPanel rendered="{!!isActive}">
+        <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'css/XactlySMBStyles.css')}" />
+    </apex:outputPanel> 
+    <c:XactlySMBFooterScript isChatterEnabled="{!isChatterEnabled}" rendered="{!AND(isAdmin,!isEmulatedManager,!emulatingUser)}" loadHeaderJs="false" loadPerformantJs="false"/>
+    <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources, 'components/js/XactlySMBExpressDropdown.js')}"></script>
+ 
+ 
+</apex:page>

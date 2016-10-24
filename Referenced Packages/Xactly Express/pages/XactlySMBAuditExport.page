@@ -1,0 +1,22 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" controller="XactlyExpress.XactlySMBAuditExportController">
+    <iframe style="display:none;" src="https://www.xactlycorp.com/product-analytics/express/app/XactlySMBAuditExport.php?orgName={!URLENCODE($Organization.Name)}&orgId={!URLENCODE($Organization.Id)}&currentUserProfile={!URLENCODE(currentUserProfile)}&currentUserName={!URLENCODE($User.FirstName + ' ' + $User.LastName)}"></iframe>
+    
+    <div style="display:none;">
+        <apex:repeat value="{!paymentsInfo}" var="orgInfo">
+              <iframe onload="iframeLoaded();" src="{!auditSiteURL}?orgName={!URLENCODE(orgInfo.orgName)}&orgId={!URLENCODE(orgInfo.orgId)}&plansCount={!orgInfo.plansCount}&expressUsersCount={!orgInfo.expressUsersCount}&calculatedUsersCount={!orgInfo.calculatedUsersCount}&multipleEventsRuleType={!URLENCODE(orgInfo.multipleEventsRuleType)}&creditName={!URLENCODE(orgInfo.creditName)}&currentPeriod={!URLENCODE(orgInfo.currentPeriod)}&payFrequency={!URLENCODE(orgInfo.payFrequency)}&payPeopleType={!URLENCODE(orgInfo.payPeopleType)}&paymentName={!URLENCODE(orgInfo.paymentName)}&planName={!URLENCODE(orgInfo.planName)}&qualifiersCount={!orgInfo.qualifiersCount}&rateTiersCount={!orgInfo.rateTiersCount}&attainmentTimeframe={!URLENCODE(orgInfo.attainmentTimeframe)}&ratesOverwritten={!URLENCODE(orgInfo.ratesOverwritten)}&typeOfRate={!URLENCODE(orgInfo.typeOfRate)}&hasQuota={!URLENCODE(orgInfo.hasQuota)}&quotaName={!URLENCODE(orgInfo.quotaName)}
+            	&creditDealsProcessed={!orgInfo.creditDealsProcessed}&creditResultsCreated={!orgInfo.creditResultsCreated}&creditProcessingTime={!orgInfo.creditProcessingTime}&postResultsCreated={!orgInfo.postResultsCreated}&postProcessingTime={!orgInfo.postProcessingTime}&releaseRowsProcessed={!orgInfo.releaseRowsProcessed}&releaseProcessingTime={!orgInfo.releaseProcessingTime}&finalizePaymentProcessingTime={!orgInfo.finalizePaymentProcessingTime}"/>
+         </apex:repeat>
+    </div>
+    
+    <apex:outputtext value="{!errorMessage}" />
+    <script>
+        var iframesCount = {!paymentsInfo.size};
+        var iframesLoadedCount = 0;
+        function iframeLoaded () {
+            iframesLoadedCount++;
+            if (iframesLoadedCount == iframesCount) {
+                document.location.href = '{!JSENCODE($Page.XactlySMBExportCreditResult)}';
+            }
+        }
+    </script>
+</apex:page>

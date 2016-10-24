@@ -1,0 +1,188 @@
+<apex:page sidebar="false"
+           controller="ePrize_Zemzu.LeaderboardController"
+           tabStyle="Contests__tab"
+           readonly="true"
+           action="{!checkContestId}"
+           applyBodyTag="false"
+           showHeader="false"
+           >
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=3" />
+  <c:JSExternals />
+  <c:SVGInject />
+  <apex:outputPanel layout="none" rendered="{!!$Setup.ContestBuilderSettings__c.LocalMode__c}">
+    <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.contestLeaderboard, 'contestLeaderboard/styles/main.css')}"></link>
+  </apex:outputPanel>
+  <apex:outputPanel layout="none" rendered="{!$Setup.ContestBuilderSettings__c.LocalMode__c}">
+    <script type="text/javascript" src="https://localhost:1337/contestLeaderboard/scripts/app.js"></script>
+  </apex:outputPanel>
+  <apex:outputPanel layout="none" rendered="{!!$Setup.ContestBuilderSettings__c.LocalMode__c}">
+    <script type="text/javascript" src="{!URLFOR($Resource.contestLeaderboard, 'contestLeaderboard/scripts/app.js')}"></script>
+  </apex:outputPanel>
+
+  <script>
+  (function(){try{var a=navigator.userAgent;
+  if((a.indexOf('Salesforce')!=-1)&&(a.indexOf('iPhone')!=-1||a.indexOf('iPad')!=-1)){
+  var s=document.createElement('style');
+  s.innerHTML="html,html body{overflow: auto;-webkit-overflow-scrolling:touch;}body{position:absolute;left:0;right:0;top:0;bottom:0;}";
+  document.getElementsByTagName('head')[0].appendChild(s);}}catch(e){}})();
+  </script>
+
+
+  <script>
+  var ua=navigator.userAgent;
+  if((ua.indexOf('Salesforce')!=-1)&&(ua.indexOf('iPhone')!=-1||ua.indexOf('iPad')!=-1)){
+  function IOS_SCROLL_BOOTSTRAP() {
+  var children = Array.prototype.slice.call(document.body.children),
+  placeholder = document.createElement('section'),
+  fragment = document.createDocumentFragment(),
+  styles,
+  width,
+  height;
+  children.forEach(function(c){fragment.appendChild(c);});
+  placeholder.appendChild(fragment);
+  styles = [
+  'width:100%;',
+  'height:', (window.screen.height - 42), 'px;',
+  'position: absolute; overflow: auto; -webkit-overflow-scrolling: touch'
+  ].join('');
+  placeholder.style.cssText = styles;
+  document.body.appendChild(placeholder);
+  }
+  window.addEventListener('load', function (e) {
+  IOS_SCROLL_BOOTSTRAP();
+  });
+  }
+  </script>
+
+  <script type="text/javascript">
+    window.L11 = window.L11 || {};
+    window.L11.contest = JSON.parse('{!JSENCODE(contestSerialized)}');
+    window.L11.currentUserId = '{!$User.Id}';
+    window.L11.viewEntriesUrl = '{!URLFOR($Page.ViewEntries)}';
+
+
+    jQuery(function() {
+      var $ = jQuery;
+      var participants = _.get(window, 'L11.contest.participants', [])
+      var myUser = _.find(participants, function(p) {
+        return p.userId && (p.userId.substr(0, 15) === window.L11.currentUserId.substr(0, 15));
+      });
+
+      //render the app
+      var domNode = document.getElementById('render-list-here');
+      window.L11.leaderboardElement = React.createElement(window.L11.components.Leaderboard, { contest: window.L11.contest, currentUserId: '{!JSENCODE($User.Id)}' });
+      ReactDOM.render(window.L11.leaderboardElement, domNode);
+
+      //hook up the search box
+      $('[name=search-person]').bind("propertychange change click keyup input paste", function(e) {
+        window.setFilterText(e.target.value);
+      });
+
+      // search box
+      $('[name=search-person]').keyup(function(e) {
+        var text = e.target.value;
+        if (text) {
+          $(this).parent().parent().find('[data-svg=close]').show();
+          $(this).parent().parent().find('[data-svg=search]').hide();
+        } else {
+          $(this).parent().parent().find('[data-svg=search]').show();
+          $(this).parent().parent().find('[data-svg=close]').hide();
+        }
+      });
+
+      $('[data-svg=close]').parent().click(function() {
+        $('[name=search-person]').val('');
+        $('[data-svg=close]').hide();
+        $('[data-svg=search]').show();
+        window.setFilterText('');
+      });
+
+      //find me button
+      $('.button-find-me').click(function(e) {
+        e.preventDefault();
+        var yourItem = $('#render-list-here .is-you');
+        if (isElementInViewport(yourItem)) {
+          return;
+        }
+        var scrollTop = Math.max(yourItem.offset().top - 115, 0);
+        $('html, body').animate({
+          scrollTop: scrollTop,
+          queue: false
+        }, 1000);
+      });
+
+      function isElementInViewport (el) {
+
+          //special bonus for those using jQuery
+          if (typeof jQuery === "function" && el instanceof jQuery) {
+              el = el[0];
+          }
+
+          var rect = el.getBoundingClientRect();
+
+          return (
+              rect.top >= 0 &&
+              rect.left >= 0 &&
+              rect.bottom <= (window.innerHeight || document.documentElement.clientHeight) && /*or $(window).height() */
+              rect.right <= (window.innerWidth || document.documentElement.clientWidth) /*or $(window).width() */
+          );
+      }
+    });
+  </script>
+
+</head>
+<body>
+  <header class="u-depth u-depth2">
+    <div class="App-mainHeader u-flex u-flexCol u-flexJustifyCenter u-paddingHs u-depth u-paddingVs">
+      <h1 class="Header-headline">
+        {!fullContest.contestEntity.ContestName__c}
+      </h1>
+      <div class="Header-timeRemaining" id="Header-timeRemaining">3 days remaining</div>
+    </div>
+    <nav>
+      <div class="App-subNavigation u-paddingAb u-depth">
+
+            <div class="u-flex u-flexAlignItemsStretch">
+
+              <button class="l11-Button l11-Button--tertiary r-ResetButton button-find-me u-marginRb">
+                find me
+              </button>
+
+              <div class="Input Input--withIcon u-sizeFull">
+                <div class="Arrange Arrange--middle">
+                  <div class="Arrange-sizeFill">
+                    <input class="u-sizeFull" type="text" name="search-person" />
+                  </div>
+                  <div class="Arrange-sizeFit">
+                    <button class="r-ResetButton l11-Button l11-Button--secondary l11-Button--withInput">
+                      <div class="l11-Icon l11-Icon--small u-alignCenter" data-svg="search"></div>
+                      <div class="l11-Icon l11-Icon--small u-alignCenter" data-svg="close" style="display:none"></div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+
+            </div>
+            <script type="text/javascript">
+            //hide the find me button in ios sf1 because safari.isStupid()
+            if (navigator.userAgent.indexOf('Salesforce') != -1 && navigator.userAgent.indexOf('iPhone') !== -1) {
+              jQuery('.button-find-me').remove();
+            }
+            </script>
+
+
+
+
+
+      </div>
+    </nav>
+
+
+  </header>
+  <div id="render-list-here" class="App"></div>
+</body>
+</html>
+</apex:page>

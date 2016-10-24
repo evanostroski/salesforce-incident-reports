@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ambition_ingestor_oauth_c4s_0</fullName>
+    <apiAccessLevel>Unrestricted</apiAccessLevel>
+    <modules>
+        <module>
+            <label>ambition_ingestor_oauth_c4s_0</label>
+            <moduleType>canvas</moduleType>
+            <name>ambition_ingestor_oauth_c4s_0</name>
+            <types>
+                <members>ambition_ingestor_oauth_c4s_0Canvas</members>
+                <name>CanvasMetadata</name>
+            </types>
+            <types>
+                <members>ambition__ambition_ingestor_oauth_c4s_0</members>
+                <name>Module</name>
+            </types>
+            <version>91.0</version>
+        </module>
+    </modules>
+    <namespacePrefix>ambition</namespacePrefix>
+    <version>36.0</version>
+</Package>

@@ -1,0 +1,8 @@
+<messaging:emailTemplate subject="This Week's Scorecard Update" 
+    recipientType="User">
+    <messaging:htmlEmailBody >
+        <c:EmailHeader userId="{!recipient.Id}" />
+        <c:EmailPerformance userId="{!recipient.Id}" />
+        <c:EmailFooter />
+    </messaging:htmlEmailBody>
+</messaging:emailTemplate>

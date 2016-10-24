@@ -1,0 +1,1093 @@
+<apex:page controller="rkpi2.RainKingSettingsController">
+	<apex:includeScript value="{!URLFOR($Resource.rkpi2__jQuery, '/js/jquery-1.7.2.min.js')}"  />
+	<apex:includeScript value="{!URLFOR($Resource.rkpi2__jQuery, '/js/jquery-ui-1.8.22.custom.min.js')}"  />
+	<apex:stylesheet value="{!URLFOR($Resource.rkpi2__jQuery, '/css/ui-lightness/jquery-ui-1.8.22.custom.css')}"  />
+	
+<!-- 	<apex:includeScript value="https://code.jquery.com/jquery-1.11.2.min.js" /> -->
+<!--     <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/jquery-ui.min.js" /> -->
+
+<!--     <apex:stylesheet value="{!URLFOR($Resource.jqueryui, 'jqueryui/jquery-ui.css')}" /> -->
+
+	<apex:stylesheet value="{!$Resource.rkpi2__plugin_styles}" />
+ 							
+	<script>
+		$j = jQuery.noConflict();  
+
+		$j(document).ready(function() {
+						
+			$j("#map-ct").hide(); 
+			$j("#controls").hide();
+			$j("#map-spinner").hide();
+			
+			if ({!isValid}==0){
+				showButton();
+			} else if ({!isValid}==1) {
+				showPluginActive();
+			} else if ({!isValid}==-1) {
+				showAccountNotFound();
+			}  
+						
+			$j("#map-ct").hide();
+			$j("#controls").hide();
+			$j("#map-spinner").hide();
+	
+			$j("#map-type").change( function() {
+							
+				$j("#map-ct").hide();
+				$j("#controls").hide();
+				var type = $j("#map-type option:selected").val() != '-' ? $j("#map-type option:selected").val() : '';
+				
+				if (type.length) {
+					paraFunction(type);
+					$j("#map-title").html(type);
+					$j("#map-spinner").show("fade");
+					$j("#map-ct").hide(); 
+					$j("#controls").hide();
+				} else {
+					$j("#map-spinner").hide();
+					$j("#map-ct").hide();
+					$j("#controls").hide();
+				}								
+			});
+			
+			$j("#sync-continents").click( function() {
+				$j("#sync-continents-link").hide();
+				$j("#sync-continents-in-progress").show("fade");
+				callOutSyncContinents();
+			});
+			
+			$j("#sync-countries").click( function() {
+				$j("#sync-countries-link").hide();
+				$j("#sync-countries-in-progress").show("fade");
+				callOutSyncCountries();
+			});
+			
+			$j("#sync-states").click( function() {
+				$j("#sync-states-link").hide();
+				$j("#sync-states-in-progress").show("fade");
+				callOutSyncStates();				
+			});
+			
+			$j("#sync-metros").click( function() {
+				$j("#sync-metros-link").hide();
+				$j("#sync-metros-in-progress").show("fade");
+				callOutSyncMetros();				
+			});
+			
+			$j("#sync-counties").click( function() {
+				$j("#sync-counties-link").hide();
+				$j("#sync-counties-in-progress").show("fade");
+				callOutSyncCounties();				
+			});
+			
+						
+		});
+		   
+		Visualforce.remoting.timeout = 120000; // Set timeout at page level
+		
+		function callOutSyncCountries() {
+			Visualforce.remoting.Manager.invokeAction(
+            	'{!$RemoteAction.RainKingSettingsController.syncCountries}',
+	            handleSyncCountries
+        	);	
+		}
+		
+		function callOutSyncContinents() {
+			Visualforce.remoting.Manager.invokeAction(
+            	'{!$RemoteAction.RainKingSettingsController.syncContinents}', 
+	            handleSyncContinents
+        	);		
+		}
+		
+		function callOutSyncStates() {
+			Visualforce.remoting.Manager.invokeAction(
+            	'{!$RemoteAction.RainKingSettingsController.syncStates}',
+	            handleSyncStates
+        	);		
+		}
+		
+		function callOutSyncMetros() {
+			Visualforce.remoting.Manager.invokeAction(
+            	'{!$RemoteAction.RainKingSettingsController.syncMetros}',
+	            handleSyncMetros
+        	);		
+		}
+		
+		function callOutSyncCounties() {
+			Visualforce.remoting.Manager.invokeAction(
+            	'{!$RemoteAction.RainKingSettingsController.syncCounties}',
+	            handleSyncCounties
+        	);		
+		}
+		
+		function handleSyncContinents(result, event) {
+			$j("#sync-continents-link").show("fade");
+			$j("#sync-continents-in-progress").hide();
+		}
+		
+		function handleSyncCountries(result, event) {
+			$j("#sync-countries-link").show("fade");
+			$j("#sync-countries-in-progress").hide();
+		}
+		
+		function handleSyncStates(result, event) {
+			$j("#sync-states-link").show("fade");
+			$j("#sync-states-in-progress").hide();
+		}
+		
+		function handleSyncMetros(result, event) {
+			$j("#sync-metros-link").show("fade");
+			$j("#sync-metros-in-progress").hide();
+		}
+		
+		function handleSyncCounties(result, event) {
+			$j("#sync-counties-link").show("fade");
+			$j("#sync-counties-in-progress").hide();
+		}
+				
+	    function doLogging(pid,cid,page,source) {
+	        //alert('doLogging called');
+			if (page == 'Set Merge Tab Visibility') {
+				if ($j('input[title=cbVisibleMergeTab]:checked').length=='0') {
+					page += ' to Off';
+				} else {
+					page += ' to On';
+				}			
+			}
+			if (page == 'Set External Links Visibility') {
+				if ($j('input[title=cbVisibleRainkingLinks]:checked').length=='0') {
+					page += ' to Off';
+				} else {
+					page += ' to On';
+				}			
+			}
+			if (page == 'Sandbox') {
+				if ($j('input[title=cbIsSandbox]:checked').length=='0') {
+					page = 'Disable Sandbox';
+				} else {
+					page = 'Enable Sandbox';
+				}			
+			}
+
+	        // This remoting call will use the page's timeout value
+	        Visualforce.remoting.Manager.invokeAction(
+	            '{!$RemoteAction.RainKingSettingsController.performLogging}',
+	            [pid,cid,page,source,'Activation'], 
+	            handleDoLogging
+	        );
+	    }
+	
+	    function handleDoLogging(result, event) { 
+			//alert('handleDoLogging called: ' + result);
+	 	}
+		   
+		function reset() {
+			if (confirm('Do you want to reset your RainKing Integration connection?\n\nThis may require that your RainKing API security token be reset by your RainKing Account Representative.\n\nContinue?')) { 
+				Visualforce.remoting.Manager.invokeAction(
+					'{!$RemoteAction.RainKingSettingsController.deleteCustomSetting}',
+			    	handleDelete
+				);   	
+			}
+		}		   
+		   
+		function callActivatePlugin() {
+		    // This remoting call will use the page's timeout value
+			Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.RainKingSettingsController.activatePlugin}',
+		    	'123', 
+		    	handleResult
+			);
+		}
+		
+		function setMergeTabVisibility() {
+			// This remoting call will use the page's timeout value
+			var el = $j('input[title=cbVisibleMergeTab]')
+			$j(el).attr("disabled", true);
+			Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.RainKingSettingsController.setMergeTabState}',
+		    	$j(el).is(':checked'), 
+		    	ajaxResult
+			);
+		}
+		
+		function ajaxResult(result, event) {
+			var el = $j('input[title=cbVisibleMergeTab]')
+			$j(el).removeAttr("disabled");
+		}
+		
+		function setRkLinksVisibility() {
+			// This remoting call will use the page's timeout value
+			var el = $j('input[title=cbVisibleRainkingLinks]')
+			$j(el).attr("disabled", true);
+			Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.RainKingSettingsController.setRainkingLinksState}',
+		    	$j(el).is(':checked'), 
+		    	ajaxResult2
+			);
+		}
+		
+		function ajaxResult2(result, event) {
+			var el = $j('input[title=cbVisibleRainkingLinks]')
+			$j(el).removeAttr("disabled");
+		}
+		
+		function setIsSandbox() {
+			var el = $j('input[title=cbIsSandbox]')
+			$j(el).attr("disabled", true);
+			Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.RainKingSettingsController.setIsSandbox}',
+		    	$j(el).is(':checked'), 
+		    	ajaxResult3
+			);
+		}
+		
+		function ajaxResult3(result, event) {
+			var el = $j('input[title=cbIsSandbox]')
+			$j(el).removeAttr("disabled");
+		}
+		
+    	function handleResult(result, event) {  
+    		if (result == 1) {
+    			showPluginActive();
+    			doLogging(0,0,'Activate Plugin','Activation');
+    			//below is necessary to make sure checkbox state is not cached in the browser
+    			$j("input[type='checkbox']").each(function() {
+					if (this.id.indexOf("cbisSandbox") >= 0) {
+						this.checked = false;
+					} else {
+						this.checked = true;
+					}
+				});
+				//perform data syncs
+				callOutSyncContinents();
+				callOutSyncCountries();
+				callOutSyncStates();
+				callOutSyncMetros();
+				callOutSyncCounties();
+    		} else if (result == 0) {
+    			$j("#fail-message").text('We were unable to activate your RainKing Integration.');
+    			showPluginActiveFail();
+    		} else if (result == -1) {
+    			$j("#fail-message").text('Unexpected error occurred while connecting to the RainKing service.');
+    			showPluginActiveFail();
+    		} else if (result == -2 || result == -3 || result == -4) {
+    			//'invalidActivationToken')
+    			$j("#fail-message").text('Unable to connect to the RainKing service at this time.');
+    			showPluginActiveFail();
+    		} else if (result == -5 ||result == -6) {
+    			//Cannot match user last name or email
+    			$j("#fail-message").text('Invalid User trying to activate.');
+    			showPluginActiveFail();
+    		} else if (result == -7) {
+    			//invalidToken
+    			$j("#fail-message").text('Rainking account has not been provisioned. ');
+    			showPluginActiveFail();
+    		} else if (result == -8) {
+    			//ExpiredAccount
+    			$j("#fail-message").text('Rainking account is not active.  ');
+    			showAccountNotFound();
+    		} else if (result == -9) {
+    			//OrgNotRegistered
+    			$j("#fail-message").text('We were unable to identify a valid RainKing account.');
+    			showPluginActiveFail();
+    		} else if (result == -10) {
+    			//invalidUserPerformingActivation
+    			$j("#fail-message").text('User does not have permission to perform activation.');
+    			showPluginActiveFail();
+    		}
+    		
+    	}
+    	
+    	function handleDelete(result, event) {
+    		showButton();
+    		
+    		Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.RainKingSettingsController.logDeactivate}',
+		    	finishDelete
+			);
+		}
+    	
+    	function finishDelete(result, event) {
+    		
+    	}
+    	
+		function showButton() {
+			$j(".panel-btn").show("fade");
+			$j(".panel-spinner").hide();
+			$j(".panel-account-not-found").hide();
+			$j(".panel-plugin-active").hide();
+			$j(".panel-plugin-active-fail").hide();
+		}
+		
+		function showAccountNotFound() {
+			$j(".panel-btn").hide();
+			$j(".panel-spinner").hide();
+			$j(".panel-account-not-found").show("fade");
+			$j(".panel-plugin-active").hide();
+			$j(".panel-plugin-active-fail").hide();
+		}
+		   
+		function showSpinner() {
+			$j(".panel-btn").hide();
+			$j(".panel-spinner").show("fade");
+			$j(".panel-account-not-found").hide();
+			$j(".panel-plugin-active").hide();
+			$j(".panel-plugin-active-fail").hide();
+		   	callActivatePlugin();
+		}
+		
+		function showPluginActive() {
+			if ({! searchEnabled } == false || {! pluginEnabled } == false) {
+				Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.RainKingSettingsController.lookupAppPermissions}',
+		    	handleLookupAppPermissions
+				);				
+			} else {
+				if ({! pluginEnabled } == true) {
+					$j(".pluginSettings").show('fade');
+				}	
+				if ({! searchEnabled } == true) {
+					$j(".searchSettings").show('fade');
+				}			
+				
+				$j(".panel-btn").hide();
+				$j(".panel-spinner").hide();
+				$j(".panel-account-not-found").hide();
+				$j(".panel-plugin-active").show("fade");
+				$j(".panel-plugin-active-fail").hide();
+			}
+		}
+		
+		function handleLookupAppPermissions(result,event) {
+			if (result.pluginEnabled == true) {
+				var check 		= '<img src="{!$Resource.rkpi2__check}" style="padding-top:5px;vertical-align: bottom;"  />';
+				var html = check + ' <span style="font-weight:bold;font-style: italic;">Enabled</span>';
+				$j("#pluginEnabled-ct").html(html);
+				$j(".pluginSettings").show('fade');
+			}
+			if (result.searchEnabled == true) {
+				var check 		= '<img src="{!$Resource.rkpi2__check}" style="padding-top:5px;vertical-align: bottom;"  />';
+				var html = check + ' <span style="font-weight:bold;font-style: italic;">Enabled</span>';
+				$j("#searchEnabled-ct").html(html);
+				$j(".searchSettings").show('fade');
+			}
+			
+			$j(".panel-btn").hide();
+			$j(".panel-spinner").hide();
+			$j(".panel-account-not-found").hide();
+			$j(".panel-plugin-active").show("fade");
+			$j(".panel-plugin-active-fail").hide();
+						
+		}
+		
+		function handleLookupPluginEnabled(result,event) {
+			if (result == true) {
+				var check 		= '<img src="{!$Resource.rkpi2__check}" style="padding-top:5px;vertical-align: bottom;"  />';
+				var html = check + ' <span style="font-weight:bold;font-style: italic;">Enabled</span>';
+				$j("#searchEnabled-ct").html(html);
+			}
+			$j(".panel-btn").hide();
+			$j(".panel-spinner").hide();
+			$j(".panel-account-not-found").hide();
+			$j(".panel-plugin-active").show("fade");
+			$j(".panel-plugin-active-fail").hide();
+		}
+		
+		function showPluginActiveFail() {
+			$j(".panel-btn").hide();
+			$j(".panel-spinner").hide();
+			$j(".panel-account-not-found").hide();
+			$j(".panel-plugin-active").hide();
+			$j(".panel-plugin-active-fail").show("fade");
+			
+			doLogging(0,0,'Activate Integration Failed','Activation');
+		}   
+		
+		function mapLoaded() {
+			//enable test value inputs - using a 1 sec delay to make sure the form is drawn
+			var endDelay = false;
+			var delay = setInterval(function() {
+     				$j("[id^=selected_] > span > select > option:selected").each( function() {
+			  		var rk = $j(this).parent().parent().parent().attr("data-rainkingField");
+			  		var sendVal = $j(this).parent().parent().parent().attr("data-default-send-val");
+			  		var val = $j(this).val();
+			  		
+			  		//if there is a selected item in the picklist, the sendVal should be enabled and populated
+			  		if (val.length) {
+			  			endDelay = true;
+			  			setSendVal(rk,sendVal);				  			
+			  		}
+				});
+				if (endDelay) {
+					clearInterval(delay);	
+				}					
+			}, 500);
+		
+			$j("#map-spinner").hide();
+			$j("#map-ct").show();
+			$j("#controls").show();
+		}
+		
+		function advanceCountryMapping() {
+			if($j(".advanced-options-country").is(":visible")) {
+				$j(".advanced-options-country").hide();
+			} else {
+				$j(".advanced-options-country").show("fade");
+			}
+		}
+		
+		function toggleCustomCountryPanel(toggle) {
+			if (toggle) {
+				$j("#custom-country-panel").show("fade");
+			} else {
+				$j("#custom-country-panel").hide();
+			}
+			setSendVal('country_name','');
+		}
+		
+		function advanceLeadSourceMapping(item) {
+			if ($j("#out-leadsource-"+item).is(":visible")) {
+				$j("#out-leadsource-"+item).hide();
+			} else {
+				$j("#out-leadsource-"+item).show("fade");
+			}
+		}
+		
+		function validateMap() {	        
+ 	        $j("#validationErrs").val('').hide();
+	        $j("#submit-spinner").show();
+	        $j("#testBtn").hide();
+	        var valStatus = true;
+	        var valMessage = '<b>Map Validation Issues</b>:';
+	
+	        if ($j("#selected_LeadSource1 > span > select :selected").val() != '' && $j("#LeadSourceVal1").val() == ''){
+	            valStatus = false;
+	            valMessage += '<br/>Leadsource1 default value missing.';
+	        }
+	        if ($j("#selected_LeadSource2 > span > select :selected").val() != '' && $j("#LeadSourceVal2").val() == ''){
+	            valStatus = false;
+	            valMessage += '<br/>Leadsource2 default value missing.';
+	        }
+	        if ($j("#selected_LeadSource3 > span > select :selected").val() != '' && $j("#LeadSourceVal3").val() == ''){
+	            valStatus = false;
+	            valMessage += '<br/>Leadsource3 default value missing.';
+	        }
+	
+	        if ($j(".useCountrySubMap:radio:checked").val() == 1){
+	           $j("[id^=countryMap_]").each( function() {
+	           		if( $j(this).val() == '' ) {
+	           			valStatus = false;
+	                    valMessage += '<br/>Country: ' + $j( this ).attr('data-country') + ' is missing a default value.';
+	                }
+	           });   	
+	        }
+	        
+	        $j(".itemValidationMsg").each( function() {
+	        	if ($j(this).is(":visible")) {
+	        		valStatus = false;
+	                valMessage += '<br/>Please address the test value validation issue(s).';
+	        	}
+	        });
+
+	        $j("#submit-spinner").hide();
+
+	        if (valStatus) {
+	            testMap();
+	        } else {
+	            $j("#validationErrs").html(valMessage).show();
+	            $j("#successMsg").hide();
+	            $j("#testBtn").show();
+	            $j("saveBtn").hide();
+	            $j("#saveMsg").hide();
+	        }
+	        return  valStatus;
+	    }
+	    
+	    function setSendVal(rk,sv) {
+	    	var val = '';
+	    	if (rk == 'country_name') {
+	    		//if we are sending coutry, we need to see if the user is using custom coutries, and send one of them
+	    		if ($j(".useCountrySubMap:radio:checked").val() == 1){
+	    			sv = $j("#countryMap_US").val();
+	    		} else {
+	    			sv = 'US';
+	    		}
+	    	} else if (rk == 'LeadSource1') {
+	    		sv = $j("#LeadSourceVal1").val();
+	    	} else if (rk == 'LeadSource2') {
+	    		sv = $j("#LeadSourceVal2").val();
+	    	} else if (rk == 'LeadSource3') {
+	    		sv = $j("#LeadSourceVal3").val();
+	    	}
+	    		    	
+	    	val = $j("#selected_"+rk+" > span > select > option:selected").val();
+	    	if (val.length) {
+	    		$j("#sendVal_" + rk).removeAttr("disabled").val(sv);
+	    		$j(".updateType_" + rk).removeAttr("disabled");
+	    	} else {
+	    		$j("#sendVal_" + rk).attr("disabled","disabled").val('');
+	    		$j(".updateType_" + rk).attr("disabled","disabled");
+	    	}
+
+	    	resetToTest();
+	    }
+	    
+	    function resetToTest() {
+            $j("#testBtn").show();
+            $j("#saveBtn").hide();
+            $j("#saveMsg").hide();
+            $j("#successMsg").hide();
+            $j("#submit-spinner").hide();
+	    }
+	    
+	    function saveMap() {
+	    	var type = $j("#map-type option:selected").val() != '-' ? $j("#map-type option:selected").val() : '';
+	    	$j("#submit-spinner").show();
+	        $j("#saveBtn").hide();
+	        	
+	  		var countries = [];
+	  		if ($j(".useCountrySubMap:radio:checked").val() == 1){
+	  			$j("[id^=countryMap_]").each( function() {
+	  				var tmp = {};
+	  				tmp['code'] = $j(this).attr("data-code");
+	  				tmp['val']  = $j(this).val();
+	  				countries.push(tmp);
+	  			});	
+	  		}
+	  		
+	  		var leadSourceVals = {};
+	  		leadSourceVals.val1 = $j("#LeadSourceVal1").val();
+	  		leadSourceVals.val2 = $j("#LeadSourceVal2").val();
+	  		leadSourceVals.val3 = $j("#LeadSourceVal3").val(); 
+  	
+	    	var data = [];
+	    	var prefix = $j("#pluginPrefix").val();
+	    	if ($j("#pluginIsInstalled").val() == 'true') {
+	    		//add id fields to map
+	    		if (type == 'lead') {
+		  			data.push({"rkField":"contact_id","sfField":prefix+"rkContactId__c","updateType":2});	
+		  			data.push({"rkField":"profile_id","sfField":prefix+"rkCompanyId__c","updateType":2});	
+	    		} else if (type == 'contact') {
+	    			data.push({"rkField":"contact_id","sfField":prefix+"rkContactId__c","updateType":2});	
+	    		} else if (type == 'account') {
+	    			data.push({"rkField":"profile_id","sfField":prefix+"rkCompanyId__c","updateType":2});	
+	    		}
+	    	}	
+	    	
+	    	$j("[id^=selected_] > span > select > option:selected").each( function() {
+		  		var rk 			= $j(this).parent().parent().parent().attr("data-rainkingField");
+		  		var sf 			= $j(this).val();
+		  			  		
+		  		if (sf.length) {
+		  			var tmp = {};
+		  			tmp['sfField'] = sf;
+		  			tmp['rkField'] = rk;
+		  			tmp['updateType'] = $j(".updateType_"+rk+":radio:checked").val();
+		  			data.push(tmp);
+		  		}		  		
+		  	});	
+		  	
+		  	var saveObj = {
+	    		"mapType":type,
+	    		"data":data,
+	    		"countries":countries,
+	    		"leadSourceVals":leadSourceVals
+	    	};
+		  	
+		  	//make sure to delete the prototype implementation toJSON or craziness will ensue
+		  	delete Array.prototype.toJSON;
+		  	
+		  	var json =JSON.stringify( saveObj );
+			
+			Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.RainKingSettingsController.saveMapping}',
+				json,
+		    	handleSaveMapResult
+			);
+	  	}
+	    
+	     function handleSaveMapResult(result, event) {
+
+	    	$j("#submit-spinner").hide();
+	    	
+	    	if (result > 0) {
+	    		$j("#validationErrs").hide(); 
+	    		$j("#successMsg").hide();
+	    		$j("#saveMsg").show().html('<div class="congrats">Success!</div>Your map has been saved. You can now push records from RainKing into Salesforce. Use the permission controls at the top-left of this page to manage your user\'s abilities to push records.<br/><br/>Make sure to <b><a href="#" onclick="mapActivation(true)">ACTIVATE</a></b> your map.');
+	    		$j("#testBtn").hide();
+	    		$j("#saveBtn").hide();
+	    		$j("#mapId").val(result);
+	    		mapActivation(false);
+	    	} else {
+	    		if (result.message && result.message.length()) {
+	    			$j("#validationErrs").show().html(result.message); 
+	    		} else {
+	    			$j("#validationErrs").show().html('An unknown error occured while saving your mapping.'); 
+	    		}
+	    		$j("#successMsg").hide();
+	    		$j("#saveMsg").hide();
+	    		$j("#testBtn").hide();
+	    		$j("#saveBtn").show();
+	    	}  	
+	    }
+
+		function testMap() {
+	    	var type = $j("#map-type option:selected").val() != '-' ? $j("#map-type option:selected").val() : '';
+			$j("#submit-spinner").show();
+	        $j("#testBtn").hide();
+	        
+	    	var testObj = {"mapType":type,"data":[]};
+	    	var prefix = $j("#pluginPrefix").val();
+	    	
+	    	if ($j("#pluginIsInstalled").val() == 'true') {
+	    		//add id fields to map
+	    		if (type == 'lead') {
+		  			testObj.data.push({"sfField":prefix+"rkContactId__c","sendVal":0});	
+		  			testObj.data.push({"sfField":prefix+"rkCompanyId__c","sendVal":0});	
+	    		} else if (type == 'contact') {
+	    			testObj.data.push({"sfField":prefix+"rkContactId__c","sendVal":0});
+	    		} else if (type == 'account') {
+	    			testObj.data.push({"sfField":prefix+"rkCompanyId__c","sendVal":0});	
+	    		}
+	    	}	    	
+	    	
+	    	$j("[id^=selected_] > span > select > option:selected").each( function() {
+		  		var rk = $j(this).parent().parent().parent().attr("data-rainkingField");
+		  		var sf = $j(this).val();
+		  		
+		  		if (sf.length) {
+		  			testObj.data.push({"sfField":sf,"sendVal":$j("#sendVal_" + rk).val()});
+		  		}		  		
+		  	});
+		  	
+		  	//make sure to delete the prototype implementation toJSON or craziness will ensue
+		  	delete Array.prototype.toJSON;
+		  	
+		  	var json = JSON.stringify(testObj);
+	  	
+		  	Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.RainKingSettingsController.testMapping}',
+				json,
+		    	handleTestMapResult
+			); 
+		}	
+	     
+	    function handleTestMapResult(result, event) {
+	    	$j("#submit-spinner").hide();
+	    	if (result.error) {
+	    		$j("#validationErrs").html(result.ex).show(); 
+	    		$j("#successMsg").hide();
+	    		$j("#testBtn").show();
+	    		$j("#saveBtn").hide();
+	    		$j("#saveMsg").hide();
+	    	} else {
+	    		$j("#validationErrs").hide();
+	    		$j("#successMsg").show().html('<div class="congrats">Congratulations!</div>Your map test was successful. A test record with ID: <b>'+result.myId+' </b>was successfully written to your Salesforce Org. It is now safe to delete this record.<br/><br/>If you are satisfied with this mapping, make sure to click "Save Map" above.');
+	    		$j("#testBtn").hide();
+	    		$j("#saveBtn").show();
+	    		$j("#saveMsg").hide();
+	       	}
+	    }
+	    
+	    function setCustomCountryVals() {
+	    	var copyType = $j("#country-quick-change option:selected").val();
+	
+	    	$j("[id^=countryMap_]").each( function() {
+	    		if (copyType == 'full') {
+	    			$j(this).val($j(this).attr("data-country"));
+	    		} else {
+	    			$j(this).val($j(this).attr("data-code"));
+	    		}	
+	    	});
+	    }
+	    
+	    function mapActivation(turnOn) {
+    		$j("#map-status").removeClass('inactive');
+    		$j("#map-status").removeClass('active');
+    		$j("#map-status").addClass('undefined');
+    		$j(".status").html('<img src="{!$Resource.rkpi2__sm_spinner}"  /> <span class="updating"> &nbsp; updating...</span>');
+    		var mapId = $j("#mapId").val();
+
+    		Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.RainKingSettingsController.setMapStatus}', 
+				turnOn,mapId,
+		    	handleMapActivation
+			); 
+    	}
+    	
+    	function handleMapActivation(result, event) {
+    		if (result == 'active') {
+    			$j("#map-status").removeClass('undefined');
+    			$j("#map-status").addClass('active');
+    			$j(".status").html('<div style="height:100%;vertical-align:middle;float:left"><img src="{!$Resource.checkmark}" /></div> <div style="height:100%;vertical-align:middle;float:left">&nbsp;  Map is Active</div>');
+    			$j(".toggle").html('<a style="cursor:pointer;" onclick="mapActivation(false)">turn off</a>');
+    			$j(".side-bar-ct").show('fade');
+    		} else {
+    			$j(".toggle").show();
+    			$j("#map-status").removeClass('undefined');
+    			$j("#map-status").addClass('inactive');
+    			$j(".status").html('<div style="height:100%;vertical-align:middle;float:left"><img src="{!$Resource.cross}" /></div> <div style="height:100%;vertical-align:middle;float:left">&nbsp;  Map is Inactive</div>');
+    			$j(".toggle").html('<a style="cursor:pointer;" onclick="mapActivation(true)">turn on</a>');
+    			$j(".side-bar-ct").hide('fade');
+    		}
+    	}
+    	
+    	function handleAutoSync() {
+    		$j("#auto-sync-enabled").attr("disabled","disabled");
+    		$j("#auto-sync-label").html('<img src="{!$Resource.rkpi2__sm_spinner}"  /> <span class="updating"> &nbsp; updating...</span>');
+    		var status = false;
+    		if ( $j("#auto-sync-enabled").is(':checked') ) {
+    			status = true;
+    		}
+    		var mapId = $j("#mapId").val();
+    		Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.RainKingSettingsController.setAutoSync}', 
+				status,mapId,
+		    	handleSetAutoSync
+			);
+    	}
+    	
+    	function handleSetAutoSync(result, event) {
+    		$j("#auto-sync-label").html('  &nbsp;  Auto Sync Enabled');
+    		$j("#auto-sync-enabled").removeAttr("disabled");
+    		if (!result) {
+    			alert('An error occurred setting Auto Sync.  Please try again.');
+    		}
+    	}
+    	
+    	function permissionToggle(pid,pgid,status) {
+    		$j("#perm-name_"+pgid).hide();
+    		$j("#spinner_"+pgid).show();
+	
+    		Visualforce.remoting.Manager.invokeAction(
+				'{!$RemoteAction.RainKingSettingsController.permissionToggle}', 
+				status,pid,pgid,
+		    	handlePermissionToggle
+			); 
+    	}
+    	
+    	function handlePermissionToggle(result, event) {
+    		$j("#perm-name_"+result[1]).show();
+    		$j("#spinner_"+result[1]).hide();
+    		if (result[0] == 'false') {
+    			alert('An error occurred setting a Permission.  Please try again.');
+    		}
+    	}
+    	
+    	function sendValValidation(item) {
+			var datatype = $j(item).attr("data-fieldType");
+			var errMsg = $j(item).parent().find(".itemValidationMsg");
+			if (datatype == 'number') {
+				if ($j.isNumeric($j(item).val())) {
+					$j(errMsg).hide('fade');
+					resetToTest();
+				} else {
+					$j(errMsg).html('Value must be a number').show();
+				}
+				
+			}
+		}
+	</script>
+
+	<!-- -->
+	<div class="bPageTitle">
+		<div class="ptBody">
+			<div class="content">				
+				<div class="rkPageTitleIcon">
+					
+				</div>
+				<h1 class="pageType">
+					RainKing Integration Administration
+					<span class="titleSeparatingColon">:</span>
+				</h1>
+				<h2 class="pageDescription"> Home</h2>
+				<div class="blank"> </div>
+			</div>
+		</div>
+	</div>
+	<apex:image value="{!$Resource.rkpi2__rk_baby}" style="left: 0;position: relative;top: -60px;" />
+	
+	<apex:form >
+		<apex:pageBlock title="RainKing Integration Activation" id="all">		    
+		        <div class="panel-btn" style="display:none;"> 	
+			    	To activate your RainKing Salesforce Integration, you must have a valid RainKing account.  If you do not have a RainKing account, please <a href="mailto:helpmenow@rainkingonline.com?Subject=Salesforce Integration Activation" onClick="doLogging(0,0,'Activation Email Link','Activation');">contact us</a>.
+			    	<br/><br/>		    
+				    <div class="activate-btn">
+				    	<apex:outputPanel rendered="{! isAdmin }">
+				    		<input type="button" class="btn" value="Activate RainKing Integration" onclick="showSpinner()" />
+				    	</apex:outputPanel>
+				    	<apex:outputPanel rendered="{! !isAdmin }">
+				    		<input type="button" disabled="disabled" value="Activate RainKing Plugin" style="opacity: 0.65;cursor: not-allowed;"  />
+				    		<span style="color:red"> &nbsp;&nbsp;&nbsp; Activation can only be performed by your RainKing Salesforce Administrator.</span>
+							<br/><br/><br/><br/>
+							<span style="color:#696969;font-style: italic;">(If you are the RainKing Salesforce Administrator, please check that the RainKing Integration is installed correctly.)</span>			    	
+				    	</apex:outputPanel>
+					</div>
+				</div>
+				
+				<div class="panel-spinner" style="display:none;">
+					<div style="height: 22px;border:solid #ffb226 medium;padding:10px;background-color:#ffdb97;vertical-align:middle;">
+						<div style="padding-left:10px;vertical-align:middle;float:left;width:30px;">
+					    	<apex:image value="{!$Resource.rkpi2__sm_spinner}" />
+						</div>
+					    <div style="padding-left:10px;vertical-align:middle;float:left;padding-top: 5px;">
+					       	Attempting to activate your RainKing Integration.  Please wait...
+					    </div>
+					</div>
+				</div>
+				
+				<div class="panel-account-not-found" style="display:none;">
+				    <div style="height: 100px;border:solid #ce1d09 medium;padding:10px;background-color:#fdd2ce;vertical-align:middle;">
+						<div style="padding-left:10px;vertical-align:middle;float:left;width:30px;">
+					    	<apex:image value="{!$Resource.rkpi2__alert}" />
+						</div>
+					    <div style="padding-left:10px;vertical-align:middle;float:left;padding-top: 5px;">
+					    	A valid RainKing Subscription was not found.<br/><br/>
+					    	<i>What's required to activate your RainKing Integration for Salesforce?</i>
+							<br/><br/>1. An active subscription to RainKing.  If you're not yet subscribed, please contact <a href="mailto:ewalter@rainkingonline.com?Subject=Salesforce Integration Activation">RainKing Sales</a> or call 1-866-592-7122.
+							<br/>2. A valid security token administered by RainKing.  If you need to have a token created, please contact <a href="mailto:helpmenow@rainkingonline.com?Subject=Salesforce Integration Activation">RainKing Client Success</a>.
+							<br/><br/>
+						</div>
+					</div>
+				</div>
+				
+				<div class="panel-plugin-active" style="display:none;"> 
+					<div style="height: 22px;border:solid green medium;padding:10px;background-color:#aeffae;">
+						<div style="padding-left:10px;vertical-align:middle;float:left;width:30px;">
+							<apex:image value="{!$Resource.rkpi2__check}" style="padding-top:5px;" />
+						</div>
+				        <div style="padding-left:10px;vertical-align:middle;float:left;padding-top: 5px;">
+							RainKing Integration has been activated. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <apex:outputPanel rendered="{! isAdmin }"><a style="font-size:9px;padding-left:20px;" href="javascript:reset()">Reset</a></apex:outputPanel>
+				   		</div>	
+					</div>
+					<br/><br/>
+					<apex:tabPanel switchType="client" selectedTab="plugin-options" id="myTabPanel" inactiveTabClass="inactiveTab">
+						<apex:tab label="Integration Settings" name="plugin-options" id="plugin-options">
+							<c:activationSettingsTab isAdmin="{! isAdmin }" visibleMergeTab="{! visibleMergeTab }" visibleRainkingLinks="{! visibleRainkingLinks }" isSandbox="{! isSandbox }" 
+								pluginEnabled="{! pluginEnabled }" searchEnabled="{! searchEnabled }" />
+						</apex:tab>
+						
+						
+							<apex:tab label="Data Mappings" name="data-mappings" id="data-mappings" rendered="{! isAdmin }">
+								<div class="header-text">In order to transfer RainKing data to your Salesforce.com instance, you must define a mapping so we know which Salesforce.com fields in your instance should receive RainKing data. If you have not customized your Salesforce.com, the default mappings should work. If you don't want RainKing data to overwrite your existing data, it is recommended that you set custom fields in Salesforce.com and push RainKing data to these fields.</div>
+								<hr size="1"/>
+							
+							<div style="margin-left:235px;font-weight:bold;margin-top: 10px;">Follow these steps when creating or updating a mapping</div>
+							<div id="step-box">
+								<div style="float:left;">
+									<select name="map-type" id="map-type" class="rk-form"><option value="-">Select
+											Map Type</option>
+										<option value="lead">Lead Mappings</option>
+										<option value="account">Account Mappings</option>
+										<option value="contact">Contact Mappings</option></select>
+									<br/>
+								</div>
+								<div style="display: inline-block;">
+									<ol class="step-list">
+										<li>Build Map</li>
+										<li>Test Map</li>
+										<li>Save Map</li>
+										<li>Activate</li>
+										<li>Set Permissions</li>
+									</ol>
+								</div>	
+							</div>
+							
+							<div id="map-spinner" style="height: 400px;">
+								<div class="ajax-mapping-loader" style="text-align: center;">
+									<img src="{!$Resource.rkpi2__sm_spinner}"  />
+									<br/><br/>
+									Getting <span id="map-title"></span> mapping data from RainKing...
+								</div>
+							</div>																	
+							
+					    	<br/>
+								
+						        <apex:actionFunction name="paraFunction" action="{!getMap}" rerender="out" oncomplete="mapLoaded()">
+						        	<apex:param id="type" name="type" value="" />
+						        </apex:actionFunction>
+	
+							    <apex:outputPanel id="out">
+							    							    	
+							    	<input type="hidden" id="mapId" value="{! myMap[0].mapId }" />
+							    	<input type="hidden" id="pluginIsInstalled" value="{! pluginIsInstalled }" />
+							    	<input type="hidden" id="pluginPrefix" value="{! pluginPrefix }" />
+							    	
+									<div class="row" id="map-ct">
+							    		<div id="left-margin" class="cell">
+											<div>
+												<apex:outputText rendered="{! mapIsActive == 1 }">
+													<c:mapWidgetSidebarActive myPermissions="{! myPermissions }" autoSyncEnabledForAccount="{! autoSyncEnabledForAccount }" autoSyncEnabledForMap="{! autoSyncEnabledForMap }" />
+												</apex:outputText>
+												<apex:outputText rendered="{! mapIsActive == 0 }">
+													<c:mapWidgetSidebarInactive myPermissions="{! myPermissions }" autoSyncEnabledForAccount="{! autoSyncEnabledForAccount }" autoSyncEnabledForMap="{! autoSyncEnabledForMap }" mapIsDefined="true" />														
+												</apex:outputText>
+												<apex:outputText rendered="{! mapIsActive == -1 }"> 
+													<c:mapWidgetSidebarInactive myPermissions="{! myPermissions }" autoSyncEnabledForAccount="{! autoSyncEnabledForAccount }" autoSyncEnabledForMap="{! autoSyncEnabledForMap }" mapIsDefined="false" />
+												</apex:outputText>
+											</div>
+							    		</div>
+							    		<div class="cell">
+									    	<table id="map-table" cellspacing="0">
+									    		<tbody>
+									    		<tr>
+									    			<th colspan="4" class="thSub"></th>
+									    			<th colspan="2" class="thSub">Update with RainKing content?</th>
+									    		</tr>
+									    		<tr>
+									    			<th>RainKing Field</th>
+									    			<th style="width: 14px;"><apex:image value="{!$Resource.rkpi2__advancedMapping}" title="Additional Mapping Options" /></th>
+									    			<th>Salesforce Field</th>
+									    			<th>Test Value</th>
+									    			<th style="width:40px;text-align:center;font-size: .9em;" title="RainKing data will be added only when a new record is created">Never</th>
+									    			<th style="width:40px;text-align:center;font-size: .9em;" title="RainKing data will be added when a record is created or updated">Always</th>
+									    			<!-- <th style="width:40px;text-align:center;font-size: .9em;" title="RainKing data will be added when a record is created or updated but only if the field is blank">If Blank</th> -->
+									    		</tr>
+									    		<tr>
+													<td colspan="6">
+														<div class="tableSubHeader">
+															Common Fields
+															<!-- <span class="commonFieldsHelp widgetHelp" data-original-title="">?</span> -->
+														</div>	
+													</td>
+												</tr>
+												
+									    		<apex:repeat value="{! myMap }" var="row" id="mapRow">
+									    			<tr>
+									    				<td><apex:outputText value="{! row.label }" /></td>
+									    				<td>
+									    					<apex:outputText rendered="{! row.label=='Country' }" ><img src="{!$Resource.rkpi2__advancedMapping}" title="Additional Mapping Options" style="cursor:pointer;" onclick="advanceCountryMapping()" /></apex:outputText>
+									    					<apex:outputText rendered="{! row.label=='[LeadSource]' }" ><img src="{!$Resource.rkpi2__advancedMapping}" title="Additional Mapping Options" style="cursor:pointer;" onclick="advanceLeadSourceMapping(1)" /></apex:outputText>
+									    					<apex:outputText rendered="{! row.label=='[LeadSource2]' }" ><img src="{!$Resource.rkpi2__advancedMapping}" title="Additional Mapping Options" style="cursor:pointer;" onclick="advanceLeadSourceMapping(2)" /></apex:outputText>
+									    					<apex:outputText rendered="{! row.label=='[LeadSource3]' }" ><img src="{!$Resource.rkpi2__advancedMapping}" title="Additional Mapping Options" style="cursor:pointer;" onclick="advanceLeadSourceMapping(3)" /></apex:outputText>
+									    				</td>
+									    				<td id="selected_{! row.rainkingField }" data-rainkingField="{! row.rainkingField }" data-default-send-val="{! row.sendVal }">
+									    					<c:mapSelector describeFieldsList="{! describeFieldsList }" pluginPrefix="{! pluginPrefix }" salesforceField="{! row.salesforceField }" rainkingField="{! row.rainkingField }" sendVal="{! row.sendVal }" pluginIsInstalled="{! pluginIsInstalled }" />
+									    				</td>
+									    				<td> 
+									    					<c:mapTestVal rainkingField="{! row.rainkingField }" fieldType="{! row.fieldType }" pluginIsInstalled="{! pluginIsInstalled }" />						    					
+									    				</td> 
+									    				<apex:outputText rendered="{! row.updateType==1 }" >
+										    				<td align="center"><input type="radio" checked="checked" class="updateType_{! row.rainkingField } rk-form" name="updateType_{! row.rainkingField }" value="1" disabled="disabled" /></td>
+															<td align="center"><input type="radio" class="updateType_{! row.rainkingField } rk-form" name="updateType_{! row.rainkingField }" value="2" disabled="disabled" /></td>
+															<!-- <td align="center"><input type="radio" class="updateType_{! row.rainkingField } rk-form" name="updateType_{! row.rainkingField }" value="3" disabled="disabled" /></td> -->						    			
+														</apex:outputText>
+														<apex:outputText rendered="{! row.updateType==2 }" >
+										    				<td align="center"><input type="radio" class="updateType_{! row.rainkingField } rk-form" name="updateType_{! row.rainkingField }" value="1" disabled="disabled" /></td>
+															<td align="center"><input type="radio" checked="checked" class="updateType_{! row.rainkingField } rk-form" name="updateType_{! row.rainkingField }" value="2" disabled="disabled" /></td>
+															<!-- <td align="center"><input type="radio" class="updateType_{! row.rainkingField } rk-form" name="updateType_{! row.rainkingField }" value="3" disabled="disabled" /></td> -->						    			
+														</apex:outputText>
+														<apex:outputText rendered="{! row.updateType==3 }" >
+										    				<td align="center"><input type="radio" class="updateType_{! row.rainkingField } rk-form" name="updateType_{! row.rainkingField }" value="1" disabled="disabled" /></td>
+															<td align="center"><input type="radio" class="updateType_{! row.rainkingField } rk-form" name="updateType_{! row.rainkingField }" value="2" disabled="disabled" /></td>
+															<!-- <td align="center"><input type="radio" checked="checked" class="updateType_{! row.rainkingField } rk-form" name="updateType_{! row.rainkingField }" value="3" disabled="disabled" /></td> -->						    			
+														</apex:outputText>													
+													</tr>
+													
+									    			<apex:outputText rendered="{! row.label=='Country' }" >
+									    				<tr class="advanced-options-country" id="out-country">
+										    				<td colspan="6">
+																<div class="advanced-options-dialog">
+																	By default, RainKing will send 2 character country abbreviations to Salesforce. 
+																	<br/>If your Org is standardized on a different country convention, you can setup a custom country mapping below.
+																	<br/><br/>
+																	<apex:outputText rendered="{! usingCustomCountryMap }" >
+																		<style>#custom-country-panel{display: block;}</style>
+																		<input type="radio" class="useCountrySubMap rk-form" name="useCountrySubMap" value="0" onclick="toggleCustomCountryPanel(false)"  />Use Default Country Mapping <input type="radio" checked="checked" class="useCountrySubMap rk-form" name="useCountrySubMap" value="1" onclick="toggleCustomCountryPanel(true)" />Use Custom Country Mapping
+																	</apex:outputText>
+																	<apex:outputText rendered="{! !usingCustomCountryMap }" >
+																		<style>#custom-country-panel{display: none;}</style>
+																		<input type="radio" checked="checked" class="useCountrySubMap rk-form" name="useCountrySubMap" value="0" onclick="toggleCustomCountryPanel(false)"  />Use Default Country Mapping <input type="radio" class="useCountrySubMap rk-form" name="useCountrySubMap" value="1" onclick="toggleCustomCountryPanel(true)" />Use Custom Country Mapping
+																	</apex:outputText>
+																	<div id="custom-country-panel">
+ 																		<hr size="1" style="color:#dcdcdc" /> 
+																		<select id="country-quick-change" onchange="setCustomCountryVals()" class="rk-form">
+																			<option value="abbr">Use Two Letter Code</option>
+																			<option value="full">Use Full Country Name</option>
+																		</select>
+ 																		<hr size="1" style="color:#dcdcdc" />
+																		<table id="map-table" cellspacing="0">
+																			<tr>
+																				<th>Country</th>
+																				<th>Send Value</th>
+																			</tr>
+																			<apex:repeat value="{! customCountryMap }" var="country_row" id="countryRow">
+																				<tr>
+																					<td><apex:outputText value="{! country_row.country }" /></td>
+																					<td><input type="text" value="{! country_row.countryValue }" class="rk-form" data-country="{! country_row.country }" data-code="{! country_row.code }" id="countryMap_{! country_row.code }" onchange="setSendVal('country_name','');" /></td>	
+																				</tr>
+																			</apex:repeat>
+																		</table>
+																	</div>
+																</div>
+															</td>
+										    			</tr>
+									    			</apex:outputText>
+									    			
+									    			<apex:outputText rendered="{! row.label=='[LeadSource]' }" >
+									    				<tr class="advanced-options-leadsource" id="out-leadsource-1">
+									    					<td colspan="6"><div class="advanced-options-dialog">Enter value to always be sent to the mapped field:<br/><input class="leadsource-input rk-form" type="text" id="LeadSourceVal1" value="{! leadSourceMap[0]['val1'] }" onchange="setSendVal('LeadSource1','');" /></div></td>
+									    				</tr>
+									    			</apex:outputText>
+									    			<apex:outputText rendered="{! row.label=='[LeadSource2]' }" >
+									    				<tr class="advanced-options-leadsource" id="out-leadsource-2">
+									    					<td colspan="6"><div class="advanced-options-dialog">Enter value to always be sent to the mapped field:<br/><input class="leadsource-input rk-form" type="text" id="LeadSourceVal2" value="{! leadSourceMap[0]['val2'] }" onchange="setSendVal('LeadSource2','');" /></div></td>
+									    				</tr>
+									    			</apex:outputText>
+									    			<apex:outputText rendered="{! row.label=='[LeadSource3]' }" >
+									    				<tr class="advanced-options-leadsource" id="out-leadsource-3">
+									    					<td colspan="6"><div class="advanced-options-dialog">Enter value to always be sent to the mapped field:<br/><input class="leadsource-input rk-form" type="text" id="LeadSourceVal3" value="{! leadSourceMap[0]['val3'] }" onchange="setSendVal('LeadSource3','');" /></div></td>
+									    				</tr>
+									    			</apex:outputText>
+									    			
+									    			<apex:outputText rendered="{! row.label=='Website' }" ><tr><td colspan="6"><div class="tableSubHeader">Non-standard Fields</div></td></tr></apex:outputText>
+									    			<apex:outputText rendered="{! row.label=='Sector' }" ><tr><td colspan="6"><div class="tableSubHeader">Source Tracking</div></td></tr></apex:outputText>
+									    			<apex:outputText rendered="{! row.label=='[LeadSource3]' }"><tr><td colspan="6"><div class="tableSubHeader">Tagging</div></td></tr></apex:outputText>
+									    		</apex:repeat>
+									    		<tr>
+													<td style="height:80px;padding-top:20px;">
+														<input type="button" id="testBtn" style="height: 25px;font-size:1.2em;" onclick="validateMap();" value="Test Map" />
+									    				<input type="button"  id="saveBtn" style="height: 25px;font-size:1.2em;display:none;" name="saveBtn" onclick="saveMap()" value="Save Map" />
+									    				<div id="submit-spinner"><img src="{!$Resource.rkpi2__sm_spinner}"  /> <span class="updating"> &nbsp; processing request...</span></div>
+									    			</td>
+													<td colspan="6" style="padding-top:20px;">
+														<div id="validationErrs"></div>
+									    				<div id="successMsg"></div>
+									    				<div id="saveMsg"></div>
+													</td>
+												</tr>		
+									    		</tbody>
+									    	</table>
+									    </div>
+									</div>
+									
+							    </apex:outputPanel> 
+	    
+							</apex:tab>
+							<!-- <apex:tab label="Reports" name="reports" id="reports" rendered="{! isAdmin }">
+							
+							</apex:tab> -->
+
+					</apex:tabPanel>
+
+				</div>
+				
+				<div class="panel-plugin-active-fail" style="display:none;height: 100px;"> 
+					<div style="border:solid #ce1d09 medium;padding:10px;background-color:#fdd2ce;vertical-align:middle;">
+						<div style="padding-left:10px;vertical-align:middle;float:left;width:30px;">
+					    	<apex:image value="{!$Resource.rkpi2__alert}" />
+						</div>
+					    <div style="padding-left:10px;vertical-align:middle;float:left;padding-top: 5px;">
+					    	<span id="fail-message"></span>
+						</div>
+						<br/><br/>Please contact <a href="mailto:ewalter@rainkingonline.com?Subject=Salesforce Integration Activation">RainKing Sales</a> to inquire about a RainKing account or <a href="mailto:helpmenow@rainkingonline.com?Subject=Salesforce Integration Activation">RainKing Client Services</a> to have a security token created and linked to your Salesforce account.  If you prefer, you can reach Sales or Client Services by calling 1-866-592-7122.
+					</div>
+				</div>
+			
+		</apex:pageBlock>
+	</apex:form>
+    <br/><br/>
+    
+
+
+</apex:page>

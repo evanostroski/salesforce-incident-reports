@@ -1,0 +1,15 @@
+<apex:page controller="lmscons.LMS_Update_Learning" showHeader="false" sidebar="false">
+	<apex:outputPanel id="pageMessages">
+		<apex:pageMessages />
+	</apex:outputPanel>
+<apex:form >
+	<apex:actionPoller action="{!statusUpdating}" rerender="pageMessages" interval="5" id="batchStatus" Enabled="{!isStop}"/>
+
+	<apex:outputtext value="{!$Label.Update_help_text}" />
+	<apex:selectRadio value="{!selectedUpdateType}" layout="pageDirection">
+	<apex:selectOptions value="{!UpdateTypes}"/>
+	</apex:selectRadio>
+	<apex:commandButton value="{!$Label.Update_assignments}" action="{!UpdateAssignments}" disabled="{!NOT(isUpdateDataAssignemts)}"/>
+</apex:form>
+
+</apex:page>

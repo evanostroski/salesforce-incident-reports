@@ -1,0 +1,658 @@
+<!--
+    Developed by Timba Software Corp. www.timbasoftware.com admin@timbasoftware.com
+    This page lists and manage deals
+    @author Dario Levy <dlevy@timbasoftware.com>
+    -->
+    <apex:page id="manageDeals" controller="XactlyExpress.XactlySMBCalculateStep3" sidebar="false" showHeader="false" standardStylesheets="true" action="{!action}">
+    <c:XactlySMBCursor />
+    <title>{!titleLabelDashRepMyDeal}</title>
+    <script type="text/javascript">
+        var ids = new Object();
+    </script>
+    <c:XactlySMBShadows shadowMargin="none " showHeader="true" showFooter="true"/>
+
+
+    <!-- PAGE WRAPPER -->
+    <div class="pageContent" id="pContent">
+
+        <!-- HEADER -->
+    
+        <apex:form id="theForm">
+
+            <apex:inputText id="selectedIndexHidden" value="{!selectedIndex}" styleClass="selectedIndexHidden hidden"/>
+            
+            <apex:outputPanel layout="block" styleClass="header">
+                <c:XactlySMBSalesRepHeader lastClosedPeriod="{!lastClosedPeriod}" isEmulatedManager="{!isEmulatedManager}" isManager="{!isManager}" isSalesAdmin="{!isSalesAdmin}" isAdmin="{!isAdmin}"  isActive="{!isActive}" nbrSeparator="{!nbrSeparator}" nbrDecimal="{!nbrDecimal}" currentUserOrSlected="{!currentUserOrSlected}" emulatingUserURLAppend="{!emulatingUserURLAppend}" dealsLabel="{!currentSettings.dealsPluralCap}" selected="2" hlabel="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ac mi eget est semper feugiat."/>
+            </apex:outputPanel>
+            
+            <!--this link goto create new deal  -->
+             <a href="{!$Page.XactlyExpress__XactlySMBDealDetails}{!IF(!ISNULL(currentView.id),'?vwId='+currentView.id,'')}{!IF(doingSearch,'&s='+URLENCODE(searchstring),'')}{!IF(!ISNULL($CurrentPage.parameters.userId),'&userId='+ URLENCODE($CurrentPage.parameters.userId),'')}" id="newDealdivLink"></a>
+            <!-- MAIN CONTENT -->
+            <apex:outputPanel layout="block" styleClass="mainContent">
+                <div class="backgrounds2 cornerMainUL"> </div>
+                <div class="backgrounds2 cornerMainUR"> </div>
+            
+                <c:XactlySMBDashboardLeftSidebar CisManager="{!isManager}" CcurrentPeriod="{!currentPeriod}" CcurrentProfileId="{!currentProfileId}" CcurrentSettings="{!currentSettings}" ClastClosedPeriod="{!lastClosedPeriod}" CcurrentSttgs="{!currentSttgs}" Csubordinates="{!SubordinateList}" currentSettingsAttach="{!currentSettingsAttach}" CisAdmin="{!isAdmin}" drawTerm="{!currentSettings.drawsCap}"/>
+                
+                <!-- CONTENT -->
+                <apex:outputPanel layout="block" styleClass="content" style="padding-bottom: 5px !important;">
+
+                    <!-- TABS HEADER -->
+                    <apex:outputPanel layout="block" styleClass="subHeader">
+                        <c:XactlySMBSalesRepTabsHeader PageReference="{!$Page.XactlyExpress__XactlySMBDashRepMyDeals}" lastClosedPeriod="{!lastClosedPeriod}" isEmulatedManager="{!isEmulatedManager}" isManager="{!isManager}" isSalesAdmin="{!isSalesAdmin}" isAdmin="{!isAdmin}"  isActive="{!isActive}" nbrSeparator="{!nbrSeparator}" nbrDecimal="{!nbrDecimal}" currentUserOrSlected="{!currentUserOrSlected}" emulatingUserURLAppend="{!emulatingUserURLAppend}" dealsLabel="{!currentSettings.dealsPluralCap}" selected="2"  hlabel="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ac mi eget est semper feugiat."/>
+                    </apex:outputPanel>
+                
+                    <div id="containerPlans">
+                        <div class="backgrounds2 cornerUL"> </div>
+                        <div class="backgrounds2 cornerUR"> </div>
+                
+                    <apex:outputPanel id="errorMsg" layout="block" styleClass="errorScrollBox" style="width:100%">
+                        <apex:outputPanel layout="block" rendered="{!errorMsg!=''}" style="width:100%">
+                            <apex:outputPanel layout="block" style="margin-right:20px;"><c:XactlySMBErrorMsg error="{!errorMsg}" errStyle="background:#FF0000;color:#FFFFFF;font-size:16px;font-weight:bold;overflow:auto;max-height:100px;"/></apex:outputPanel>
+                        </apex:outputPanel>
+                    </apex:outputPanel>   
+                    <apex:outputPanel layout="block">
+                        <apex:outputPanel layout="block" styleClass="actionButtons" rendered="{!Views.size > 0}">
+                            <apex:outputText styleclass="areaTitle" value="{!$Label.xactlyexpress__selectView}"/>
+                            <apex:selectList id="viewDrpdwn" onclick="checkEditing();" onchange="if(!checkEditing()){return false;};waitOn();window.location.href='{!$Page.XactlyExpress__XactlySMBDashRepMyDeals}{!IF(LEN(emulatingUserURLAppend)>0,'?'&emulatingUserURLAppend&'&','?')}vwId='+escape(this.value);" value="{!dummyString}" size="1" multiselect="false" style="margin-left:21px;margin-top:20px;">
+                                <apex:selectOptions value="{!Views}"/> 
+                            </apex:selectList>  
+                        </apex:outputPanel>
+                        <apex:outputPanel rendered="{!CanEdit}" layout="block" styleClass="actionButtons">
+                            <apex:outputPanel id="newDealdiv" layout="block"   style="margin:20px 13px 0 32px;">
+                           
+                                      <div class="xactlyBtnRectWrapper enable" onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);" style="float:left;margin-left:5px;margin-right:30px;" onclick="if(!checkEditing()){return false;};waitOn();jQuery('#newDealdivLink').click()">
+                                                                        <div class="xactlyBtnRect">
+                                                                            <div class="xactlyBtnRectBackground">
+                                                                                <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                                                    <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                                                                        <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel">   
+                                                                                        <apex:outputtext escape="false" value="{!$Label.xactlyexpress__newDeal}">
+                                                                                            <apex:Param value="{!currentSettings.dealsCap}"/>
+                                                                                        </apex:outputtext>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>     
+                                                                          </div>
+                                                                        </div>
+                                                                </div> 
+                                        
+                                     
+                                </apex:outputPanel>
+                            </apex:outputPanel>
+                                                       
+                        <apex:outputPanel id="searchbutton" layout="block"  style="float:right;margin: 20px 0px 0px 5px;cursor:pointer;">                                                     
+                           
+                                             <div class="xactlyBtnRectWrapper"  id="searchBtnEnable" onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);" style="float:left;margin-left:10px;margin-right:20px;">
+                                                                        <div class="xactlyBtnRect">
+                                                                            <div class="xactlyBtnRectBackground">
+                                                                                <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                                                    <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                                                                        <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel">
+                                                                                             <apex:outputText value="{!$Label.xactlyexpress__Search}"/>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>     
+                                                                          </div>
+                                                                        </div>
+                                                                </div>
+                                                                 <div class="disabledOpacityButton" id="searchBtnDisable" style="float:left;margin-left:-4px;left:0px;margin-right:34px;display:none;">
+                                                                        <div class="xactlyBtnRect">
+                                                                            <div class="xactlyBtnRectBackground">
+                                                                                <div class="middleOffMouse xactlyBtnRectMiddle" style="cursor:default;">
+                                                                                    <div class="rigthOffMouseBtn xactlyBtnRectRight" style="cursor:default;">
+                                                                                        <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel">   <apex:outputText value="{!$Label.xactlyexpress__Search}"/></div>
+                                                                                    </div>
+                                                                                </div>     
+                                                                          </div>
+                                                                        </div>
+                                                                </div> 
+                     </apex:outputPanel>
+                        <apex:outputPanel layout="block" styleClass="actionButtons" style="float:right;margin: 20px 0px 0pt 0px;">                 
+                            <apex:inputText value="{!searchstring}" id="theTextInput" style="text-align:right;"/>
+                        </apex:outputPanel>  
+                            <div style="clear:both;"></div>
+                        </apex:outputPanel>
+                        <apex:outputPanel id="tableWrapper" styleclass="tableWrapper" layout="block">
+                        <input class="hidden" id="doingSearch" value="{!doingSearch}" />
+                        <input class="hidden" id="currentViewId" value="{!JSENCODE(currentView.id)}" />
+                        
+                            <div class="tHeader">
+                                <div style="float: left;"><img class="img-topLeftCurvyDeals" src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/topLeftCurvyDeals.png')}"/></div>
+                                <div style="float: left; width:720px; background: url('{!URLFOR($Resource.XactlySMBResources ,'img/layout/topBgTableDeals.png')}') repeat-x;height:58px;">
+                                    <div class="headerLeftSide" style="width: 230px;">
+                                        <a style="{!IF(isReadOnlyAdmin,'display:none','')}" href="{!$Page.XactlySMBCreateEditViews}?sctn=deals&amp;dsh=1{!IF(LEN(emulatingUserURLAppend)>0,'&'&emulatingUserURLAppend,'')}" onclick="if(!checkEditing()){return false;};"><apex:outputText value="{!$Label.xactlyexpress__createNewView} |"/></a>
+                                        <apex:outputPanel layout="none" rendered="{!!ISNULL(currentView)}">
+                                            <apex:outputPanel layout="none" rendered="{!!ISNULL(currentView.XactlyExpress__ProfileId__c) || (isSalesAdmin && !isReadOnlyAdmin)}">
+                                                <a style="{!IF(isReadOnlyAdmin,'display:none','')}" href="{!$Page.XactlySMBCreateEditViews}?sctn=deals&amp;dsh=1&amp;id={!URLENCODE(currentView.id)}{!IF(LEN(emulatingUserURLAppend)>0,'&amp;'&emulatingUserURLAppend,'')}" onclick="if(!checkEditing()){return false;};"><apex:outputText value="{!$Label.xactlyexpress__Edit} |"/></a>
+                                                <apex:commandLink style="{!IF(isReadOnlyAdmin,'display:none','')}" id="deleteViewLink" action="{!deleteView}" onclick="if(confirmDeleteView()){if(!checkEditing()){return false;}}else{return false;};"><apex:outputText value="{!$Label.xactlyexpress__Delete} |"/></apex:commandLink>
+                                            </apex:outputPanel>
+                                            <a href="{!$Page.XactlyExpress__XactlySMBDashRepMyDeals}?vwId={!URLENCODE(currentView.id)}{!IF(LEN(emulatingUserURLAppend)>0,'&amp;'&emulatingUserURLAppend,'')}" style="font-weight:bold;" onclick="if(!checkEditing()){return false;}"><apex:outputText value="{!$Label.xactlyexpress__Refresh}"/></a>
+                                        </apex:outputPanel>
+                                    </div>      
+
+                                    
+                                    <div class="containerFilters">
+                                        <apex:outputPanel id="filterByLettersCont" style="" layout="block" styleClass="headerRightSide" rendered="{!attrType == 'string' || attrType == 'usertype'}">
+                                           <apex:repeat value="{!LetterList}" var="iter" id="letters">
+                                               <apex:commandLink id="iterLetter" style="{!IF(SL == iter,'background-color:#DEECFC;','')}" action="{!applyFiltersAndGrouping}" onclick="if(!checkEditing()){return false;};waitOn();" value="{!iter}" rerender="tableWrapper,errorMsg" oncomplete="waitOff();initSuperbox();fixCelsDimensions();introAsTab();">
+                                                   <apex:param value="{!iter}" name="SL"/>
+                                               </apex:commandLink>
+                                           </apex:repeat>
+                                           <apex:commandLink id="filterOther" style="{!IF(SL == 'Other','background-color:#DEECFC;','')}" action="{!applyFiltersAndGrouping}" onclick="if(!checkEditing()){return false;};waitOn();" value="{!$Label.xactlyexpress__Other}" rerender="tableWrapper,errorMsg" oncomplete="waitOff();initSuperbox();fixCelsDimensions();introAsTab();">
+                                               <apex:param value="Other" name="SL"/>
+                                           </apex:commandLink>
+                                           <apex:commandLink id="filterAll" style="{!IF(SL == 'All','background-color:#DEECFC;','')}" action="{!applyFiltersAndGrouping}" onclick="if(!checkEditing()){return false;};waitOn();" value="{!$Label.xactlyexpress__all}" rerender="tableWrapper,errorMsg" oncomplete="waitOff();initSuperbox();fixCelsDimensions();introAsTab();">
+                                               <apex:param value="All" name="SL"/>
+                                           </apex:commandLink>
+                                        </apex:outputPanel>
+                                    </div>
+                                  
+                                </div> 
+                                <div style="float: left;margin-right:-5px;"><img class="img-topRightCurvyDeals" src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/topRightCurvyDeals.png')}"/></div>
+                                <div style="clear:both"></div>
+                            </div>
+                            <div class="clear"> </div>
+                            <div class="tContent" id="tContent">
+                                <apex:outputPanel rendered="{!IF(visibleDeals.size > 0,false,true)}">
+                                    <apex:outputText value="{!noDealForThisViewLabel}"/>
+                                </apex:outputPanel>
+                                <apex:outputPanel id="tableContainerContainer" layout="block">
+                                    <apex:outputPanel rendered="{!IF(visibleDeals.size > 0,true,false)}" id="tableContainer" styleClass="tableContainer hideable " layout="block">                                                                
+                                        <div class="FixedCelsTable">
+                                            <div class="tablesHolder">
+                                
+                                                <apex:outputPanel id="FixedCelsTableGrid">
+                                                    <div id="recordsList" class="recordsList">
+                                                        <input type="hidden" id="focusHandler"/>
+                                                        <!-- Left Panel -->
+                                                        <div id="rowsContainer" class="rows">
+                                                            <div id="rowsHeaders" class="rowsHeader evenHeader">
+                                                                <table border="0"  cellspacing="0" width="100px">
+                                                                    <tr class="objectHeaders">
+                                                                        <td width="100px"></td>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                            <div id="rows" class="rowsScroll">
+                                                                <table border="0" class="rowsTable" cellspacing="0" width="100px">
+                                                                    <apex:variable var="iterIndex" value="{!1}"/>
+                                                                    <apex:repeat var="d" value="{!visibleDeals}" id="genGadgets">                                                               
+                                                                        <tr class="dataRow whiteCells rows{!RIGHT(TEXT(iterIndex),2)} {!IF(ISNULL(d.d.id) && mod(d.i,2)==0,'oddNewDealRow',
+                                                                            IF(ISNULL(d.d.id) && mod(d.i,2)!=0,'evenNewDealRow',
+                                                                            IF(mod(d.i,2)==0 && d.editable,'odd',
+                                                                            IF(mod(d.i,2)==0 && !d.editable,'oddNonEditable',
+                                                                            IF(d.editable,'even',
+                                                                            'evenNonEditable')))))}">                              
+                                                                            <td width="100px" >
+                                                                                <div style="width: 100px">
+                                                                                    <apex:outputPanel styleClass="actionBtnContainer" layout="block">                                        
+                                                                                        <a class="{!IF(d.d.Comment__c=='','inteactionIconSprite addCommentLink','inteactionIconSprite editCommentLink')}"  href="javascript:if({!d.d.Comment__c!=''}||{!canEdit}){addComment({!d.i});}"></a>                                                                                 
+                                                                                    </apex:outputPanel>
+                                                                                   
+                                                                                    <div class="actionBtnContainer">
+                                                                                        <apex:outputLink rendered="{!CanEdit}" value="{!$Page.XactlyExpress__XactlySMBDealDetails}" onclick="if(!checkEditing()){return false;};">
+                                                                                            <div class="inteactionIconSprite copyDeal"></div>
+                                                                                            <apex:param value="{!d.d.id}" name="cpy"/>
+                                                                                            <apex:param value="{!JSENCODE(currentView.id)}" name="vwId"/>
+                                                                                            <apex:outputPanel layout="none" rendered="{!!ISNULL($CurrentPage.parameters.userId)}">
+                                                                                                <apex:param value="{!JSENCODE($CurrentPage.parameters.userId)}" name="userId"/>
+                                                                                            </apex:outputPanel>
+                                                                                        </apex:outputLink> 
+                                                                                    </div>
+                                                                                    <apex:outputPanel layout="block" styleclass="actionBtnContainer" rendered="{!AND(d.editable,CanEdit,!d.isDisabled)}">
+                                                                                     <div class="inteactionIconSprite delete_small" style="cursor:pointer;" onclick="jQuery('.removeDeal{!d.i}').click();"></div>
+                                                                                        <apex:commandLink id="removeDeal" styleClass="removeDeal{!d.i}" action="{!removeDeal}"  rerender="tableContainerContainer,tFooter,errorMsg" onclick="if(!confirmDelete({!RIGHT(TEXT(iterIndex),2)})){return;}"  oncomplete="waitOff();initSuperbox();fixCelsDimensions();introAsTab();" >
+                                                                                            <apex:param value="{!d.i}" name="index"/>
+                                                                                        </apex:commandLink>                                                                                 
+                                                                                    </apex:outputPanel>
+                                                                                    <apex:outputPanel rendered="{!AND(d.editable,CanEdit)}" style="display:none;" styleclass="actionBtnContainer editingDeal row{!RIGHT(TEXT(iterIndex),2)}" >
+                                                                                        <div class="inteactionIconSprite tic" onclick="rerenderNoCompare = true;lockDeal({!RIGHT(TEXT(iterIndex),2)});"></div>
+                                                                                    </apex:outputPanel>
+                                                                                    <apex:outputPanel rendered="{!AND(d.editable,CanEdit)}" styleclass="actionBtnContainer rowShow{!RIGHT(TEXT(iterIndex),2)}" >
+                                                                                        <div class="inteactionIconSprite pencilEdit" style="cursor:pointer;margin-right: 7px;margin-top: -1px;" onclick="rerenderNoCompare = true;editDeal({!RIGHT(TEXT(iterIndex),2)});"></div>
+                                                                                    </apex:outputPanel>
+                                                                                </div>                        
+                                                                            </td>
+                                                                        </tr>
+                                                                        <apex:variable var="iterIndex" value="{!iterIndex + 1}"/>
+                                                                    </apex:repeat>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+        
+                                                        <!-- Top Panel -->
+                                                        <div id="colsContainer" class="colsContainer" style="margin-left:100px">
+                                                            <div id="cols"  class="columns">
+                                                                <table id="cellsTable" cellspacing="0" border="0" style="margin-top: 0px;">
+                                                                    <tr class="objectHeaders evenHeader">
+                                                                        <apex:repeat var="h" value="{!attrs}" id="genHeadersLinks"> 
+                                                                            <td>                                                                           
+                                                                                <div class="titles" style="overflow:hidden;">
+                                                                                    <apex:outputPanel rendered="{!sortBy == h.XactlyExpress__DealColumnName__c}" layout="block" style="float:left;margin-top:3px;">
+                                                                                        <div class="inteactionIconSprite {!IF(sortByDesc == true,'arrowDown','arrowUp')}"></div>
+                                                                                    </apex:outputPanel>
+                                                                                    <apex:commandLink id="applyFilterLink" action="{!applyFiltersAndGrouping}" onclick="if(!checkEditing() || String('{!JSINHTMLENCODE(h.XactlyExpress__DealColumnName__c)}')=='importSource'){return false;};waitOn();" value="{!IF(h.Name == 'Product Id',$Label.xactlyexpress__Product,IF(h.Name == 'Account Id',$Label.xactlyexpress__Account,h.Name))}{!IF(h.XactlyExpress__IsRequired__c, '*','')}" style="float: left; margin-left: 2px;color: #3B6080;font-size:11px;font-weight:bold;text-align:center;white-space:nowrap;" rerender="tableWrapper,errorMsg" oncomplete="initSuperbox();fixCelsDimensions();introAsTab();waitOff();">
+                                                                                        <apex:param value="{!h.XactlyExpress__DealColumnName__c}" name="sb"/>
+                                                                                    </apex:commandLink>
+                                                                                </div>
+                                                                            </td> 
+                                                                        </apex:repeat>
+                                                                    </tr>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+        
+                                                        <!-- Cells Panel -->
+                                                        <div id="cellContainer" class="cellContainer" style="margin-left:100px;">
+                                                            <div id="cells" class="cells">
+                                                                <table id="dealsTable" cellspacing="0" border="0">
+                                                                    <apex:variable var="iterIndex" value="{!1}"/>
+                                                                    <apex:variable var="index" value="{!0}"/>     
+                                                                    <apex:repeat var="d" value="{!visibleDeals}" id="valuesGenerator">
+                                                                        <tr class="dataRow whiteCells rows{!RIGHT(TEXT(iterIndex),2)} {!IF(ISNULL(d.d.id) && mod(d.i,2)==0,'oddNewDealRow',
+                                                                            IF(ISNULL(d.d.id) && mod(d.i,2)!=0,'evenNewDealRow',
+                                                                            IF(mod(d.i,2)==0 && d.editable,'odd',
+                                                                            IF(mod(d.i,2)==0 && !d.editable,'oddNonEditable',
+                                                                            IF(d.editable,'even',
+                                                                            'evenNonEditable')))))}" style="cursor:pointer;">
+        
+                                                                            <apex:repeat value="{!d.attrs}" var="y" id="genDealTable">
+                                                                             
+                                                                                    <td onclick="if('{!JSENCODE(y.field)}'=='SourceID__c' && '{!JSENCODE(d.sourceId)}'){window.open('/{!JSENCODE(d.sourceId)}');return false};if({!IF(y.field == 'ProductId__c' || y.field == 'AccountId__c',true,false)}){return true;}else{doEdit('{!d.d.id}');}">  
+                                                                                                                                                    
+                                                                                    <apex:outputPanel rendered="{!TEXT(iterIndex) == '1'}" style="display:none" styleClass="cWidth">
+                                                                                        <apex:outputText value="{!TEXT(FLOOR(y.customWidth))}"/>          
+                                                                                    </apex:outputPanel>
+                                                                                    <apex:outputPanel rendered="{!d.editable}"  layout="block" style="width:{!FLOOR(y.customWidth)-4}px;overflow:hidden;white-space:nowrap">
+                                                                                       
+                                                                                        <apex:outputPanel layout="block"  rendered="{!LEFT(y.field,7) == 'Boolean'}">
+                                                                                            <apex:selectList id="boolDrpdwn" onfocus="adjustScroll(this);compareObjHandler[this.id] = this.options[this.selectedIndex].value;" onchange="checkValue(this,'{!LOWER(y.datatype)}',{!y.required}, '{!y.field}', '');jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent().parent()).html(this.options[this.selectedIndex].text+'&nbsp;');" styleclass="row{!RIGHT(TEXT(iterIndex),2)}" style="display:none;width:{!FLOOR(y.customWidth)-6}px;" value="{!y.value}" rendered="{!LEFT(y.field,7) == 'Boolean'}" size="1" multiselect="false">
+                                                                                                <apex:selectOptions value="{!booleanOptions}" />
+                                                                                            </apex:selectList>
+                                                                                        </apex:outputPanel>
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)}" rendered="{!LEFT(y.field,7) == 'Boolean'}" layout="block">
+                                                                                            <apex:outputText value="{!y.value}"/>&nbsp;
+                                                                                        </apex:outputPanel>
+                                                                                        
+                                                                                        <!-- Profile Id -->  <!-- UserType -->
+                                                                                        <apex:outputPanel layout="none" rendered="{!y.field == 'ProfileId__c'}" >
+                                                                                            <apex:selectList id="usrsDrpdwn" onfocus="adjustScroll(this);compareObjHandler[this.id] = this.options[this.selectedIndex].value;" onchange="checkValue(this,'{!LOWER(y.datatype)}',{!y.required}, '{!y.field}', '');jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent()).html(this.options[this.selectedIndex].text+'&nbsp;');" value="{!d.d.XactlyExpress__ProfileID__c}" size="1" multiselect="false" rendered="{!y.field == 'ProfileId__c'}" style="display:none;width:{!FLOOR(y.customWidth)-6}px;" styleclass="row{!RIGHT(TEXT(iterIndex),2)}">
+                                                                                                <apex:selectOptions value="{!usersOptions}" />
+                                                                                            </apex:selectList>
+                                                                                        </apex:outputPanel>
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)}" rendered="{!y.field == 'ProfileId__c'}" layout="block">
+                                                                                            <apex:outputText value="{!d.Salesperson}"/>&nbsp;
+                                                                                        </apex:outputPanel>
+                                                                                   
+                                                                                        <apex:outputPanel layout="none" rendered="{!y.field == 'ProfileID2__c'}" >
+                                                                                            <apex:selectList id="usrsDrpdwnUserType2" onfocus="adjustScroll(this);compareObjHandler[this.id] = this.options[this.selectedIndex].value;" onchange="checkValue(this,'{!LOWER(y.datatype)}',{!y.required}, '{!y.field}', '');jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent()).html(this.options[this.selectedIndex].text+'&nbsp;');" value="{!d.d.XactlyExpress__ProfileID2__c}" size="1" multiselect="false" rendered="{!y.field == 'ProfileID2__c'}" style="display:none;width:{!FLOOR(y.customWidth)-6}px;" styleclass="row{!RIGHT(TEXT(iterIndex),2)}">
+                                                                                                <apex:selectOptions value="{!usersOptions}" />
+                                                                                            </apex:selectList>
+                                                                                        </apex:outputPanel>
+                                                                                          <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)}" rendered="{!y.field == 'ProfileID2__c'}" layout="block">
+                                                                                            <c:XactlySMBLongTextBubble text="{!d.UserType2}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle=""/>
+                                                                                        </apex:outputPanel>
+                                                                                        
+                                                                                        <apex:outputPanel layout="none" rendered="{!y.field == 'ProfileID3__c'}" >
+                                                                                            <apex:selectList id="usrsDrpdwnUserType3" onfocus="adjustScroll(this);compareObjHandler[this.id] = this.options[this.selectedIndex].value;" onchange="checkValue(this,'{!LOWER(y.datatype)}',{!y.required}, '{!y.field}', '');jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent()).html(this.options[this.selectedIndex].text+'&nbsp;');" value="{!d.d.XactlyExpress__ProfileID3__c}" size="1" multiselect="false" rendered="{!y.field == 'ProfileID3__c'}" style="display:none;width:{!FLOOR(y.customWidth)-6}px;" styleclass="row{!RIGHT(TEXT(iterIndex),2)}">
+                                                                                                <apex:selectOptions value="{!usersOptions}" />
+                                                                                            </apex:selectList>
+                                                                                        </apex:outputPanel>
+                                                                                          <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)}" rendered="{!y.field == 'ProfileID3__c'}" layout="block">
+                                                                                            <c:XactlySMBLongTextBubble text="{!d.UserType3}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle=""/>
+                                                                                        </apex:outputPanel>
+                                                                                        
+                                                                                          <apex:outputPanel layout="none" rendered="{!y.field == 'ProfileID4__c'}" >
+                                                                                            <apex:selectList id="usrsDrpdwnUserType4" onfocus="adjustScroll(this);compareObjHandler[this.id] = this.options[this.selectedIndex].value;" onchange="checkValue(this,'{!LOWER(y.datatype)}',{!y.required}, '{!y.field}', '');jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent()).html(this.options[this.selectedIndex].text+'&nbsp;');" value="{!d.d.XactlyExpress__ProfileID4__c}" size="1" multiselect="false" rendered="{!y.field == 'ProfileID4__c'}" style="display:none;width:{!FLOOR(y.customWidth)-6}px;" styleclass="row{!RIGHT(TEXT(iterIndex),2)}">
+                                                                                                <apex:selectOptions value="{!usersOptions}" />
+                                                                                            </apex:selectList>
+                                                                                        </apex:outputPanel>
+                                                                                          <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)}" rendered="{!y.field == 'ProfileID4__c'}" layout="block">
+                                                                                            <c:XactlySMBLongTextBubble text="{!d.UserType4}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle=""/>
+                                                                                        </apex:outputPanel>
+                                                                                        
+                                                                                          <apex:outputPanel layout="none" rendered="{!y.field == 'ProfileID5__c'}" >
+                                                                                            <apex:selectList id="usrsDrpdwnUserType5" onfocus="adjustScroll(this);compareObjHandler[this.id] = this.options[this.selectedIndex].value;" onchange="checkValue(this,'{!LOWER(y.datatype)}',{!y.required}, '{!y.field}', '');jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent()).html(this.options[this.selectedIndex].text+'&nbsp;');" value="{!d.d.XactlyExpress__ProfileID5__c}" size="1" multiselect="false" rendered="{!y.field == 'ProfileID5__c'}" style="display:none;width:{!FLOOR(y.customWidth)-6}px;" styleclass="row{!RIGHT(TEXT(iterIndex),2)}">
+                                                                                                <apex:selectOptions value="{!usersOptions}" />
+                                                                                            </apex:selectList>
+                                                                                        </apex:outputPanel>
+                                                                                        
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)} nonEditable" rendered="{!y.field=='CreatedById'}" layout="block">
+                                                                                            <c:XactlySMBLongTextBubble text="{!d.userTypeCreatedBy}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle=""/>
+                                                                                        </apex:outputPanel>
+                                                                                        
+                                                                                         <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)} nonEditable" rendered="{!y.field=='LastModifiedById'}" layout="block">
+                                                                                            <c:XactlySMBLongTextBubble text="{!d.userTypeLastModifiedBy}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle=""/>
+                                                                                        </apex:outputPanel>
+
+                                                                                        <!-- EndUserType -->
+                                                                                        
+                                                                                        <!-- Product Id --> 
+                                                                                        <apex:outputPanel styleclass="row{!RIGHT(TEXT(iterIndex),2)}" style="display:none;" layout="block" rendered="{!y.field == 'ProductId__c'}">
+                                                                                            <div id="{!IF(y.field == 'ProductId__c', TEXT(d.idx) + '-product', '')}">
+                                                                                                <input disabled="disabled" onfocus="adjustScroll(this);" type="text" class="{!d.idx}-productName" value="{!d.ProductName}" style="width:{!FLOOR(y.customWidth)-25}px;" onchange="checkValue(this,'{!LOWER(y.datatype)}',{!y.required}, '{!y.field}', '');jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent().parent().parent()).html('{!JSENCODE('<')}a target='_blank' href=\'../'+jQuery('.{!d.idx}-productId',jQuery(this).parent()).val()+'\'{!JSENCODE('>')}'+this.value+'{!JSENCODE('<')}/a{!JSENCODE('>&nbsp;')}');"/>
+                                                                                                <apex:commandLink id="openProductPopup" onclick="openProductPopup({!d.idx});compareObjHandler[jQuery('.{!d.idx}-productId',jQuery(this).parent())[0].id] = jQuery('.{!d.idx}-productId',this.parentNode)[0].value;" rerender="errorMsg">
+                                                                                                    <apex:image styleClass="img-magnifier" url="{!URLFOR($Resource.XactlyExpress__XactlySMBResources, 'img/icons/magnifier.png')}"  />
+                                                                                                </apex:commandLink>
+                                                                                                <apex:inputField id="prdId" style="display:none;" styleClass="{!d.idx}-productId" value="{!d.d.XactlyExpress__ProductID__c}"/>
+                                                                                            </div> 
+                                                                                        </apex:outputPanel>
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)}" rendered="{!y.field == 'ProductId__c'}" layout="block" style="white-space:nowrap;">
+                                                                                            <a href="../{!d.d.XactlyExpress__ProductID__c}"><apex:outputText value="{!d.ProductName}"/></a>&nbsp;
+                                                                                        </apex:outputPanel>
+                                                                                        
+                                                                                        <!-- Account Id --> 
+                                                                                        <apex:outputPanel styleclass="row{!RIGHT(TEXT(iterIndex),2)}" style="display:none;" layout="block" rendered="{!y.field == 'AccountId__c'}">
+                                                                                            <div id="{!IF(y.field == 'AccountId__c', TEXT(d.idx) + '-account', '')}">
+                                                                                                <input disabled="disabled" onfocus="adjustScroll(this);" type="text" class="{!d.idx}-accountName" value="{!d.AccountName}" style="width:{!FLOOR(y.customWidth)-25}px;"  onchange="checkValue(this,'{!LOWER(y.datatype)}',{!y.required}, '{!y.field}', '');jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent().parent().parent()).html('{!JSENCODE('<')}a target='_blank' href=\'../'+jQuery('.{!d.idx}-accountId',jQuery(this).parent()).val()+'\'{!JSENCODE('>')}'+this.value+'{!JSENCODE('<')}/a{!JSENCODE('>&nbsp;')}');"/>
+                                                                                                <apex:commandLink id="openAccountPopup" onclick="openAccountPopup({!d.idx});compareObjHandler[jQuery('.{!d.idx}-accountId',jQuery(this).parent())[0].id] = jQuery('.{!d.idx}-accountId',this.parentNode)[0].value;" rerender="errorMsg">
+                                                                                                    <apex:image styleClass="img-magnifier" url="{!URLFOR($Resource.XactlyExpress__XactlySMBResources, 'img/icons/magnifier.png')}"/>
+                                                                                                </apex:commandLink>
+                                                                                                <apex:inputField id="accId" style="display:none;" styleClass="{!d.idx}-accountId" value="{!d.d.XactlyExpress__AccountID__c}"/>
+                                                                                            </div>   
+                                                                                        </apex:outputPanel>
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)}" rendered="{!y.field == 'AccountId__c'}" layout="block" style="white-space:nowrap;">
+                                                                                            <a href="../{!d.d.XactlyExpress__AccountID__c}"><apex:outputText value="{!d.AccountName}"/></a>&nbsp;
+                                                                                        </apex:outputPanel>
+        
+                                                                                        <apex:outputPanel styleclass="row{!RIGHT(TEXT(iterIndex),2)}" style="display:none" layout="block" rendered="{!y.field == 'DealId__c'}">
+                                                                                            <apex:inputField id="dealIdInp" style="width:{!FLOOR(y.customWidth)-6}px;" onblur="checkValue(this,'{!LOWER(y.datatype)}',{!y.required}, '{!y.field}', '');jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent().parent()).html(this.value+'&nbsp;');" onfocus="adjustScroll(this);compareObjHandler[this.id] = this.value;" value="{!d.d.XactlyExpress__DealID__c}"/>
+                                                                                        </apex:outputPanel>
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)}" rendered="{!y.field == 'DealId__c'}" layout="block">
+                                                                                            <apex:outputText value="{!d.d.XactlyExpress__DealID__c}"/>&nbsp;
+                                                                                        </apex:outputPanel>
+                                                                                        
+                                                                                        <!-- Object ID -->
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)} nonEditable"  rendered="{!y.field='SourceID__c'}" layout="block">
+                                                                                            <apex:outputPanel rendered="{!d.sourceId!=null}">
+                                                                                            	<a href="javascript: void(0);">
+                                                                                        	   	  <c:XactlySMBLongTextBubble text="{!d.sourceId}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle=""/>
+                                                                                        		</a>
+                                                                                        	</apex:outputPanel>
+                                                                                        </apex:outputPanel>
+        
+                                                                                        <!-- DealDate -->   
+                                                                                        <apex:outputPanel styleclass="dateType row{!RIGHT(TEXT(iterIndex),2)}" style="display:none;height: 25px;text-align: center;margin-top:6px" layout="block" rendered="{!y.field == 'DealDate__c'}">
+                                                                                            <apex:inputField style="width:{!FLOOR(y.customWidth)-6}px;" id="newdealdate" onblur="checkValue(this,'{!LOWER(y.datatype)}',{!y.required}, '{!y.field}', dealdate{!FLOOR(index)}_{!RIGHT(TEXT(iterIndex),2)})" value="{!d.d.XactlyExpress__DealDate__c}"/>
+                                                                                            <script>
+                                                                                                var newdealdate{!FLOOR(index)}_{!RIGHT(TEXT(iterIndex),2)} = '{!$Component.newdealdate}'.replace(/:/g,'\\:');                                                                                                                                                                               
+                                                                                            </script> 
+                                                                                        </apex:outputPanel>
+        
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)}" style="height: 25px;text-align: center;margin-top:6px" rendered="{!y.field == 'DealDate__c'}" layout="block">
+                                                                                            <apex:outputText id="dealdate" value="{!d.dateFormat}"/>&nbsp;
+                                                                                            <script>
+                                                                                                var dealdate{!FLOOR(index)}_{!RIGHT(TEXT(iterIndex),2)} = '{!$Component.dealdate}'.replace(/:/g,'\\:');                                                                                                                                                                                 
+                                                                                            </script> 
+                                                                                        </apex:outputPanel>
+                                                                                        <script type="text/javascript">
+                                                                                            if ('{!y.field }' == 'DealDate__c'){
+                                                                                                ids['newdealdate{!FLOOR(index)}_{!RIGHT(TEXT(iterIndex),2)}'] = 'dealdate{!FLOOR(index)}_{!RIGHT(TEXT(iterIndex),2)}';
+                                                                                            }                                                                                       
+                                                                                        </script>    
+                                                                                        
+                                                                                        <!-- Date differnt a DealDate -->     
+                                                                                        <apex:outputPanel styleclass="row{!RIGHT(TEXT(iterIndex),2)}" style="text-align: center;display:none" layout="block" rendered="{!AND(y.field != 'DealDate__c', y.datatype=='date', y.field != 'CreatedDate', y.field != 'LastModifiedDate')}">
+                                                                                            <apex:inputText style="width:{!FLOOR(y.customWidth)-6}px;" onfocus="showCalendar(isDate{!FLOOR(index)});adjustScroll(this);compareObjHandler[this.id] = this.value;" onblur="checkValue(this,'{!LOWER(y.datatype)}',{!y.required}, '{!y.field}', '');jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent().parent()).html(this.value+'&nbsp;');" id="fld" value="{!y.value}"/>
+                                                                                            <script>
+                                                                                                var isDate{!FLOOR(index)} = '{!$Component.fld}';  
+                                                                                                var dateId_{!d.idx}_{!y.idx} = '{!$Component.fld}';
+                                                                                            </script>  
+                                                                                        </apex:outputPanel>   
+        
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)} {!IF(OR(y.field=='CreatedDate',y.field=='LastModifiedDate'),'nonEditable','')}" style="text-align: center;" rendered="{!AND(y.field != 'DealDate__c', y.datatype=='date')}" layout="block">
+                                                                                            <apex:outputText value="{!y.value}"/>&nbsp;
+                                                                                        </apex:outputPanel>  
+
+                                                                                        <!-- import Source -->
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)} nonEditable" rendered="{!y.field=='importSource'}" layout="block">
+                                                                                      			<c:XactlySMBLongTextBubble text="{!d.importSource}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle=""/>
+                                                                                   	    </apex:outputPanel>	
+                                                                                        
+                                                                                         <!-- Customs -->
+                                                                                        <apex:outputPanel styleclass="row{!RIGHT(TEXT(iterIndex),2)}" style="display:none" layout="block" rendered="{!AND(y.field != 'ProductId__c', y.field != 'AccountId__c', y.field != 'DealId__c', y.field != 'ProfileId__c', y.field != 'ProfileID2__c', y.field != 'ProfileID3__c', y.field != 'ProfileID4__c', y.field != 'ProfileID5__c', y.field != 'DealDate__c', y.field != 'ProfileId__r.UserId__c',y.datatype!='date', LEFT(y.field,7) != 'Boolean', y.field != 'importSource', y.field != 'CreatedById', y.field != 'LastModifiedById',y.field!='SourceID__c')}">
+                                                                                            <apex:inputText style="width:{!FLOOR(y.customWidth)-6}px;" id="inpGrl" onblur="checkValue(this,'{!LOWER(y.datatype)}',{!y.required}, '{!y.field}', '');jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent().parent()).html(this.value+'&nbsp;');if(('{!LOWER(y.dataType)}' == 'currency' || '{!LOWER(y.dataType)}' == 'decimal')){this.value.indexOf('-')!=-1?jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent().parent()).removeClass('editablePositive').addClass('editableNegative'):jQuery('.rowShow{!RIGHT(TEXT(iterIndex),2)}',jQuery(this).parent().parent()).removeClass('editableNegative').addClass('editablePositive');}" onfocus="adjustScroll(this);compareObjHandler[this.id] = this.value;" value="{!y.value}" styleclass=" {!IF(OR(y.datatype == 'currency', y.datatype == 'decimal'),IF(NOT(CONTAINS(y.value,'-')),'editablePositive','editableNegative'),'')}"/>
+                                                                                        </apex:outputPanel>
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)} {!IF(OR(y.datatype == 'currency', y.datatype == 'decimal'),IF(NOT(CONTAINS(y.value,'-')),'editablePositive','editableNegative'),'')}" rendered="{!AND(y.field != 'ProductId__c', y.field != 'AccountId__c', y.field != 'DealId__c', y.field != 'ProfileId__c', y.field != 'ProfileID2__c', y.field != 'ProfileID3__c', y.field != 'ProfileID4__c', y.field != 'ProfileID5__c', y.field != 'DealDate__c', y.field != 'ProfileId__r.UserId__c',y.datatype!='date', LEFT(y.field,7) != 'Boolean', y.field != 'importSource', y.field != 'SourceID__c', y.field != 'CreatedById', y.field != 'LastModifiedById')}" layout="block">
+                                                                                            <apex:outputText value="{!y.value}"/>&nbsp;
+                                                                                        </apex:outputPanel>  
+        
+                                                                                    </apex:outputPanel>
+                                                                                    
+                                                                                    <!--  Deals in close period -->
+                                                                                    <apex:outputPanel rendered="{!!d.editable}" style="width:{!FLOOR(y.customWidth)-4}px;overflow:hidden;white-space:nowrap;{!IF(OR(y.field == 'DealDate__c',y.datatype == 'date'),'text-align:center;','')}" layout="block">
+                                                                                        
+										                                                 <apex:outputPanel rendered="{!LEFT(y.field,7) == 'Boolean'}" onclick="displayNotEditableError();">
+										                                                     <c:XactlySMBLongTextBubble text="{!y.value}"  maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle="white-space:nowrap;"/>
+										                                                 </apex:outputPanel>
+										                                                 <apex:outputPanel rendered="{!y.field == 'DealId__c'}" onclick="displayNotEditableError();">
+										                                                     <c:XactlySMBLongTextBubble text="{!d.d.XactlyExpress__DealID__c}"  maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle="white-space:nowrap;"/>
+										                                                 </apex:outputPanel>
+										                                                 <apex:outputPanel layout="block" rendered="{!!ISNULL(d.d.ProfileId__r.XactlyExpress__UserID__c) && y.field == 'ProfileId__c'}" onclick="displayNotEditableError();">
+										                                                     <c:XactlySMBLongTextBubble text="{!d.d.ProfileId__r.UserId__r.Name}"  maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle="white-space:nowrap;"/>
+										                                                 </apex:outputPanel>
+										                                                 <apex:outputPanel rendered="{!y.field == 'ProductId__c'}" onclick="displayNotEditableError();">
+										                                                     <a href="/{!d.d.XactlyExpress__ProductID__c}" target="_top"><c:XactlySMBLongTextBubble text="{!d.d.ProductId__r.Name}"  maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle="white-space:nowrap;"/></a>
+										                                                 </apex:outputPanel>
+										                                                 <apex:outputPanel rendered="{!y.field == 'AccountId__c'}" onclick="displayNotEditableError();">
+										                                                     <a href="/{!d.d.XactlyExpress__AccountID__c}" target="_top"><c:XactlySMBLongTextBubble text="{!d.d.AccountId__r.Name}"  maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle="white-space:nowrap;"/></a>
+										                                                 </apex:outputPanel>
+										                                                 <apex:outputPanel rendered="{!AND(y.field != 'ProductId__c', y.field != 'AccountId__c', y.field != 'DealId__c', y.field != 'ProfileId__c', y.field != 'ProfileID2__c', y.field != 'ProfileID3__c', y.field != 'ProfileID4__c', y.field != 'ProfileID5__c', y.field != 'ProfileId__r.UserId__c', LEFT(y.field,7) != 'Boolean', y.field !='importSource', y.field!='CreatedById',y.field!='LastModifiedById', y.field!='SourceID__c')}" style="{!IF(OR(y.datatype == 'currency', y.datatype == 'decimal'),'float:right;','')}">
+										                                                     <c:XactlySMBLongTextBubble text="{!y.value}"  maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle="white-space:nowrap;"/>
+										                                                 </apex:outputPanel>
+                                                                                
+																						<apex:outputPanel rendered="{!y.field == 'ProfileID2__c'}" layout="block">
+																						    <c:XactlySMBLongTextBubble text="{!d.UserType2}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle="white-space:nowrap;"/>
+																						</apex:outputPanel>
+																						
+																						<apex:outputPanel rendered="{!y.field == 'ProfileID3__c'}" layout="block">
+																						    <c:XactlySMBLongTextBubble text="{!d.UserType3}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle="white-space:nowrap;"/>
+																						</apex:outputPanel>
+																						
+																						<apex:outputPanel rendered="{!y.field == 'ProfileID4__c'}" layout="block">
+																						    <c:XactlySMBLongTextBubble text="{!d.UserType4}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle="white-space:nowrap;"/>
+																						</apex:outputPanel>
+																						
+																						<apex:outputPanel rendered="{!y.field == 'ProfileID5__c'}" layout="block">
+																						    <c:XactlySMBLongTextBubble text="{!d.UserType5}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle="white-space:nowrap;"/>
+																						</apex:outputPanel>    
+																						
+																						<apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)}" rendered="{!y.field=='CreatedById'}" layout="block">
+                                                                                            <c:XactlySMBLongTextBubble text="{!d.userTypeCreatedBy}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle=""/>
+                                                                                        </apex:outputPanel>
+                                                                                        
+                                                                                         <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)}" rendered="{!y.field=='LastModifiedById'}" layout="block">
+                                                                                            <c:XactlySMBLongTextBubble text="{!d.userTypeLastModifiedBy}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle=""/>
+                                                                                        </apex:outputPanel>
+																						
+																						<!-- import Source -->
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)}" rendered="{!y.field=='importSource'}" layout="block">
+                                                                                      			<c:XactlySMBLongTextBubble text="{!d.importSource}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle=""/>
+                                                                                   	    </apex:outputPanel>	 
+                                                                                   	    
+                                                                                   	     <!-- Object ID -->
+                                                                                        <apex:outputPanel styleclass="rowShow{!RIGHT(TEXT(iterIndex),2)} nonEditable"  rendered="{!y.field='SourceID__c'}" layout="block">
+                                                                                            <apex:outputPanel rendered="{!d.sourceId!=null}">
+                                                                                            	<a href="javascript: void(0);">
+                                                                                        	   	  <c:XactlySMBLongTextBubble text="{!d.sourceId}" maxLength="{!ROUND((y.customWidth / 5.7) - 4, 0)}" wrappStyle=""/>
+                                                                                        		</a>
+                                                                                        	</apex:outputPanel>
+                                                                                        </apex:outputPanel>                                                                    
+                                                                                
+                                                                                
+                                                                                    </apex:outputPanel>                                                                    
+                                                                               </td>
+                                                                               <apex:variable var="index" value="{!index + 1}"/>   
+                                                                            </apex:repeat>                                      
+                                                                        </tr>
+                                                                        <apex:variable var="iterIndex" value="{!iterIndex + 1}"/>
+                                                                    </apex:repeat>
+                                                                </table>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </apex:outputPanel>      <!-- close FixedCelsTableGrid -->                                            
+                                            </div>
+                                        </div>      
+                                    </apex:outputPanel>
+                                </apex:outputPanel> <!-- Close tableContainerContainer -->
+                            </div>
+
+                        <apex:inputText id="currentPage" value="{!currentPage}" styleClass="currentPage hidden"/>
+                        <apex:outputPanel styleclass="tFooter" id="tFooter">                         
+                            <div class="footerLeftSide">                               
+                                <c:XactlySMBMessageBox msg="{!msgLimitAlert}" />
+                                <c:XactlySMBMessageBox msg="{!msgLimitSearchAlert}" />
+                            </div>
+                            <div class="prevNextWrapp">
+                                
+                                    <apex:outputPanel layout="none" rendered="{!currentPage > 1}">
+                                          <div id="btnFirstButton" onclick="if(!checkEditing()){return false;};jQuery('.currentPage').val(1);waitOn();goToPage()">
+                                                <div class="inteactionIconSprite btnFirstPagebk"></div>
+                                            </div>
+                                            <div id="btnPrevPageButton"  onclick="if(!checkEditing()){return false;};jQuery('.currentPage').val(jQuery('.currentPage').val()==1?1:parseInt(jQuery('.currentPage').val())-1);waitOn();goToPage()" >
+                                                <div class="inteactionIconSprite btnPrevPagebk"></div>
+                                            </div><apex:outputText value="{!$Label.xactlyexpress__Previous}" style="color:#404040;"/>&nbsp;
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none" rendered="{!currentPage == 1}">
+                                      <div class="inteactionIconSprite btnFirstPage"></div>
+                                        <div class="inteactionIconSprite btnPrevPage"></div><apex:outputText value="{!$Label.xactlyexpress__Previous}" style="color:#A8A8A8;"/>&nbsp;
+                       
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none" rendered="{!currentPage < numPages}">
+                                         <apex:outputText value="{!$Label.xactlyexpress__Next}" style="color:#404040;"/>&nbsp;
+                                                 <div id="btnLastPageButton" onclick="if(!checkEditing()){return false;};jQuery('.currentPage').val({!numPages});waitOn();goToPage()">
+                                                   <div class="inteactionIconSprite btnLastPagebk"></div>
+                                               </div>                  
+                                                <div id="btnNextPageButton"  onclick="if(!checkEditing()){return false;};jQuery('.currentPage').val(jQuery('.currentPage').val()=={!numPages}?{!numPages}:parseInt(jQuery('.currentPage').val())+1);waitOn();goToPage()">
+                                                    <div class="inteactionIconSprite btnNextPagebk" ></div>
+                                                </div>
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="none" rendered="{!currentPage == numPages}">
+                                          <apex:outputText value="{!$Label.xactlyexpress__Next}" style="color:#A8A8A8;"/>&nbsp;
+                                          <div class="inteactionIconSprite btnLastPage " ></div>
+                                          <div class="inteactionIconSprite btnNextPage " ></div>
+                                    </apex:outputPanel>                        
+                               
+                            </div>
+                            <apex:outputPanel styleclass="footerRightSide" id="paginator">                            
+                                <apex:outputText value="{!$Label.xactlyexpress__Page}"/>&nbsp;<input type="Text" value="{!currentPage}" onfocus="checkEditing();" onblur="MoveIfNeeded(this.value);" style="width:16px;"/>&nbsp;<apex:outputText value="{!$Label.xactlyexpress__Of}"/>&nbsp;<apex:outputText value="{!numPages}"/>
+                            </apex:outputPanel>
+                        </apex:outputPanel>  
+                    </apex:outputPanel>                    
+                    <apex:outputPanel layout="block" id="commentBox" styleClass="hideable" style="margin-bottom:70px;margin-top:30px; display:none;">                  
+                        
+                                        <apex:inputHidden id="public_comment" value="{!oldPublicComment}" />
+                                        <apex:inputHidden id="private_comment" value="{!oldPrivateComment}" />
+                        
+                    </apex:outputPanel><!-- END COMMENT BOX -->
+                    
+                    </div>
+                    
+                </apex:outputPanel><!-- END CONTENT -->
+                <div class="clearboth"></div>
+            </apex:outputPanel><!-- END CONTENTWRAPPER -->
+            
+            
+            <!-- FOOTER  -->
+            <apex:outputPanel layout="block"   rendered="{!CanEdit}"  styleClass="footer" id="pFooter"  >
+                <div style="width:100%;height:100%;z-index:50000;position:absolute;display:none" class="footerGlass">&nbsp;</div>
+                <apex:outputPanel layout="block" styleClass="previousStepWrapper" style="width:350px;">
+                                 
+                </apex:outputPanel>                                               
+                <apex:outputPanel layout="block" styleClass="actionButtons">
+                    <apex:outputPanel rendered="{!CanEdit}" layout="block" styleClass="actionButtonWrapper">
+                        <div class="xactlyBtnRectWrapper enable" onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);" style="float:left;margin-left:5px;margin-right:30px;" onclick="if(!chkValsChg()){return false};if(!copyfields('')){return false};rerenderNoCompare = true;waitOn();save();">
+                             <div class="xactlyBtnRect">
+                                 <div class="xactlyBtnRectBackground">
+                                     <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                         <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                             <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel">   
+                                                <apex:outputtext escape="false" value="{!$Label.xactlyexpress__SaveChanges}"/>
+                                             </div>
+                                         </div>
+                                     </div>     
+                                 </div>
+                             </div>
+                        </div> 
+                   </apex:outputPanel>
+                    
+                    <apex:outputPanel rendered="{!CanEdit}" layout="block" styleClass="actionButtonWrapper">
+                        <!-- <div class="actionButtonLeft"></div>
+                        <apex:commandLink action="{!discardChanges}" styleclass="actionButtonMiddle" onclick="rerenderNoCompare = true;waitOn();">
+                            <apex:outputtext escape="false" value="{!$Label.xactlyexpress__DiscardChanges}">
+                               <apex:param value="{!URLFOR($Resource.XactlySMBResources ,'img/buttons/navigateCancelMiddle.gif')}" />
+                            </apex:outputtext>
+                        </apex:commandLink>
+                        <div class="actionButtonRight"></div>-->
+                        <div class="xactlyBtnRectWrapper enable" onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);" style="float:left;margin-left:5px;margin-right:30px;" onclick="rerenderNoCompare = true;waitOn();discard();">
+                             <div class="xactlyBtnRect">
+                                 <div class="xactlyBtnRectBackground">
+                                     <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                         <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                             <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel">   
+                                                <apex:outputtext escape="false" value="{!$Label.xactlyexpress__DiscardChanges}"/>
+                                             </div>
+                                         </div>
+                                     </div>     
+                                 </div>
+                             </div>
+                        </div> 
+                    </apex:outputPanel>
+                </apex:outputPanel>
+                 
+            </apex:outputPanel>
+            
+            <input class="hidden" id="numPages" value="{!numPages}" />
+            <input class="hidden" id="searchEmpty_label" value="{!$Label.SearchEmpty}" />
+            <input class="hidden" id="searchMaxLimit_label" value="{!$Label.SearchMaxLimit}" />
+            <input class="hidden" id="deleteCreditQuest_label" value="{!$Label.deleteCreditQuest}" />
+            <input class="hidden" id="theTextInput" value="{!$Component.theTextInput}" />
+            <input class="hidden" id="searchbutton" value="{!$Component.searchbutton}" />
+            <input class="hidden" id="theTextInputJq" value="{!$Component.theTextInput}" />
+            <input class="hidden" id="searchbuttonJq" value="{!$Component.searchbutton}" />
+            <input class="hidden" id="orgName" value="{!URLENCODE($Organization.Name)}" />
+            <input class="hidden" id="orgId" value="{!URLENCODE($Organization.Id)}" />
+            <input class="hidden" id="userId" value="{!JSENCODE($CurrentPage.parameters.userId)}" />
+            <input class="hidden" id="url_deal_details" value="{!JSENCODE($Page.XactlySMBDealDetails)}" />
+            
+            
+            <input class="hidden" id="changesWillNotBeSaved_label" value="{!$Label.ChangesWillNotBeSaved}" />
+            <input class="hidden" id="wrongDateFormatJS_label" value="{!$Label.WrongDateFormatJS}" />
+            <input class="hidden" id="wrongNumberFormatJS_label" value="{!$Label.WrongNumberFormatJS}" />
+            <input class="hidden" id="wrongCurrencyFormatJS_label" value="{!$Label.WrongCurrencyFormatJS}" />
+            
+            <input class="hidden" id="canEdit" value="{!canEdit}" />
+            <input class="hidden" id="dateFirst" value="{!dateFirst}" />
+            <input class="hidden" id="dateSeparator" value="{!dateSeparator}" />
+            <input class="hidden" id="editingADealLabel" value="{!JSENCODE(EditingADealLabel)}" />
+            <input class="hidden" id="changeKeyInformationLabel" value="{!ChangeKeyInformationLabel}" />
+            <input class="hidden" id="deals_label" value="{!currentSettings.deals}" />
+
+            <apex:actionFunction name="doSearch" action="{!doSearch}" rerender="tableWrapper, viewDrpdwn, newDealdiv, FixedCelsTableGrid" onComplete="initSuperbox();SearchComplete();"/>
+            <apex:actionFunction name="goToPage" action="{!goToPage}"/>
+            <apex:actionFunction name="submitComment" action="{!setComment}" rerender="commentBox" oncomplete="initSuperbox();introAsTab();waitOff();commentDealOnComplete();"/>
+            <apex:actionFunction name="closeComment" action="{!closeComment}"  rerender="commentBox" oncomplete="initSuperbox();fixCelsDimensions();introAsTab();"/>
+            <apex:actionFunction name="saveComment" action="{!saveComment}"  rerender="commentBox, tableContainer" oncomplete="initSuperbox();fixCelsDimensions();introAsTab();waitOff();"/>                                       
+            <apex:actionFunction name="discard" action="{!discardChanges}"/>
+
+            <apex:actionFunction name="saveFN" action="{!save}" />
+    </apex:form>
+</div>  
+    
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'css/XactlySMBStyles.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'css/XactlySMBDashboardStyles.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'components/css/XactlySMBExpressDropdown.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'pages/css/XactlySMBDashRepMyDeals.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'components/css/XactlySMBShowAdjustments.css')}" />
+
+    <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources, 'js/XactlySMBJavascript.js')}"></script> 
+    <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources, 'components/js/XactlySMBDashboardLeftPanel.js')}"></script>
+    <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources, 'components/js/XactlySMBExpressDropdown.js')}"></script>
+    <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources, 'components/js/XactlySMBShowAdjustments.js')}"></script>
+    <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources ,'pages/js/XactlySMBDashRepMyDeals.js')}"></script> 
+    <c:XactlySMBShowAdjustments label_measure_result_details="{!$Label.xactlyexpress__Payment} {!$Label.xactlyexpress__Details}" label_liability_details="{!$Label.xactlyexpress__Liability} {!$Label.xactlyexpress__Details}" label_amount="{!$Label.xactlyexpress__Amount}" label_period="{!$Label.xactlyexpress__Period}" label_comment="{!$Label.xactlyexpress__CommentLabel}" label_total="{!$Label.xactlyexpress__Total}" label_payment_name="{!$Label.xactlyexpress__PaymentRuleName}" label_credit_name="{!creditRuleNameLabel}" label_manual_adjustment="{!$Label.xactlyexpress__ManualAdjustment}" label_close="{!$Label.xactlyexpress__Close}"/>
+    <c:XactlySMBFeedbackTab />
+    <c:XactlySMBComments publicCommentEnabled="true" privateCommentEnabled="false" readOnlyPublic="{!!canEdit}" readOnlyPrivate="true" />
+</apex:page>

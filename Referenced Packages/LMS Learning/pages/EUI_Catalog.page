@@ -1,0 +1,47 @@
+<apex:page title="{!pageTitle}" sidebar="false" controller="lmscons.EUI_CatalogController" action="{!Load}" tabStyle="Learning__tab" standardStylesheets="false" showHeader="true">
+
+	<script>
+		function selectActiveTab () {
+			$("#catalog").addClass('active');
+		}
+
+		function getParameterFromURL (sParam) {
+			var sPageURL = window.location.search.substring(1);
+			var sURLVariables = sPageURL.split('&');
+			for (var i = 0; i < sURLVariables.length; i++) {
+				var sParameterName = sURLVariables[i].split('=');
+				if (sParameterName[0] == sParam) {
+					return sParameterName[1];
+				}
+			}
+		}
+	</script>
+
+	<apex:composition template="lmscons__EUI_CompositionTemplate">
+		<apex:define name="body">
+<!-- Css -->
+			<apex:stylesheet value="{!URLFOR($Resource.lmscons__libraries, '/libraries/bootstrap/3.3.2/bootstrap.min.css')}"/>
+			<apex:stylesheet value="{!URLFOR($Resource.lmscons__libraries, '/libraries/bootstrap-datetimepicker/4.0.0/bootstrap-datetimepicker.min.css')}"/>
+			<apex:stylesheet value="{!URLFOR($Resource.lmscons__libraries, '/libraries/bootstrap-multiselect/0.9.8/bootstrap-multiselect.css')}"/>
+
+<!-- Script -->
+			<apex:includeScript value="{!URLFOR($Resource.lmscons__libraries, '/libraries/bootstrap/3.3.2/bootstrap.min.js')}"/>
+			<apex:includeScript value="{!URLFOR($Resource.lmscons__libraries, '/libraries/moment/2.9.0/moment-with-locales.js')}"/>
+			<apex:includeScript value="{!URLFOR($Resource.lmscons__libraries, '/libraries/bootstrap-datetimepicker/4.0.0/bootstrap-datetimepicker.min.js')}"/>
+			<apex:includeScript value="{!URLFOR($Resource.lmscons__libraries, '/libraries/bootstrap-multiselect/0.9.11/bootstrap-multiselect.js')}"/>
+			<apex:includeScript value="{!URLFOR($Resource.lmscons__libraries, '/libraries/jquery-cookie/1.4.1/jquery.cookie.min.js')}"/>
+
+<!-- Sending data to $scope -->
+			<c:EUI_JSComponentHeader DataSourceName="CatalogData"
+				DataSourceValue="{!FirstLevelData}"
+				LabelsList="Assignment_List_Filter,Assignments_Completed,Assignments_Status,CERTIFICATE_OF_COMPLETION,Completed_Training_Link,ConsumerCatalogDetail_Lang,ConsumerCatalogSearch_ViewDetails,ConsumerUser_Error,DUE_DATE,DURATION,EUI_Assigned,EUI_Clear,EUI_Keywords,EUI_No,EUI_No_Training_Included,EUI_Not_Assigned,EUI_Passing_Score,EUI_Prerequisites,EUI_Request_Assignment,EUI_Search_For,EUI_Success,EUI_Training_Included,EUI_Training_Type,EUI_View_Prerequisites,EUI_Yes,EUI_Your_Score,From,MyTeam_To,MyTraining_Close,MyTraining_LaunchCourse,MyTraining_title_My_Training,No_results_found_Please_search_again,Quizzes,Search,SearchCatalog_AllCatalogs,SearchCatalog_Column_Type,SearchCatalog_Courses,SearchCatalog_Curriculums,SearchCatalog_Enroll,SearchCatalog_LearningPaths,SearchCatalog_Modules,SearchCatalog_Search_Description,Sequence,Unassigned,You_are_not_authorized_to_view_or_take_training,SearchCatalog_AllSelected"
+			>
+			</c:EUI_JSComponentHeader>
+<!-- Angular composition template directive -->
+			<div data-ng-controller="itemWrapper">
+				<input type="hidden" data-ng-model="dataSourceName" data-ng-init="dataSourceName='CatalogData'" />
+				<div my-catalog="my-catalog" pathPrefix="{!URLFOR($Resource.templates, '')}"></div>
+			</div>
+		</apex:define>
+	 </apex:composition>
+</apex:page>

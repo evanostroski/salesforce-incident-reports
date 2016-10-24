@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>ScanBizCards Enterprise</fullName>
+    <apiAccessLevel>Unrestricted</apiAccessLevel>
+    <namespacePrefix>scanbizcards</namespacePrefix>
+    <types>
+        <members>isLicensed</members>
+        <members>isLicensedTest</members>
+        <name>ApexClass</name>
+    </types>
+    <types>
+        <members>SBCAccountLink</members>
+        <members>SBCFeedLink</members>
+        <name>ApexPage</name>
+    </types>
+    <types>
+        <members>Contact.ScanBizCards__c</members>
+        <members>Lead.ScanBizCards__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>Account_SBC</members>
+        <members>Global_SBC</members>
+        <name>QuickAction</name>
+    </types>
+    <types>
+        <members>SBC_S1_Tile</members>
+        <name>StaticResource</name>
+    </types>
+    <version>36.0</version>
+</Package>

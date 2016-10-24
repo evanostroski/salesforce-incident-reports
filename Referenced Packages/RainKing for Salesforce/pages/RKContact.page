@@ -1,0 +1,459 @@
+<apex:page standardController="Contact" extensions="rkpi2.ContactControllerExtension,rkpi2.LoggingControllerExtension,rkpi2.ImportControllerExtension,rkpi2.TechnologiesControllerExtension">
+	<head> 
+		<c:rkPluginStyles />
+	</head>
+
+<!-- 	<apex:pageMessages /> --> 
+
+	<apex:outputPanel id="refresh" rendered="true">
+	 <apex:outputPanel id="refresh1" rendered="{!refreshPage}">
+	  <script>
+		window.top.location='/{!JSENCODE(contactId)}';
+ 	  </script> 
+	 </apex:outputPanel>
+	</apex:outputPanel>
+	
+	
+	
+	<apex:outputPanel rendered="{! !pluginEnabled }">
+		The RainKing Plugin is not enabled for your Salesforce Organization.
+	</apex:outputPanel>
+	<apex:outputPanel rendered="{! pluginEnabled }">
+		<apex:outputPanel rendered="{! Contact.rk_retrievalFlag__c != 'Off' }">
+			<script> 
+				Visualforce.remoting.timeout = 120000; // Set timeout at page level
+		
+				$j = jQuery.noConflict(); 
+			
+		        $j(document).ready(function ($j) { 
+		        	
+		        	Visualforce.remoting.Manager.invokeAction(
+		           		'{!$RemoteAction.TechnologiesControllerExtension.getCompanyTechnologies}', 
+		           		{!rk['companyId']},           		 
+		            	handleGetCompanyTechnologies
+		       		);
+		       		
+		        	Visualforce.remoting.Manager.invokeAction(
+		           		'{!$RemoteAction.ImportControllerExtension.getMergeData}', 
+		           		'Contact',{!rk['contactId']},'{!Contact.id}',           		 
+		            	handleGetMergeData
+		       		);
+		        });
+		                        
+		        function handleGetMergeData(result,event) {
+		        	console.log(result);
+		        	
+		        	var html = '<table width="100%" cellpadding="4" cellspacing="1" bgcolor="#dcdcdc"><tr class="contentHeader"><td width="30" align="center"></td><td width="20%"><b style="color:#696969">Field</b></td><td width="40%"><b style="color:#696969">RainKing Value</b></td><td width="40%"><b style="color:#696969">SalesForce Value</b></td></tr>'; 
+					$j.each( result, function(i, val) {
+						html += '<tr ';
+						if ($j.trim(val.rkVal) === $j.trim(val.sfVal)) {
+							html += ' class="disableRow"';
+						}
+						html += ' bgcolor="#ffffff">';
+						html += '<td width="30" align="center" class="myCheckbox"><input';
+						if ($j.trim(val.rkVal) === $j.trim(val.sfVal)) {
+							html += ' disabled="disabled"';
+						}
+						html += ' onclick="toggleRowColor()" type="checkbox" class="merge-cb" data-rkField="'+val.rkField+'" data-sfField="'+val.sfField+'" id="mf'+ val.sfField +'" value="'+ val.rkVal +'" /></td>';
+						html += '<td';
+						if ($j.trim(val.rkVal) === $j.trim(val.sfVal)) {
+							html += ' class="disableCell"';
+						}
+						html += '>'+val.sfField+'</td>';
+						html += '<td';
+						if ($j.trim(val.rkVal) === $j.trim(val.sfVal)) {
+							html += ' class="disableCell"';
+						}
+						html += '>'+val.rkVal+'</td>';
+						html += '<td';
+						if ($j.trim(val.rkVal) === $j.trim(val.sfVal)) {
+							html += ' class="disableCell"';
+						}
+						if (val.sfVal == null) {
+							html += '></td>';
+						} else {
+							html += '>'+val.sfVal+'</td>';
+						}
+						html += '</tr>';
+					});
+					html += '</table>';
+					$j(".merge-grid .the-grid").html(html);
+					$j(".merge-spinner").css("display","none");
+		        	$j(".merge-grid").show('fade');			
+		        }
+		        
+		        function doMerge() {
+		        	var itemsToUpdate = [];
+		        	$j(".merge-cb:checked").each(function() {
+		        		var item = {};
+		        		item.sfField = $j(this).attr("data-sfField");
+		        		item.rkField = $j(this).attr("data-rkField");
+		        		item.value = $j(this).val();
+		        		itemsToUpdate.push(item);
+		        	});
+		        	
+		        	Visualforce.remoting.Manager.invokeAction(
+		           		'{!$RemoteAction.ImportControllerExtension.doMergeData}',
+		           		'Contact',itemsToUpdate,'{!Contact.id}',           		 
+		            	handleDoMergeData
+		       		);
+		       	}
+		
+				function handleDoMergeData(result, event) {
+					if (result.status == 'false') {
+						alert('Failed to update Contact record.');
+					} else {
+						window.top.location='/'+result.Id; 
+					}
+				}
+		
+			    function doLogging(pid,cid,page,source) {
+			        //alert('doLogging called');
+			
+			        // This remoting call will use the page's timeout value
+			        Visualforce.remoting.Manager.invokeAction(
+			            '{!$RemoteAction.LoggingControllerExtension.performLogging}', 
+			            [pid,cid,page,source,'Contact'], 
+			            handleDoLogging
+			        );
+			    }
+			
+			    function handleDoLogging(result, event) { 
+					//alert('handleDoLogging called: ' + result);
+			 	}
+			 	
+			 	function handleIsRkUser(result, event) { 
+					if (result == true) {
+						$j("#let-us-know").show();
+					}
+			 	}
+			</script>
+		</apex:outputPanel>
+		
+		<apex:outputPanel rendered="{! rk['errMsg'] == 'companyNotFound' }">
+			<script>
+				Visualforce.remoting.Manager.invokeAction(
+		            '{!$RemoteAction.LoggingControllerExtension.isRkUser}',
+		            [], 
+		            handleIsRkUser
+		        );
+			</script>
+		</apex:outputPanel>
+	
+		<apex:outputPanel rendered="{! Contact.rk_RetrievalFlag__c != 'Off' && pluginActive == true && rk['errMsg'] != 'companyNotFound' }"> 
+		 	<script>
+		 	$j = jQuery.noConflict();
+			   $j(document).ready(function() {
+			   		var timerId;
+			   		$j(".company-content").scroll( function() {
+			   			clearTimeout(timerId)
+				        timerId = setTimeout(function(){
+				            doLogging({!rk['companyId']},{!rk['contactId']},'Scroll','Company Tab');
+				        }, 5000);
+			   			
+			   		});
+			   		
+			   		$j(".contact-content").scroll( function() {
+			   			clearTimeout(timerId)
+				        timerId = setTimeout(function(){
+				            doLogging({!rk['companyId']},{!rk['contactId']},'Scroll','Contact Tab');
+				        }, 5000);
+			   			
+			   		});
+			   		
+			   		$j(".rich-tab-header").on( "click", function() {
+			   			//console.log($j(this).html());
+			   			if ($j(this).html() == 'Merge Data') {
+			   				doLogging({!rk['companyId']},{!rk['contactId']},'Merge Tab Clicked','Merge Tab');
+			   			} else if ($j(this).html() == 'RainKing Company') {
+			   				doLogging({!rk['companyId']},{!rk['contactId']},'Company Tab Clicked','Company Tab');
+			   			} else if ($j(this).html() == 'RainKing Contact') {
+			   				doLogging({!rk['companyId']},{!rk['contactId']},'Contact Tab Clicked','Contact Tab');
+			   			}
+			   		});
+			   });
+			</script>
+			</apex:outputPanel>
+		
+		<apex:form >
+		<br />
+		
+		<apex:actionFunction name="doToggleVisibilityFlag" action="{!toggleRkDisplayFlag}" rerender="refresh" status="myStatus"/>
+		<apex:actionFunction name="doToggleRetrievalFlag" action="{!resetRetrievalFlag}" rerender="refresh" status="myStatus"/>
+		<apex:actionFunction name="doUnlinkContact" action="{!performUnlinkContact}" rerender="refresh" status="myStatus"/>
+		<apex:actionFunction name="doUnlinkCompany" action="{!performUnlinkCompany}" rerender="refresh" status="myStatus"/>
+		<apex:actionFunction name="doResearchNow" action="{!performResearchNow}" rerender="rnStatusBox" status="rnStatusBox"/>
+		
+		<input type="hidden" name="researchNowTextMain" id="researchNowTextMain" />
+		
+		<div class="main">
+		<apex:pageBlock title="">
+			<div style="padding-left: 24px;position: absolute;top: 660px;z-index: 2000;">
+	       		<apex:image url="{!$Resource.rkpi2__trademarkCrown4}" /> Live Data as of <span id="myDiv">zzz</span>
+	  		</div>
+				<apex:tabPanel rendered="{!NOT(ISNULL(rk)) && status['id'] == '1'}" switchType="client" selectedTab="tabdetails" id="myTabPanel" inactiveTabClass="inactiveTab">
+					<div class="logo"><apex:image url="{!$Resource.rkpi2__rk_baby}" /></div>
+					<apex:tab label="RainKing Contact" name="RkContact" id="RkContact" onTabEnter="hideActionPanels()">
+						<apex:outputPanel rendered="{!status['showContactlist'] == '0'}">
+							<c:tabContactContent rk="{!rk}" 
+								renderTechs="{!techs.size}" 
+								teks="{!techs}" 
+								renderRanks="{!ranks.size}"
+								ranks="{!ranks}"
+								renderGroups="{!contactGroups.size}"
+								contactGroups="{!contactGroups}"
+								renderDirectReports="{!directReports.size}"
+								directReports="{!directReports}"
+								renderWorkhistory="{!workhistory.size}"
+								workhistory="{!workhistory}"
+								renderEducation="{!education.size}"
+								education="{!education}"
+								teaser="{!status['description']=='Teaser'}"
+								user="{!sfUser}"
+								renderRkLinks="{!renderRkLinks}"
+								isSandbox="{!isSandbox}"
+						 		isUpdateable="{! $ObjectType.Contact.Updateable }"  
+								hasIt="{! rk['hasIt'] }"
+								hasMarketing="{! rk['hasMarketing'] }" />
+						</apex:outputPanel>	
+						
+						<apex:outputPanel id="lookupContact" styleClass="lookupContact" layout="block" rendered="{!status['showContactlist'] == '1'  && $ObjectType.Contact.Updateable}">
+	
+								<div class="content">
+									<b>RainKing Contact's for {!rk['companyName']}</b>
+									<br />
+									The following Contacts are available in RainKing.  To link one to your Contact, just click on it.
+									<br /><br />
+									<apex:actionStatus id="linkStatus2"  startText=" (updating...)"  stopText=""/>
+									<br />
+									<div class="tblHeader">
+										<div class="tblHeaderCell" style="width:30%;">&nbsp;Contact</div>
+										<div class="tblHeaderCell" style="width:49%;">Title</div>
+										<div class="tblHeaderCell" style="width:10%;">Location</div>
+									</div>
+									<div class="contentScrolling" style="background-color:#ffffff;border:1px solid #c0c0c0;height:400px;padding-left:0px;padding-right:0px;width:95%;">
+										<apex:dataTable value="{!contactList}" var="t" style="width:100%;background-color:#ffde48">
+											<apex:column style="padding:5px 5px 5px 5px;width:30%" rendered="{!t['lastName']==Contact.LastName}">
+												<apex:outputText value="{!t['lastName']+', '+t['firstName']}" style="text-decoration:underline;color:blue;cursor:pointer;cursor:hand;"/>
+							       				<apex:actionSupport onsubmit="showSpinner();doLogging(0,{!t['contactId']},'Link Contact','Contact Tab');" event="onclick"  action="{!linkContact}" rerender="refresh" status="linkStatus2">
+									         		<apex:param name="contactIdToLink" value="{!t['contactId']}"/>
+									         	</apex:actionSupport>				
+										    </apex:column>
+										    <apex:column style="padding:5px 5px 5px 5px;width:50%" rendered="{!t['lastName']==Contact.LastName}">{!t['title']}</apex:column>
+										    <apex:column style="padding:5px 5px 5px 5px;width:20%" rendered="{!t['lastName']==Contact.LastName}">{!IF(ISBLANK(t['state']),t['city'],t['city']+', '+t['state'])}</apex:column>
+										</apex:dataTable>
+										<apex:dataTable value="{!contactList}" var="t" rowClasses="even,odd" style="width:100%;">
+											<apex:column style="padding:5px 5px 5px 5px;width:30%" rendered="{!t['lastName']!=Contact.LastName}">
+												<apex:outputText value="{!t['lastName']+', '+t['firstName']}" style="text-decoration:underline;color:blue;cursor:pointer;cursor:hand;"/>
+							       				<apex:actionSupport onsubmit="showSpinner();doLogging(0,{!t['contactId']},'Link Contact','Contact Tab');" event="onclick"  action="{!linkContact}" rerender="refresh" status="linkStatus2">
+									         		<apex:param name="contactIdToLink" value="{!t['contactId']}"/>
+									         	</apex:actionSupport>				
+										    </apex:column>
+										    <apex:column style="padding:5px 5px 5px 5px;width:50%" rendered="{!t['lastName']!=Contact.LastName}">{!t['title']}</apex:column>
+										    <apex:column style="padding:5px 5px 5px 5px;width:20%" rendered="{!t['lastName']!=Contact.LastName}">{!IF(ISBLANK(t['state']),t['city'],t['city']+', '+t['state'])}</apex:column>
+										</apex:dataTable>
+									</div>	
+	
+							</div>
+						</apex:outputPanel>
+						
+						<apex:outputPanel id="lookupContactOff" styleClass="lookupContact" layout="block" rendered="{!status['showContactlist'] == '1'  && !$ObjectType.Contact.Updateable}">
+	
+								<div class="content">
+									<div style="border:1px solid red;background-color:#FFF0F0;padding:10px;margin-bottom:20px;">Cannot perform actions on this page due to insufficient permissions.  Please contact your Salesforce Administrator if you feel this is in error.</div>
+									<b>RainKing Contact's for {!rk['companyName']}</b>
+									<br />
+									The following Contacts are available in RainKing.  To link one to your Contact, just click on it.
+									<br /><br />
+									<br />
+									<div class="tblHeader">
+										<div class="tblHeaderCell" style="width:30%;">&nbsp;Contact</div>
+										<div class="tblHeaderCell" style="width:49%;">Title</div>
+										<div class="tblHeaderCell" style="width:10%;">Location</div>
+									</div>
+									<div class="contentScrolling" style="background-color:#ffffff;border:1px solid #c0c0c0;height:400px;padding-left:0px;padding-right:0px;width:95%;">
+										<apex:dataTable value="{!contactList}" var="t" style="width:100%;background-color:#ffde48">
+											<apex:column style="padding:5px 5px 5px 5px;width:30%" rendered="{!t['lastName']==Contact.LastName}">
+												<apex:outputText value="{!t['lastName']+', '+t['firstName']}"/>		
+										    </apex:column>
+										    <apex:column style="padding:5px 5px 5px 5px;width:50%" rendered="{!t['lastName']==Contact.LastName}">{!t['title']}</apex:column>
+										    <apex:column style="padding:5px 5px 5px 5px;width:20%" rendered="{!t['lastName']==Contact.LastName}">{!IF(ISBLANK(t['state']),t['city'],t['city']+', '+t['state'])}</apex:column>
+										</apex:dataTable>
+										<apex:dataTable value="{!contactList}" var="t" rowClasses="even,odd" style="width:100%;">
+											<apex:column style="padding:5px 5px 5px 5px;width:30%" rendered="{!t['lastName']!=Contact.LastName}">
+												<apex:outputText value="{!t['lastName']+', '+t['firstName']}" />
+										    </apex:column>
+										    <apex:column style="padding:5px 5px 5px 5px;width:50%" rendered="{!t['lastName']!=Contact.LastName}">{!t['title']}</apex:column>
+										    <apex:column style="padding:5px 5px 5px 5px;width:20%" rendered="{!t['lastName']!=Contact.LastName}">{!IF(ISBLANK(t['state']),t['city'],t['city']+', '+t['state'])}</apex:column>
+										</apex:dataTable>
+									</div>	
+	
+							</div>
+						</apex:outputPanel>
+						
+					</apex:tab>
+					<apex:tab label="RainKing Company" name="RkCompany" id="RkCompany" onTabEnter="hideActionPanels()">
+						<c:tabCompanyContent rk="{!rk}"
+							lv="{!lastVerified}"
+							researcher="{!researcher[0]}"
+							companyIntel="{!companyIntel}"
+							fye="{!fye}"
+							renderScoops="{!myScoops.size}"
+							myScoops="{!myScoops}"
+							renderCompanyTechs="{!companyTechs.size}"
+							companyTechs="{!companyTechs}"
+							renderLocations="{!locations.size}"
+							locations="{!locations}"
+							teaser="{!status['description']=='Teaser'}"
+							user="{!sfUser}"
+							renderRkLinks="{!renderRkLinks}"
+							isSandbox="{!isSandbox}" 
+						 	isUpdateable="{! $ObjectType.Account.Updateable }"
+						 	hasIt="{! rk['hasIt'] }"
+							hasMarketing="{! rk['hasMarketing'] }" /> 
+					</apex:tab>
+					<apex:tab label="Merge Data" name="Merge " id="tabMerge" rendered="{!renderMergeTab && NOT(ISNULL(rk)) && status['showContactlist'] == '0' && status['description']!='Teaser' && $ObjectType.Contact.Updateable}" onTabEnter="hideActionPanels()">
+						<c:contactHeader rk="{!rk}" showWrongBtn="false" teaser="{!status['description']=='Teaser'}" />
+	
+						<div class="researchNow">
+							<c:researchNow company="{!rk['companyName']}" contact="" user="{!sfUser}" />
+						</div>
+						<div class="content">
+							<div class="merge-spinner">
+								<apex:outputPanel >
+					       			<apex:image value="{!$Resource.rkpi2__spinner}"  />
+								</apex:outputPanel>
+							</div>
+							<div class="merge-grid" style="display:none;">
+								<div style="color:#696969"> 
+									Select rows to copy RainKing data into your Salesforce record.
+								</div> 
+								<div class="the-grid">
+								
+								</div>
+								<br />
+								<div class="submitBtnCt"> 
+									<input type="button" id="performMergeRecords"  onclick="doMerge();showSpinner();doLogging({!rk['companyId']},{!rk['contactId']},'Merge Contact','Merge Tab');" disabled="true" value="Merge Selected Fields" />
+								</div> 
+								<br/><br/>
+							</div>
+						</div>
+					</apex:tab>
+				</apex:tabPanel>
+				
+				<apex:outputPanel id="lookupCompany" styleClass="lookupContact" layout="block" rendered="{!status['id']=='3' && $ObjectType.Account.Updateable}">
+				 	<br />
+	
+						<div>
+							<b>Contact not Found in RainKing</b>
+							<br />
+							Sorry, we tried to use the email address from SalesForce to look up this person.  It's possible your SalesForce Contact has a different or out-dated email address.  Confirm the company below, then you can choose from a list of possible alternatives.
+							<br /><br />
+							<apex:actionStatus id="linkStatus"  startText=" (updating...)"  stopText=""/>
+							<br />
+							<div style="height:350px;overflow:auto">
+								<apex:dataTable value="{!companyList}" var="t" rowClasses="even,odd" style="width:100%;border:solid 1px #c0c0c0;">
+									<apex:column style="padding:5px 5px 5px 5px;">
+										<apex:outputText value="{!t['companyName']}" style="text-decoration:underline;color:blue;cursor:pointer;cursor:hand;"/>
+					       				<apex:actionSupport onsubmit="showSpinner();doLogging({!t['companyId']},0,'Link Company','Link Company');" event="onclick"  action="{!linkCompany}" rerender="refresh" status="linkStatus">
+							         		<apex:param name="companyIdToLink" value="{!t['companyId']}"/>
+							         	</apex:actionSupport>				
+								    </apex:column>
+								</apex:dataTable>
+							</div>
+							<br /><br />
+						<div align="center">
+							<div style="text-align:left;height:55px;background-color:#dcdcdc;border:#c0c0c0 solid 1px;padding:10px;width:75%;border-radius: 5px;-moz-border-radius: 5px;-webkit-border-radius: 5px;">
+								<apex:commandButton value="Company Not in List" action="{!companyNotInList}" rerender="refresh" onclick="showSpinner();doLogging({!rk['companyId']},0,'Company Not in List','Link Company');" />
+								<div style="width:100%;height:7px;" />
+								<span style="font-size:11px;">If the company is not in the list above, you can choose for the RainKing plugin not to show for this record by clicking this button.</span>
+							</div>
+						</div>
+						<br /><br />		
+						</div>
+	
+				</apex:outputPanel>
+				
+				<apex:outputPanel id="lookupCompanyOff" styleClass="lookupContact" layout="block" rendered="{!status['id']=='3' && !$ObjectType.Account.Updateable}">
+				 	<br />
+	
+						<div>
+							<div style="border:1px solid red;background-color:#FFF0F0;padding:10px;margin-bottom:20px;">Cannot perform actions on this page due to insufficient permissions.  Please contact your Salesforce Administrator if you feel this is in error.</div>
+									<b>Contact not Found in RainKing</b>
+							<br />
+							Sorry, we tried to use the email address from SalesForce to look up this person.  It's possible your SalesForce Contact has a different or out-dated email address.  Confirm the company below, then you can choose from a list of possible alternatives.
+							<br /><br />
+							<br />
+							<div style="height:350px;overflow:auto">
+								<apex:dataTable value="{!companyList}" var="t" rowClasses="even,odd" style="width:100%;border:solid 1px #c0c0c0;">
+									<apex:column style="padding:5px 5px 5px 5px;">
+										<apex:outputText value="{!t['companyName']}" />
+								    </apex:column>
+								</apex:dataTable>
+							</div>
+							<br /><br />
+						
+						<br /><br />		
+						</div>
+	
+				</apex:outputPanel>
+			
+		 	    <apex:outputPanel id="companyNotFound" styleClass="lookupContact" layout="block" rendered="{!status['id']=='2'}">
+	
+						<div class="content">
+							<c:errorBox rkDisplayFlag="{!Contact.rkpi2__rk_DefaultVisibility__c}" error="companyNotFound" isUpdateable="{! $ObjectType.Contact.Updateable }" />
+						</div>
+	
+		 		</apex:outputPanel>
+				
+	
+				<apex:outputPanel id="error" styleClass="lookupContact" layout="block" rendered="{!status['id']=='4'}">
+	
+						<div class="content">
+							<c:errorBox rkDisplayFlag="{!Contact.rkpi2__rk_DefaultVisibility__c}" error="{!rk['errMsg']}" isUpdateable="{! $ObjectType.Contact.Updateable }" />
+						</div>
+	
+		 		</apex:outputPanel>
+	
+	 		
+		 		<apex:outputPanel id="cfgError" styleClass="lookupContact" layout="block" rendered="{!status['id']=='5'}">
+	
+						<div class="content">
+							<c:errorBox rkDisplayFlag="{!Contact.rkpi2__rk_DefaultVisibility__c}" isUpdateable="{! $ObjectType.Contact.Updateable }" error="Either the RainKing Plugin is not configured correctly or there is a communication issue between Salesforce and RainKing." />
+						</div>
+	
+		 		</apex:outputPanel>
+				 	
+				 <c:js />
+	
+			</apex:pageBlock>
+	       </div>
+	       <div class="spinner2" title="" style="height:400px;width:100%;padding-left:40%;padding-top:100px;">
+	       		
+	       		<br/><br/>
+	       		<apex:actionStatus id="rnStatusBox" >
+	       			 <apex:facet name="start"> 
+		       			<apex:outputPanel >
+			       			<apex:image value="{!$Resource.rkpi2__spinner}"  />
+	    				</apex:outputPanel>
+	    			</apex:facet>
+	       			 <apex:facet name="stop"> 
+		       			<div class="researchNowSuccess" style="position:absolute;left:250px;">
+		       			<b style="font-size:12px;">Research Now</b>
+		       			<hr size="1" />
+		       			{!researchNowReturnStatus} 
+		       			<br/>
+		       			<input type="button" value=" OK " onclick="hideSpinner();" style="margin-left:32px;margin-top:10px;" />
+	    				</div>
+	    			</apex:facet>
+	       		</apex:actionStatus>
+	       </div>
+	       <div class="spinner" title="" style="height:100%;width:100%;padding-left:40%;padding-top:100px;">
+	       		<apex:image value="{!$Resource.rkpi2__spinner}"/>
+	       </div>
+		</apex:form>
+	</apex:outputPanel>		
+	
+	
+	
+</apex:page>

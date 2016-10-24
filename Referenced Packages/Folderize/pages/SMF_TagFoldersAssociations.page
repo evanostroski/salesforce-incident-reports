@@ -1,0 +1,5 @@
+<apex:page tabStyle="Folderize__tab">
+	
+	<c:TagsFoldersViewer />
+	
+</apex:page>

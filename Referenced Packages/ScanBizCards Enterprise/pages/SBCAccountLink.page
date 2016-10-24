@@ -1,0 +1,57 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false">
+
+    <center>
+    <span style="font-family: Helvetica; color: gray; font-size: 8pt">
+    If you do not have ScanBizCards installed on your device you must download it by clicking this link:<br/><br/>
+    <a href="#" id="downloadLink">Get ScanBizCards</a>
+    </span>
+    </center>
+    
+    <script>
+    
+    var UA_RULES = [
+      ['iPhone;', 'iPhone'],
+      ['iPad;', 'iPad'],
+      ['Android.*Mobile Safari', 'Android'],  // Chrome/Browser on Android phone
+      ['Android.*Safari', 'Android'],        // Chrome/Browser on Android tablet
+      ['.*', 'desktop'],                    // Fallback to desktop.
+    ]
+    
+    var curDevice = 'iPhone';
+    
+    var ua = navigator.userAgent;
+    for (var i = 0; i < UA_RULES.length; i++) {
+        var device = UA_RULES[i][1];
+        var re = new RegExp(UA_RULES[i][0]);
+        if (ua.match(re)) {
+            curDevice = device;
+            break;
+        }
+    }
+    
+    if (curDevice != 'desktop') {
+        showInstallInfo();
+        document.write('<apex:iframe src="scanbizs1://accountId={!$CurrentPage.parameters.id}" scrolling="true" id="theIframe" width="300" height="300"/>');
+        
+    } else {
+        document.getElementById("dpSpan").innerHTML = 'This action can only be invoked from the Salesforce1 mobile app.';
+    }
+    
+
+    function showInstallInfo() {
+        var installUrl = '';
+        
+        if (curDevice == 'iPhone') {
+            installUrl = 'https://itunes.apple.com/us/app/scanbizcards-lite-business/id426260937?mt=8';
+        } else if (curDevice == 'iPad') {
+            installUrl = 'https://itunes.apple.com/us/app/scanbizcards-hd-lite-business/id575711234?mt=8';
+        } else if (curDevice == 'Android') {
+            installUrl = 'https://play.google.com/store/apps/details?id=com.scanbizcards&hl=en';
+        }
+        
+        document.getElementById("downloadLink").href = installUrl;
+    }
+        
+    </script>
+    
+</apex:page>

@@ -1,0 +1,3 @@
+<apex:page standardController="clzV5__Clarizen_Project__c" recordSetVar="projects">
+    <apex:detail />
+</apex:page>

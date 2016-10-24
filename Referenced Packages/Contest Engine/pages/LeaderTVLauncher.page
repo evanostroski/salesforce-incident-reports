@@ -1,0 +1,396 @@
+<apex:page controller="ePrize_Zemzu.LeaderboardMenuController" sidebar="false">
+    <apex:composition template="ePrize_Zemzu__LeaderboardTemplate">
+    <apex:define name="head">
+
+    <script type="text/javascript">
+    jQuery(function onReady($) {
+      if (!window.Compete) window.Compete = {};
+
+      var page, params;
+      if (window.Compete && window.Compete.page) page = window.Compete.page;
+      if (window.Compete && window.Compete.params) params = window.Compete.params;
+      var verIE;
+      // add the 'active' class to the correct link based on the page
+      function makeLinkActive() {
+        if (page) {
+          if (page === 'viewcontest' || page === 'viewcontest2') {
+            $('#view-contest-link').addClass('active');
+          } else if (page === 'leaderboard2' || page === 'leaderboard') {
+            $('#view-leaderboard-link').addClass('active');
+          } else if (page === 'viewallcontestentries' || page === 'viewallcontestentries2') {
+            $('#view-all-entries-link').addClass('active');
+          } else if (page === 'admincontestnotifications' || page === 'admincontestnotifications2') {
+            $('#edit-notifications-link').addClass('active');
+          } else if (page === 'adhocentries' || page === 'adhocentries2') {
+            $('#ad-hoc-entries-link').addClass('active');
+          } else if (page === 'adminwinners' || page === 'adminwinners') {
+            $('#view-winners-link').addClass('active');
+          }
+        }
+      }
+
+      function getSelectedContests() {
+        var selected = 0;
+        $('select[name="contests"] option').each(function() {
+          if ($(this).is(':selected')) selected++;
+        });
+        return selected;
+      }
+
+      function setMaxCyclesOptions() {
+        var count = getSelectedContests();
+        var mc = $('select[name="maxcycles"]');
+        var priorValue = mc.val();
+        mc.html('');
+        if (count < 2) {
+          mc.append(
+            $('<option></option>')
+            .attr('value', '-1')
+            .attr('selected', 'selected')
+            .text('Unlimited')
+          );
+        } else {
+          for (var i = 1; i < 11; i++) {
+            var suffix = (i === 1) ? 'Cycle' : 'Cycles';
+            var opt = $('<option></option>');
+            opt.attr('value', i);
+            if (i.toString() === priorValue) {
+              opt.attr('selected', 'selected');
+            }
+            opt.text(i + ' ' + suffix);
+            mc.append(opt);
+          }
+        }
+      }
+
+      function getIsIE() {
+        if (verIE === null) {
+          if (jQuery.browser.msie) {
+            verIE = parseFloat(jQuery.browser.version);
+          }
+        }
+        return verIE;
+      }
+
+      function launchLeaderTV() {
+
+        $('[data-ltv-launch]').click(function() {
+          var contestIds = [];
+          var tickerTypes = [];
+
+          $('select[name="contests"] option:selected').each(function(c) {
+            contestIds.push($(this).val());
+          });
+
+          $('input[name="tickertypes"]:checked').each(function() {
+            tickerTypes.push($(this).val());
+          });
+
+          var url = '/apex/leadertv?';
+
+          if (contestIds.length === 0) {
+            return alert('You must select at least one Contest to show.');
+          }
+
+          if (contestIds.length === 1) {
+            url += 'contestId=' + contestIds[0];
+          } else {
+            url += 'contestIds=' + contestIds.join(',');
+          }
+
+          if (tickerTypes.length) {
+            url += '&tickertypes=' + tickerTypes.join(',');
+          } else {
+            url += '&tickertypes=none';
+          }
+
+          var interval = $('select[name="interval"]').val();
+          if (interval) url += '&interval=' + interval;
+
+          var maxcycles = $('select[name="maxcycles"]').val();
+          if (typeof maxcycles !== undefined) url += '&maxcycles=' + maxcycles;
+
+          var leaders = $('select[name="leaders"]').val();
+          if (leaders) url += '&leaders=' + leaders;
+
+          var theme = $('[name="theme"]:checked').attr('id');
+          if (theme) {
+            url += '&theme=' + theme;
+          } else {
+            url += '&theme=original';
+          }
+
+          console.log('url: ' + url);
+
+          window.open(url, '_blank', 'menubar=no,status=no,titlebar=no,toolbar=no,fullscreen=yes');
+
+        });
+
+      }
+
+      function initContestChangeHandler() {
+        $('select[name="contests"]').change(function() {
+          setMaxCyclesOptions();
+        });
+      }
+
+      $(function() {
+        setMaxCyclesOptions();
+        makeLinkActive();
+        initContestChangeHandler();
+        // applyLeaderboardUpdatesFrequencyHandling();
+        launchLeaderTV();
+      });
+    }.bind(null, jQuery))
+    </script>
+    </apex:define>
+
+    <apex:define name="header">
+      <apex:outputPanel layout="none" rendered="{!contestIsLive}" >
+        <h1 class="Header-headline u-textBold">
+          {!fullContest.contestEntity.ContestName__c}
+        </h1>
+      </apex:outputPanel>
+      <!-- WHEN CONTEST IS OVER AND FINALIZED-->
+      <button class="l11-Button l11-Button--primary r-ResetButton u-floatRight">
+        view prize winner
+      </button>
+      <!-- WHEN CONTEST IS OVER -->
+      <button class="l11-Button l11-Button--primary r-ResetButton u-floatRight">
+        finalize this contest
+      </button>
+      <div class="FlipClock u-inlineBlock">
+        <div class="your-clock">
+        </div>
+      </div>
+    </apex:define>
+    <apex:define name="contentMain" >
+    <apex:outputpanel layout="none" rendered="{!isleadertvlicensed}">
+
+      <div class="App">
+        <!-- LEADER TV LAUNCHER -->
+        <main class="App-mainSectionContainer u-paddingAm u-sizeFull">
+          <header class="Arrange Arrange--middle u-marginBm">
+            <div class="Arrange-sizeFill">
+              <h1 class="App-sectionHeadline u-textBold">
+                Configure Settings
+              </h1>
+            </div>
+            <div class="Arrange-sizeFit">
+              <a class="l11-Button l11-Button--primary u-inlineBlock" href="#" data-ltv-launch="true">launch leaderTV</a>
+            </div>
+          </header>
+          <div class="App-mainSection u-sizeFull u-paddingAm u-marginBm">
+            <div class="Grid Grid--withGutter">
+              <div class="Grid-cell u-size1of2">
+                <ul class="u-size7of8">
+                  <li class="u-marginBs">
+                    <label class="Input-label u-block u-textBold" for="leaders">Leaders Shown</label>
+                    <div class="Input-select">
+                      <select class="u-paddingAb" name="leaders">
+                        <option value="9999">all</option>
+                        <option value="5">top 5</option>
+                        <option value="10">top 10</option>
+                        <option value="15">top 15</option>
+                        <option value="20">top 20</option>
+                        <option value="25" selected="selected">top 25 (default)</option>
+                        <option value="30">top 30</option>
+                        <option value="35">top 35</option>
+                        <option value="40">top 40</option>
+                        <option value="45">top 45</option>
+                        <option value="50">top 50</option>
+                        <option value="75">top 75</option>
+                        <option value="100">top 100</option>
+                        <option value="125">top 125</option>
+                        <option value="150">top 150</option>
+                        <option value="200">top 200</option>
+                      </select>
+                    </div>
+                  </li>
+                  <li class="u-marginBs">
+                    <label class="Input-label u-block u-textBold" for="interval">Cycle Speed</label>
+                    <div class="Input-select">
+                      <select class="u-paddingAb" name="interval">
+                        <option value="3000">3s</option>
+                        <option value="4000">4s</option>
+                        <option value="5000" selected="selected">5s (default)</option>
+                        <option value="6000">6s</option>
+                        <option value="6000">7s</option>
+                        <option value="8000">8s</option>
+                        <option value="9000">9s</option>
+                        <option value="10000">10s</option>
+                      </select>
+                    </div>
+                  </li>
+                  <li class="u-marginBs">
+                    <label class="Input-label u-block u-textBold" for="maxcycles">Cycles Per Leaderboard</label>
+                    <div class="Input-select">
+                      <select class="u-paddingAb" name="maxcycles">
+                        <option selected="selected" value="-1">unlimited</option>
+                      </select>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+              <div class="Grid-cell u-size1of2">
+                <ul>
+                  <li class="u-marginBs">
+                    <label class="Input-label u-block u-textBold" for="theme">Choose Your Theme</label>
+                    <ul class="u-size7of8">
+                      <li class="Input-radioSlatItem u-borderRadius u-paddingAb u-marginBb">
+                        <label for="blackboard" class="l11-SelectableInput-label u-sizeFull">
+                          <input
+                            type="radio"
+                            id="blackboard"
+                            name="theme"
+                            checked="checked"
+                            class="l11-SelectableInput"
+                          />
+                          <span class="l11-SelectableInput-overlay"></span>
+                          <div class="l11-SelectableInput-labelName">
+                            Blackboard
+                          </div>
+                          <div class="u-floatRight">
+                            <span class="ThemeBox u-inlineBlock u-borderRadius" style="background:#e75e18;"></span>
+                            <span class="ThemeBox u-inlineBlock u-borderRadius" style="background:#000000;"></span>
+                            <span class="ThemeBox u-inlineBlock u-borderRadius" style="background:#eeeeee;"></span>
+                          </div>
+                        </label>
+                      </li>
+                      <li class="Input-radioSlatItem u-borderRadius u-paddingAb u-marginBb">
+                        <label class="l11-SelectableInput-label u-sizeFull" for="sleek">
+                          <input
+                            type="radio"
+                            id="sleek"
+                            name="theme"
+                            class="l11-SelectableInput"
+                          />
+                          <span class="l11-SelectableInput-overlay"></span>
+                          <div class="l11-SelectableInput-labelName">
+                            Sleek
+                          </div>
+                          <div class="u-floatRight">
+                            <span class="ThemeBox u-inlineBlock u-borderRadius" style="background:#ef4039;"></span>
+                            <span class="ThemeBox u-inlineBlock u-borderRadius" style="background:#333333;"></span>
+                            <span class="ThemeBox u-inlineBlock u-borderRadius" style="background:#ffffff;"></span>
+                          </div>
+                        </label>
+                      </li>
+                      <li class="Input-radioSlatItem u-borderRadius u-paddingAb u-marginBb">
+                        <label class="l11-SelectableInput-label u-sizeFull" for="funky">
+                          <input
+                            type="radio"
+                            id="funky"
+                            name="theme"
+                            class="l11-SelectableInput"
+                          />
+                          <span class="l11-SelectableInput-overlay"></span>
+                          <div class="l11-SelectableInput-labelName">
+                            Funky
+                          </div>
+                          <div class="u-floatRight">
+                            <span class="ThemeBox u-inlineBlock u-borderRadius" style="background:#ef4039;"></span>
+                            <span class="ThemeBox u-inlineBlock u-borderRadius"  style="background:#d5e03d;"></span>
+                            <span class="ThemeBox u-inlineBlock u-borderRadius" style="background:#eeeeee;"></span>
+                          </div>
+                        </label>
+                      </li>
+                    </ul>
+                  </li>
+                  <li class="u-marginBs">
+                    <label class="Input-label u-block u-textBold" for="tickertypes">Ticker Item Types</label>
+                    <ul>
+                      <li class="u-inlineBlock u-marginRm">
+                        <label class="l11-SelectableInput-label" for="actions">
+                          <input
+                            checked="checked"
+                            class="l11-SelectableInput l11-SelectableInput--checkbox"
+                            id="actions"
+                            name="tickertypes"
+                            type="checkbox"
+                            value="actions"
+                          />
+                          <span class="l11-SelectableInput-overlay l11-SelectableInput-overlay--checkbox"></span>
+                          <div class="l11-SelectableInput-labelName">
+                            Actions
+                          </div>
+                        </label>
+                      </li>
+                      <li class="u-inlineBlock u-marginRm">
+                        <apex:outputpanel layout="none" rendered="{!ischatterenabled}">
+                          <label class="l11-SelectableInput-label" for="chatter">
+                            <input
+                              checked="checked"
+                              class="l11-SelectableInput l11-SelectableInput--checkbox"
+                              id="chatter"
+                              name="tickertypes"
+                              type="checkbox"
+                              value="chatter"
+                            />
+                            <span class="l11-SelectableInput-overlay l11-SelectableInput-overlay--checkbox"></span>
+                            <div class="l11-SelectableInput-labelName">
+                              Chatter
+                            </div>
+                          </label>
+                        </apex:outputPanel>
+
+                        <apex:outputPanel layout="none" rendered="{!!isChatterEnabled}">
+                          <label class="l11-SelectableInput-label l11-SelectableInput--disabled" for="chatter">
+                            <input
+                              class="l11-SelectableInput l11-SelectableInput--checkbox"
+                              disabled="disabled"
+                              id="chatter"
+                              name="tickertypes"
+                              type="checkbox"
+                              value="chatter"
+                            />
+                            <span class="l11-SelectableInput-overlay l11-SelectableInput-overlay--checkbox"></span>
+                            <div class="l11-SelectableInput-labelName">
+                              Chatter
+                            </div>
+                          </label>
+                        </apex:outputPanel>
+                      </li>
+                      <li class="u-inlineBlock u-marginRm">
+                        <label class="l11-SelectableInput-label" for="prizes">
+                          <input
+                            checked="checked"
+                            class="l11-SelectableInput l11-SelectableInput--checkbox"
+                            name="tickertypes"
+                            id="prizes"
+                            type="checkbox"
+                            value="prizes"
+                          />
+                          <span class="l11-SelectableInput-overlay l11-SelectableInput-overlay--checkbox"></span>
+                          <div class="l11-SelectableInput-labelName">
+                            Prizes
+                          </div>
+                        </label>
+                      </li>
+                    </ul>
+                  </li>
+
+                </ul>
+              </div>
+            </div>
+          </div>
+          <div class="App-mainSection u-sizeFull u-paddingAm u-marginBm">
+            <label class="Input-label u-block u-textBold" for="contests">Choose Contests To Show</label>
+            <select class="u-sizeFull u-borderRadius" name="contests" multiple="multiple">
+              <option class="Input-selectOption u-paddingAb" value="{!fullContest.contestEntity.id}" selected="selected">{!fullContest.contestEntity.ContestName__c} (Current Contest)</option>
+              <apex:repeat value="{!allOtherActiveContests}" var="contest">
+                <option class="Input-selectOption u-paddingAb" value="{!contest.Id}">{!contest.ePrize_Zemzu__ContestName__c}</option>
+              </apex:repeat>
+            </select>
+            <p><em>Hold Ctrl/Cmd to select multiple</em></p>
+          </div>
+          <a class="l11-Button l11-Button--primary u-floatRight" href="#" data-ltv-launch="true">launch leaderTV</a>
+        </main>
+        <!-- END LEADER TV LAUNCHER -->
+      </div>
+      </apex:outputpanel>
+      </apex:define>
+      </apex:composition>
+
+
+</apex:page>

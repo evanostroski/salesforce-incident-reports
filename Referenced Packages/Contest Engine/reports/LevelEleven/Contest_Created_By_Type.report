@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>Contest__c.ContestName__c</field>
+    </columns>
+    <columns>
+        <field>Contest__c.StartDate__c</field>
+    </columns>
+    <columns>
+        <field>Contest__c.EndDate__c</field>
+    </columns>
+    <description>Contests grouped by type</description>
+    <filter>
+        <criteriaItems>
+            <column>Contest__c.isDraft__c</column>
+            <operator>equals</operator>
+            <value>0</value>
+        </criteriaItems>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Contest__c.Goal__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Contest Created By Type</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>CustomEntity$Contest__c</reportType>
+    <scope>organization</scope>
+    <showDetails>true</showDetails>
+    <timeFrameFilter>
+        <dateColumn>Contest__c.EndDate__c</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>

@@ -1,0 +1,19 @@
+<apex:page title="{!$Label.MyTraining_title_My_Training}" controller="lmscons.EUI_MyTrainingController" sidebar="false" action="{!load}" tabStyle="Learning__tab">
+    <apex:composition template="lmscons__EUI_CompositionTemplate">
+        <apex:define name="body">
+            <div data-ng-controller="itemWrapper">
+                <input
+                    type="hidden"
+                    data-ng-model="dataSourceName"
+                    data-ng-init="dataSourceName='MyTraining'"
+                />
+                <div cfs-learning-grid="cfs-learning-grid" pathPrefix="{!URLFOR($Resource.templates, '')}"></div>
+            </div>
+            <!-- Body of My Training page -->
+            <c:EUI_JSComponentHeader DataSourceName="MyTraining"
+                                     DataSourceValue="{!dataJSON}"
+                                     LabelsList="myTraining,MyTraining_title_My_Training,Completed_Training_Link,EUI_Keywords,Assignments_Status,ConsumerCatalogDetail_Lang,SearchCatalog_Column_Type,DURATION,EUI_Passing_Score,DUE_DATE,MyTraining_LaunchCourse,EUI_View_Prerequisites,EUI_Training_Included,EUI_No_Training_Included,EUI_Prerequisites,Sequence,Unassigned,EUI_Request_Assignment,CERTIFICATE_OF_COMPLETION,Assignments_Completed,EUI_Your_Score"
+            ></c:EUI_JSComponentHeader>
+        </apex:define>
+    </apex:composition>
+</apex:page>

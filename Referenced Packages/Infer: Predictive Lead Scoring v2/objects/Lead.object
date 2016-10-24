@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fields>
+        <fullName>Infer_Converted_to_Opp__c</fullName>
+        <deprecated>false</deprecated>
+        <description>True if this lead was converted into an opportunity.</description>
+        <externalId>false</externalId>
+        <formula>NOT(ISBLANK(ConvertedOpportunityId))</formula>
+        <inlineHelpText>True if this lead was converted into an opportunity.</inlineHelpText>
+        <label>Infer: Converted to Opp</label>
+        <trackHistory>false</trackHistory>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Infer_Good_Lead__c</fullName>
+        <deprecated>false</deprecated>
+        <description>True if this lead has a &quot;Good&quot; Infer Score. You can set the threshold for what &quot;Good&quot; means by going to Settings | Installed Packages, and click Configure by the Infer package.</description>
+        <externalId>false</externalId>
+        <formula>IF(NOT(ISBLANK(Infer_Score__c)) &amp;&amp; Infer_Score__c &gt;= $Setup.Infer_Scoring_Settings__c.Good_Threshold__c, TRUE, FALSE)</formula>
+        <inlineHelpText>True if this lead has a &quot;Good&quot; Infer Score.</inlineHelpText>
+        <label>Infer: Good Lead</label>
+        <trackHistory>false</trackHistory>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Infer_Is_Open__c</fullName>
+        <deprecated>false</deprecated>
+        <description>True if this lead is &quot;open&quot;. You can configure what lead statuses are considered &quot;open&quot; by going to Setup | Installed Packages, and click Configure next to the Infer package.</description>
+        <externalId>false</externalId>
+        <formula>NOT(IsConverted) &amp;&amp; CONTAINS($Setup.Infer_Scoring_Settings__c.Open_Statuses__c, &apos;$^$&apos; + TEXT(Status) + &apos;$_$&apos;)</formula>
+        <inlineHelpText>True if this lead is in an &quot;open&quot; status.</inlineHelpText>
+        <label>Infer: Is Open</label>
+        <trackHistory>false</trackHistory>
+        <type>Checkbox</type>
+    </fields>
+    <fields>
+        <fullName>Infer_Lead_Age__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Number of days since this lead was created.</description>
+        <externalId>false</externalId>
+        <formula>TODAY() - DATEVALUE(CreatedDate)</formula>
+        <inlineHelpText>Number of days since this lead was created.</inlineHelpText>
+        <label>Infer: Lead Age</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Infer_Lead_Created_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>CreatedDate</formula>
+        <label>Infer: Lead Created Date</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Infer_Rating__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>Infer_Score_ID__r.Rating__c</formula>
+        <label>Infer: Rating</label>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Infer_Score_ID__c</fullName>
+        <deleteConstraint>SetNull</deleteConstraint>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <label>Infer: Score ID</label>
+        <referenceTo>Infer_Entity_Score__c</referenceTo>
+        <relationshipLabel>Leads</relationshipLabel>
+        <relationshipName>Leads</relationshipName>
+        <required>false</required>
+        <trackHistory>false</trackHistory>
+        <type>Lookup</type>
+    </fields>
+    <fields>
+        <fullName>Infer_Score__c</fullName>
+        <deprecated>false</deprecated>
+        <externalId>false</externalId>
+        <formula>Infer_Score_ID__r.Score__c</formula>
+        <label>Infer: Score</label>
+        <precision>18</precision>
+        <required>false</required>
+        <scale>0</scale>
+        <trackHistory>false</trackHistory>
+        <type>Number</type>
+        <unique>false</unique>
+    </fields>
+</CustomObject>

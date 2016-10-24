@@ -1,0 +1,3 @@
+<aura:component implements="force:appHostable,flexipage:availableForAllPageTypes" access="global">
+	<iframe src="/apex/ContestsLightning" width="100%" style="height: 621px; border: none;" aura:id="iframe" />
+</aura:component>

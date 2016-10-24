@@ -1,0 +1,102 @@
+<apex:page standardController="ePrize_Zemzu__Scheduled_Contest__c" recordSetVar="schedContests" extensions="ePrize_Zemzu.ContestSchedulerController" readonly="false" tabStyle="Contest_Scheduler__tab">
+  <apex:composition template="ePrize_Zemzu__CompetePageTemplate">
+
+    <apex:define name="head">
+
+    </apex:define>
+
+    <apex:define name="pageTitle">Contest Scheduler</apex:define>
+    <apex:define name="contentMain">
+      <apex:form id="theForm" styleClass="">
+
+        <apex:pageBlock >
+          <apex:pageBlockButtons >
+            <apex:commandButton action="{!createPendingContests}" value="Create Contest Schedule" immediate="false" />
+          </apex:pageBlockButtons>
+
+          <apex:pageBlockSection columns="1" >
+            <apex:pageBlockSectionItem >
+              <apex:outputLabel value="Template" for="template-select" />
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+                <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                <apex:actionRegion >
+                  <apex:selectList id="template-select" value="{!selectedTemplate}" size="1" multiselect="false">
+                    <apex:selectOptions value="{!templateContestOptions}" />
+                    <apex:actionSupport event="onchange" rerender="current-scheduled-contests" action="{!loadCurrentScheduledContests}" />
+                  </apex:selectList>
+                </apex:actionRegion>
+              </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:inputField value="{!proxyScheduledContest.ePrize_Zemzu__Contest_Start_Date__c}" />
+            <apex:inputField value="{!proxyScheduledContest.ePrize_Zemzu__Contest_End_Date__c}" />
+
+            <apex:pageBlockSectionItem >
+              <apex:outputLabel value="Repeat" for="repeat-select" />
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+                <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                <apex:selectList id="repeat-select" value="{!repeatSelect}" size="1" multiselect="false">
+                  <apex:selectOptions value="{!repeatOptions}" />
+                </apex:selectList>
+              </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+            <apex:pageBlockSectionItem >
+              <apex:outputLabel value="Repeat Count (Number)" for="repeat-count-option" />
+              <apex:outputPanel styleClass="requiredInput" layout="block">
+                <apex:outputPanel styleClass="requiredBlock" layout="block"/>
+                <apex:inputText value="{!repeatCountOption}" />
+              </apex:outputPanel>
+            </apex:pageBlockSectionItem>
+
+          </apex:pageBlockSection>
+
+        </apex:pageBlock>
+
+        <apex:pageBlock title="Pending Contests">
+
+          <apex:pageBlockButtons >
+            <apex:commandButton action="{!saveScheduledContests}" value="Save Scheduled Contests" disabled="{!pendingScheduledContests.size == 0}" />
+          </apex:pageBlockButtons>
+
+          <apex:pageBlockTable value="{!pendingScheduledContests}" var="con">
+            <apex:column headerValue="Contest Name">
+              <apex:inputField value="{!con.scheduledContest.ePrize_Zemzu__Contest_Name__c}" />
+            </apex:column>
+            <apex:column headerValue="Start Date">
+              <apex:inputField value="{!con.scheduledContest.ePrize_Zemzu__Contest_Start_Date__c}" />
+            </apex:column>
+            <apex:column headerValue="End Date">
+              <apex:inputField value="{!con.scheduledContest.ePrize_Zemzu__Contest_End_Date__c}" />
+            </apex:column>
+            <apex:column headerValue="Template">
+              <apex:outputField value="{!con.template.ePrize_Zemzu__ContestName__c}" />
+            </apex:column>
+            <apex:column >
+              <apex:commandButton action="{!con.remove}" value="Remove" />
+            </apex:column>
+
+          </apex:pageBlockTable>
+        </apex:pageBlock>
+
+        <apex:pageBlock title="Existing Contests" id="current-scheduled-contests">
+
+          <apex:pageBlockTable value="{!currentScheduledContests}" var="con">
+
+            <apex:column headerValue="Contest Name" value="{!con.scheduledContest.ePrize_Zemzu__Contest_Name__c}" />
+            <apex:column headerValue="Start Date" value="{!con.scheduledContest.ePrize_Zemzu__Contest_Start_Date__c}" />
+            <apex:column headerValue="End Date" value="{!con.scheduledContest.ePrize_Zemzu__Contest_End_Date__c}" />
+            <apex:column headerValue="Template" value="{!con.template.ePrize_Zemzu__ContestName__c}" />
+            <apex:column >
+              <apex:commandButton action="{!con.edit}" value="Edit" immediate="true" />&nbsp;
+              <apex:commandButton action="{!con.deleteContest}" value="Delete" immediate="true" />
+            </apex:column>
+
+          </apex:pageBlockTable>
+
+        </apex:pageBlock>
+
+      </apex:form>
+    </apex:define>
+  </apex:composition>
+</apex:page>

@@ -1,0 +1,69 @@
+<apex:page controller="XactlyExpress.XactlySMBCalculatePayroll" sidebar="false" showHeader="false" standardStylesheets="false">
+    <div class="header"></div>
+    <div class="content">
+     <apex:form >
+         <div class="titleLabel">
+             <apex:outputText value="{!$Label.xactlyexpress__anErrorOccured}"/>
+         </div>
+         <div class="titleTip">
+             <apex:outputText value="{!$Label.xactlyexpress__errorOnImport}"/>
+         </div>
+         <div style="width:400px;margin-top:20px;">
+            <div id="planList" style="overflow:hidden;"></div>
+         </div>
+         <div class="btnAction">
+             <div style="margin-top:15px;margin-left:15px;">
+              <a href="javascript:;" onclick="window.close();">
+                  <div class="rightBtnOrange">
+                      <div class="leftBtnOrange">
+                          <div class="middleBtnOrange">
+                              {!$Label.Close}
+                          </div>
+                      </div>
+                  </div> 
+              </a>
+           </div>
+          </div>
+          <div class="xactlyLogo"></div>
+     </apex:form>
+    </div>
+
+    <div class="hidden">
+        <input type="hidden" id="orgName" value="{!URLENCODE($Organization.Name)}" />
+        <input type="hidden" id="orgId" value="{!URLENCODE($Organization.Id)}" />
+        <input type="hidden" id="currentUserProfile" value="{!URLENCODE(currentUserProfile)}" />
+        <input type="hidden" id="currentUserName" value="{!URLENCODE($User.FirstName + ' ' + $User.LastName)}" />
+    </div>
+    
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'css/XactlySMBFontStyles.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'pages/css/XactlySMBErrorDetails.css')}" />
+    <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources ,'js/XactlySMBJavascript.js')}"></script>
+    <script>
+    $(document).ready(function(){
+       setTimeout("loadAnltc('XactlySMBErrorDetails.php')", 1000);
+    
+       var listPlans = error.split(',');
+       var outPut = '';
+       outPut += '<div class=\'topTableE\' style=\'height: 10px !important\'></div>';
+       outPut += '<table class=\'tble\'>';
+       for(var i = 0; i < listPlans.length; i++){
+            outPut += '<tr><td>'+listPlans[i]+'</td></tr>';
+       }
+       outPut += '</table>';
+       outPut +='<div class=\'bottomTableE\' style=\'height: 10px !important\'></div>';
+       $('#planList').html(outPut);
+       reColourTableRows();
+    });
+    
+    function reColourTableRows(){
+        var rows = $('tr',$('#planList'));
+        var j=0;
+        for(var i=0; i<rows.length; i++){
+            if($(rows[i]).is(':visible')){
+                $(rows[i]).removeClass('odd').removeClass('even').addClass(j%2 == 0 ? 'odd' : 'even');
+                j++;
+            }
+        }
+    }
+    </script>
+</apex:page>

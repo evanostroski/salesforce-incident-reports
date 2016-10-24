@@ -1,0 +1,176 @@
+<apex:page controller="rkpi2.SearchController" extensions="rkpi2.SearchGeoControllerExtension,rkpi2.SearchPersonInfoControllerExtension,rkpi2.SearchCompanyInfoControllerExtension" standardStylesheets="false" sidebar="false" tabStyle="RK_Search__tab">
+    
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" />
+    <apex:includeScript value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js" />
+    <script>
+    $j = jQuery.noConflict();
+    </script>
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jqueryui/1.9.2/jquery-ui.min.js" />
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css" />
+    
+    <apex:includeScript value="{!URLFOR($Resource.rkpi2__multiSelectBrowser)}" />
+    <apex:includeScript value="{!URLFOR($Resource.rkpi2__searchTags)}" />
+    <apex:includeScript value="{!URLFOR($Resource.rkpi2__searchTagsAdder)}" />
+    <apex:includeScript value="{!URLFOR($Resource.rkpi2__scrollspy)}" />
+    <apex:includeScript value="{!URLFOR($Resource.rkpi2__rk_search_styles, 'rk_search_styles/rk_search_js.js')}" />
+    
+    <apex:stylesheet value="{!URLFOR($Resource.rkpi2__jqueryui, 'jqueryui/jquery-ui.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.rkpi2__rk_search_styles, 'rk_search_styles/rk_bootstrap.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.rkpi2__rk_search_styles, 'rk_search_styles/rk_search_styles.css')}" />
+
+    <apex:outputPanel rendered="{! !searchEnabled }">
+    	<apex:pageMessage summary="RainKing Search is not enabled." severity="error" strength="3" />
+    </apex:outputPanel>
+    
+    <apex:outputPanel rendered="{! searchEnabled }">
+	    <script type="text/javascript">
+	        var searchId = "{!JSENCODE($CurrentPage.parameters.id)}";
+	        var currentPage = "{!JSENCODE($CurrentPage.Name)}";
+	        var savedSearchJSON = "{!JSENCODE( currentSearch )}";
+	        savedSearchJSON = $j.parseJSON( savedSearchJSON );
+	        if( savedSearchJSON ) {
+	        	savedSearchJSON = $j.parseJSON( savedSearchJSON );
+	        }
+	
+			$j( document ).ready( function( $ ) {
+				            
+	            /* RUN SEARCH */
+	            $("#run-search").click(function(e){
+	            	$( this ).prop("disabled", true).html( $(this).attr("data-loading-text") );
+	            	
+	                // search required fields
+	                var search_name = "";
+	                var search_description = "";
+	
+	                // Scrape JSON
+	                var final_json = buildCriteriaJSON();
+	                var search_type = JSON.parse(final_json).search;
+	                
+	                // Save Search and Redirect
+	                Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.SearchController.saveSearch}', search_name, search_description, final_json, search_type, searchId, function(response, event) {
+	                    Visualforce.remoting.Manager.invokeAction('{!$RemoteAction.SearchController.runSearch}', response.Id, function(response, event) {
+	                		location.href = htmlDecode( response );
+	                    }); 
+	                });
+	            });
+	
+	
+				/* SEARCH TAGS */
+			   	$("[data-search-tags-input]").each(function() {
+					var inputName = $(this).data('searchTagsInput');
+					
+					$(this).searchTags({
+						inputName: inputName
+					});
+				});
+				
+				$(".tagAdd").searchTagsAdder();
+				
+				
+				/* HQ ONLY */
+				if( savedSearchJSON ) {
+					var hasGeo = false;
+					for( var geoProperty in savedSearchJSON.geo ) {
+						if( ! hasGeo && savedSearchJSON.geo[ geoProperty ].length ) {
+							hasGeo = true;
+						}
+					}
+					
+					if( hasGeo ) {
+						$( "#hqOnly" ).prop( "checked", savedSearchJSON.company_info.hqOnly );
+					}
+				}
+	        
+	        });
+	
+	    </script> 
+	    <style>
+	        .rk input[type="radio"], .rk input[type="checkbox"] {
+	          line-height: normal;
+	          cursor: pointer;
+	        }
+	    </style>
+	    <div id="search-container" class="rk">
+	    
+            <div class="criteriaSearch container-fluid">
+                
+                <!-- LEFT COLUMN -->
+                <div class="criteriaSearchSidebar">
+                    <c:criteriaSidebarHeader type="{! searchType }" />
+
+                    <h2>Select Criteria</h2>
+                    
+                    <div class="criteriaSelectorSection">
+	                    <c:criteriaGeography />
+	                    <c:criteriaPersonInfo />
+	                    <c:criteriaCompanyInfo type="{! searchType }" hasIt="{! hasIt }" hasMktg="{! hasMktg }" />
+	                </div>
+                </div>
+                <!-- END LEFT COLUMN -->
+                
+                <!-- RIGHT COLUMN -->
+                <div class="criteriaSearchMain">
+                  <apex:form html-class="js-searchForm">
+                    <div class="criteriaSearchHeader">
+                    	<div class="criteriaSearchActions">
+                    		<button type="button" id="run-search" data-loading-text="Running..." class="btn btn-warning pull-right" disabled="disabled">Run Search</button>
+                    	</div>
+
+                        <h1>Build Your People Search</h1>
+                    </div>
+                    <aside class="emptyCriteriaPlaceholder js-active">
+                        <h2>Select some criteria from the left to get started!</h2>
+                    </aside>
+                    
+                    <div class="criteriaInputSection">
+                     <div class="criteriaInputSectionHeader">
+                            <div class="pull-right">
+                                <label class="checkbox"><input type="checkbox" name="hqOnly" checked="checked" id="hqOnly"/>Headquarters Only</label>
+                            </div>
+                     	<h2>Geography</h2>
+                     </div>
+                     <div class="criteriaInputFields">
+                         <c:criteriaGeoCountry countrySearchTerm="{!countrySearchTerm}" selectedCountry="{!selectedCountry}" />
+                         <c:criteriaGeoState stateSearchTerm="{!stateSearchTerm}" selectedState="{!selectedState}" />
+                         <c:criteriaGeoMetro metroSearchTerm="{!metroSearchTerm}" selectedMetro="{!selectedMetro}" />
+                         <c:criteriaGeoCounty countySearchTerm="{!countySearchTerm}" selectedCounty="{!selectedCounty}" />
+                         <c:criteriaGeoCity />
+                         <c:criteriaGeoZip />
+                         <c:criteriaGeoAreacode />
+                     </div>
+                 </div>
+                 <div class="criteriaInputSection">
+                 	<div class="criteriaInputSectionHeader">
+                 		<h2>Person Info</h2>
+                 	</div>
+                     <div class="criteriaInputFields">
+                         <c:criteriaPersonKeyword />
+                         <c:criteriaPersonTechnologies technologySearchTerm="{!technologySearchTerm}" selectedTechnology="{!selectedTechnology}" />
+                         <c:criteriaPersonJobTitle />
+                         <c:criteriaPersonJobDetails hasIt="{! hasIt }" hasMktg="{! hasMktg }" />
+                         <c:criteriaPersonWorkHistory />
+                         <c:criteriaPersonEducation higherEducationSearchTerm="{!higherEducationSearchTerm}" selectedHigherEducation="{!selectedHigherEducation}" />
+                         <c:criteriaPersonName />
+                     </div>
+                 </div>
+                 <div class="criteriaInputSection">
+                 	<div class="criteriaInputSectionHeader">
+                 		<h2>Company Info</h2>
+                 	</div>
+                     <div class="criteriaInputFields">
+                         <c:criteriaCompanyName />
+                         <c:criteriaCompanySector />
+                         <c:criteriaCompanyBudget hasIt="{! hasIt }" hasMktg="{! hasMktg }" />
+                         <c:criteriaCompanyEmployees hasIt="{! hasIt }" hasMktg="{! hasMktg }" />
+                     </div>
+                 </div>
+                  </apex:form>
+                </div>
+                <!-- END RIGHT COLUMN -->
+            </div>
+	    </div>
+	</apex:outputPanel>
+</apex:page>

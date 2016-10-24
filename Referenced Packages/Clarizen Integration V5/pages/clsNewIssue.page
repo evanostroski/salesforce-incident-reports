@@ -1,0 +1,2 @@
+<apex:page standardController="clzV5__Clarizen_Issue__c" extensions="clzV5.clzNewIssueController" action="{!Redirect}">
+</apex:page>

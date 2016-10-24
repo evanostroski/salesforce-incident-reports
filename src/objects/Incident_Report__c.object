@@ -21,10 +21,6 @@
         <type>Default</type>
     </actionOverrides>
     <actionOverrides>
-        <actionName>Follow</actionName>
-        <type>Default</type>
-    </actionOverrides>
-    <actionOverrides>
         <actionName>List</actionName>
         <type>Default</type>
     </actionOverrides>
@@ -61,15 +57,19 @@
         <label>Affected Data Centers</label>
         <picklist>
             <picklistValues>
-                <fullName>US</fullName>
+                <fullName>US1</fullName>
                 <default>false</default>
             </picklistValues>
             <picklistValues>
-                <fullName>EU</fullName>
+                <fullName>EU1</fullName>
                 <default>false</default>
             </picklistValues>
             <picklistValues>
-                <fullName>AU</fullName>
+                <fullName>AU1</fullName>
+                <default>false</default>
+            </picklistValues>
+            <picklistValues>
+                <fullName>RU1</fullName>
                 <default>false</default>
             </picklistValues>
             <picklistValues>
@@ -78,15 +78,17 @@
             </picklistValues>
             <sorted>false</sorted>
         </picklist>
+        <required>false</required>
         <trackTrending>false</trackTrending>
         <type>MultiselectPicklist</type>
-        <visibleLines>3</visibleLines>
+        <visibleLines>6</visibleLines>
     </fields>
     <fields>
         <fullName>Chat_Failure_Rate__c</fullName>
         <externalId>false</externalId>
         <globalPicklist>Failure_Rates</globalPicklist>
         <label>Chat Failure Rate</label>
+        <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
     </fields>
@@ -95,6 +97,7 @@
         <externalId>false</externalId>
         <globalPicklist>Failure_Rates</globalPicklist>
         <label>Comments Failure Rate</label>
+        <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
     </fields>
@@ -154,6 +157,7 @@
             </picklistValues>
             <sorted>false</sorted>
         </picklist>
+        <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
     </fields>
@@ -162,6 +166,7 @@
         <externalId>false</externalId>
         <globalPicklist>Failure_Rates</globalPicklist>
         <label>Feed Failure Rate</label>
+        <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
     </fields>
@@ -170,6 +175,7 @@
         <externalId>false</externalId>
         <globalPicklist>Failure_Rates</globalPicklist>
         <label>Gamification Failure Rate</label>
+        <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
     </fields>
@@ -178,6 +184,7 @@
         <externalId>false</externalId>
         <globalPicklist>Failure_Rates</globalPicklist>
         <label>Identity Store Failure Rate</label>
+        <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
     </fields>
@@ -186,6 +193,7 @@
         <externalId>false</externalId>
         <globalPicklist>Failure_Rates</globalPicklist>
         <label>Login Failure Rate</label>
+        <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
     </fields>
@@ -216,6 +224,7 @@
         <externalId>false</externalId>
         <globalPicklist>Failure_Rates</globalPicklist>
         <label>RaaS Failure Rate</label>
+        <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
     </fields>
@@ -242,6 +251,7 @@
             </picklistValues>
             <sorted>false</sorted>
         </picklist>
+        <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
     </fields>
@@ -250,6 +260,7 @@
         <externalId>false</externalId>
         <globalPicklist>Failure_Rates</globalPicklist>
         <label>Share Failure Rate</label>
+        <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
     </fields>
@@ -280,18 +291,32 @@
             </picklistValues>
             <sorted>false</sorted>
         </picklist>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Picklist</type>
+    </fields>
+    <fields>
+        <fullName>Webhooks_Failure_Rate__c</fullName>
+        <externalId>false</externalId>
+        <globalPicklist>Failure_Rates</globalPicklist>
+        <label>Webhooks Failure Rate</label>
+        <required>false</required>
         <trackTrending>false</trackTrending>
         <type>Picklist</type>
     </fields>
     <label>Incident Report</label>
     <listViews>
         <fullName>All</fullName>
+        <columns>NAME</columns>
+        <columns>OBJECT_ID</columns>
+        <columns>Status__c</columns>
         <filterScope>Everything</filterScope>
         <label>All</label>
     </listViews>
     <nameField>
-        <label>Incident Title</label>
-        <type>Text</type>
+        <displayFormat>{0000}</displayFormat>
+        <label>AutoId</label>
+        <type>AutoNumber</type>
     </nameField>
     <pluralLabel>Incident Reports</pluralLabel>
     <searchLayouts/>
@@ -303,4 +328,53 @@
         <errorDisplayField>Affected_Data_Centers__c</errorDisplayField>
         <errorMessage>Must Select Affected Data Centers</errorMessage>
     </validationRules>
+    <validationRules>
+        <fullName>End_Time_Required_on_Resolved</fullName>
+        <active>false</active>
+        <errorConditionFormula>OR( 
+AND(ISPICKVAL( Status__c , &apos;Open&apos;), NOT(ISNULL( End_Time__c ))) ,
+AND(ISPICKVAL( Status__c , &apos;Resolved&apos;), ISNULL( End_Time__c )), AND(ISPICKVAL( Status__c , &apos;Closed&apos;) , ISNULL( End_Time__c )))</errorConditionFormula>
+        <errorDisplayField>Affected_Data_Centers__c</errorDisplayField>
+        <errorMessage>Check that Incident&apos;s Status and End Time match process</errorMessage>
+    </validationRules>
+    <webLinks>
+        <fullName>Send_Post_Mortem</fullName>
+        <availability>online</availability>
+        <displayType>button</displayType>
+        <linkType>javascript</linkType>
+        <masterLabel>Send Post Mortem</masterLabel>
+        <openType>onClickJavaScript</openType>
+        <protected>false</protected>
+        <url>{!REQUIRESCRIPT(&quot;/soap/ajax/20.0/connection.js&quot;)}
+{!REQUIRESCRIPT(&quot;/soap/ajax/20.0/apex.js&quot;)}
+
+var t = {!ISPICKVAL(Incident_Report__c.Status__c, &apos;Closed&apos;)};
+alert(t + &apos; &apos; + typeof t);
+
+if( t ) {
+window.open(&apos;/apex/Send_PostMortem?id={!Incident_Report__c.Id}&apos;);
+} else {
+alert (&quot;Status must be Closed in order to send Post Mortem&quot;);
+}</url>
+    </webLinks>
+    <webLinks>
+        <fullName>Send_Update</fullName>
+        <availability>online</availability>
+        <displayType>button</displayType>
+        <linkType>javascript</linkType>
+        <masterLabel>Send Update</masterLabel>
+        <openType>onClickJavaScript</openType>
+        <protected>false</protected>
+        <url>{!REQUIRESCRIPT(&quot;/soap/ajax/20.0/connection.js&quot;)}
+{!REQUIRESCRIPT(&quot;/soap/ajax/20.0/apex.js&quot;)}
+
+var t = {!ISPICKVAL(Incident_Report__c.Status__c, &apos;Open&apos;)};
+alert(t + &apos; &apos; + typeof t);
+
+if( t ) {
+window.open(&apos;/apex/Send_Update?id={!Incident_Report__c.Id}&apos;);
+} else {
+alert (&quot;Status must be Open in order to send Update&quot;);
+}</url>
+    </webLinks>
 </CustomObject>

@@ -1,0 +1,104 @@
+<apex:page id="XactlySMBHelpAndInformation" controller="XactlyExpress.XactlySMBHelpAndInformationController" sidebar="false" showHeader="false" standardStylesheets="false" action="{!redirectWhenAccessIsDenied}">
+    <c:XactlySMBCursor />
+    <title>{!$Label.xactlyexpress__HelpAndInfo}</title>
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'pages/css/XactlySMBHelpAndInformation.css')}" />
+    <style>
+        .pageContent{overflow: visible !important;{!IF(isAdmin && !isEmulatedManager && !emulatingUser, '', 'margin: 80px auto 0;')}}
+        .header{background:none !important;{!IF(isAdmin && !isEmulatedManager && !emulatingUser, '', 'margin-top: -51px;')}}
+		{!IF(isAdmin && !isEmulatedManager && !emulatingUser, '', '.HeaderText{margin-top: 17px;}')}
+    </style> 
+    
+    <!-- PAGE WRAPPER -->  
+    <div class="pageContent" id="pContent">
+        <apex:form >
+            <!-- HEADER -->
+            <apex:outputPanel layout="block" styleClass="header" rendered="{!isAdmin && !isEmulatedManager && !emulatingUser}">
+                <c:XactlySMBHeader isAdmin="{!isAdmin}"  isActive="{!isActive}" nbrSeparator="{!nbrSeparator}" nbrDecimal="{!nbrDecimal}" currentUserOrSlected="{!currentUserOrSlected}" wqlabel="{!currentSettings.quotasPluralCap}" wclabel="{!currentSettings.creditsPluralCap}" wlabel="{!currentSettings.dealsPluralCap}" emulatingUserURLAppend="{!emulatingUserURLAppend}" showPrevious="false" showNext="false" showSave="false" showRefresh="false" showExport="false" selected="4" selectedLevel2="3"/>
+            </apex:outputPanel>
+            <apex:outputPanel layout="block" styleClass="header" rendered="{!isEmulatedManager || isSalesRep || isManager || emulatingUser}">
+                <c:XactlySMBSalesRepHeader lastClosedPeriod="{!lastClosedPeriod}" isEmulatedManager="{!isEmulatedManager}" isManager="{!isManager}" isSalesAdmin="{!isSalesAdmin}" isAdmin="{!isAdmin}"  isActive="{!isActive}" nbrSeparator="{!nbrSeparator}" nbrDecimal="{!nbrDecimal}" currentUserOrSlected="{!currentUserOrSlected}" emulatingUserURLAppend="{!emulatingUserURLAppend}" dealsLabel="{!currentSettings.dealsPluralCap}" selected="8" hlabel="Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean ac mi eget est semper feugiat."/>
+            </apex:outputPanel>
+            
+            <div id="shadowContainer" class="shadowContainer">
+            <apex:outputpanel layout="block" id="chatter" styleClass="additionalContent" rendered="{!isAdmin && isActive}">
+                <c:XactlySMBChatterWall objectId="{!$User.Id}" showHeader="true" showWall="true" currentPage="{!$CurrentPage.Name}" chatterCurrentUserImageUrl="{!chatterCurrentUser_ImageUrl}" rendered="{!isChatterEnabled && isChatterLoaded}" />
+            </apex:outputPanel>
+            
+            <!-- MAIN CONTENT -->
+            <apex:outputPanel layout="block" styleClass="mainContent" style="{! IF (isAdmin && !isEmulatedManager && !emulatingUser, '', 'margin-top:-31px')}">
+                <!-- LEFT PANEL -->
+                <apex:outputPanel layout="block" styleClass="leftPanel">
+                    <div class="leftSummaryBox">
+                        <div class="SummaryBoxTitle">
+                            {!$Label.HelpAndInfoCategories}
+                        </div>
+                        <div id="leftMenuContent" class="SummaryBoxContent">                                             
+                            {!$Label.WaitLoading}...    
+                        </div>
+                        <div class="SummaryBoxFooter"></div>
+                    </div>
+                </apex:outputPanel>
+                
+                <!-- CONTENT -->
+                <apex:outputPanel layout="block" styleClass="content">
+                    <div class="helpByScreenHeader">
+                        <div class="section">
+                            {!$Label.HelpByScreen}
+                        </div>
+                        <div> 
+                            {!$Label.ViewHelpPage}
+                        </div>    
+                    </div>
+                    
+                    <div class="mainSummaryBox">
+                        <div class="SummaryBoxTitle">
+                            
+                        </div>
+                        <div id="mainHelpAndInfoContent" class="SummaryBoxContent">                                             
+                            {!$Label.WaitLoading}...   
+                        </div>
+                        <div class="SummaryBoxFooter"></div>
+                    </div>
+                </apex:outputPanel>
+                <div style="clear:both;"></div>
+            </apex:outputPanel>
+            
+            </div>
+            
+            <!-- FOOTER  -->
+		    <apex:outputPanel rendered="{!IF(isAdmin && !isEmulatedManager && !emulatingUser,false,true)}">
+			    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'components/css/XactlySMBExpressDropdown.css')}" /> 
+			    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'css/XactlySMBStyles.css')}" />
+			    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'css/XactlySMBDashboardStyles.css')}" />
+	            <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources, 'components/js/XactlySMBExpressDropdown.js')}"></script>
+            </apex:outputPanel>
+            <c:XactlySMBFooter isReadOnlyAdmin="{!isReadOnlyAdmin}" packageVersion="{!packageVersion}" showPrevious="false" showNext="false" showSave="false" showRefresh="false" showExport="false"/>
+        	<apex:actionfunction id="chatterLoader" name="loadChatter" action="{!loadChatter}" rerender="chatter" oncomplete="waitOff();initChatter();jQuery('.innerOcultar a').click();"/>	
+        </apex:form>
+    </div>
+    
+    <c:XactlySMBFooterScript isChatterEnabled="{!isChatterEnabled}" loadHeaderJs="true" loadPerformantJs="true" />
+    
+    <script>
+        
+        window.onload = function(){
+                loadAnltc('XactlySMBHelpAndInformation.php');
+                $.ajaxSetup({
+	                beforeSend: function(x) {
+	                    if(x && x.overrideMimeType) {
+	                        x.overrideMimeType('text/html; charset=iso-8859-1');
+	                    }
+	                }
+	            });
+                var pageName = '{!JSENCODE(pageName)}';
+	            $("#leftMenuContent").load("{!URLFOR($Resource.BestPracticesAndHelpContent, currentUserLang + '/leftMenu.txt')}");        
+	            if (pageName != null && pageName != '') {
+	                $("#mainHelpAndInfoContent").load("{!URLFOR($Resource.BestPracticesAndHelpContent, currentUserLang + '/' + pageName + '.txt')}");
+	            }  
+	            else {
+	                $("#mainHelpAndInfoContent").load("{!URLFOR($Resource.BestPracticesAndHelpContent, currentUserLang + '/home.txt')}");
+	            }
+        };
+    </script>
+     <c:XactlySMBFeedbackTab />
+</apex:page>

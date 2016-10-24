@@ -1,0 +1,41 @@
+<apex:page sidebar="false" controller="ePrize_Zemzu.InstallGuideController" tabStyle="ePrizeSupport__tab" readonly="false">
+
+  <apex:composition template="ePrize_Zemzu__SetupWizardTemplate">
+
+    <apex:define name="contentLeft">
+      <apex:form id="form">
+        <div class="l11 l11-panel">
+          <div class="inner Compete-setupWizardFont">
+            <h1 class="Compete-subheadline">Start LevelEleven Notification Engine</h1>
+            <p class="u-paddingBm">One last step and we’ll be ready to go! Click the button below to start the LevelEleven <strong>Notification Engine</strong> and complete the setup. You must be logged in with a System Administrator profile to complete this.</p>
+
+            <apex:outputPanel layout="none" rendered="{!!isDaemonScheduled}" >
+              <div class="u-marginBm">
+                <apex:commandLink styleClass="l11-Button l11-Button--primaryAlt" action="{!previousStep}" value="Back" />
+                <apex:commandLink styleClass="l11-Button l11-Button--primary u-marginLm" action="{!scheduleDaemon}" value="Start LevelEleven Notification Engine" id="scheduleDaemon"/>
+              </div>
+            </apex:outputPanel>
+
+            <apex:outputPanel layout="none" rendered="{!isDaemonScheduled}" >
+              <p class="u-paddingBm"><apex:outputText value="The LevelEleven <strong>Notification Engine</strong> has already been started. Please click Next to continue." escape="false" /></p>
+            </apex:outputPanel>
+
+
+            <apex:outputPanel layout="none" rendered="{!isDaemonScheduled}" >
+              <div class="u-marginBm">
+                <apex:commandLink styleClass="l11-Button l11-Button--primaryAlt" action="{!previousStep}" value="Back" />
+                <apex:commandLink styleClass="l11-Button l11-Button--primary u-marginLm" action="{!nextStep}" value="Next" />
+              </div>
+            </apex:outputPanel>
+          </div>
+         </div>
+      </apex:form>
+    </apex:define>
+
+    <apex:define name="contentRight">
+      <iframe src="https://player.vimeo.com/video/68642229" width="415" height="281" frameborder="0" webkitAllowFullScreen="true" mozallowfullscreen="true" allowFullScreen="true"></iframe>
+    </apex:define>
+
+  </apex:composition>
+
+</apex:page>

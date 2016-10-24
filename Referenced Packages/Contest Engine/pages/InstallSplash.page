@@ -1,0 +1,30 @@
+<apex:page sidebar="false" controller="ePrize_Zemzu.InstallGuideController" tabStyle="ePrizeSupport__tab" readonly="false">
+
+  <apex:composition template="ePrize_Zemzu__SetupWizardTemplate">
+
+
+    <apex:define name="contentLeft">
+      <apex:form >
+        <div class="l11 l11-panel">
+          <div class="inner Compete-setupWizardFont">
+            <h1 class="Compete-contentHeadline">Let's Crank Up the Competition</h1>
+            <p class="u-paddingBm">Welcome to LevelEleven, the easiest to use and highest-rated gamification app for salesforce.com. In just a few minutes, you’ll be building high impact dashboards just like the one at right.</p>
+
+            <h2 class="Compete-subheadline">Here's what's next</h2>
+            <p class="u-paddingBm">We’re going to walk you through our <strong>five-step install process</strong>. Yup, it’s that easy. You’ll be building your first contest in minutes!</p>
+
+            <div class="u-marginBm">
+              <apex:commandLink styleClass="l11-Button l11-Button--primary" action="{!nextStep}" value="Let's Go!" />
+            </div>
+          </div>
+         </div>
+      </apex:form>
+    </apex:define>
+
+    <apex:define name="contentRight">
+      <iframe src="https://player.vimeo.com/video/68641631" width="415" height="281" frameborder="0" webkitAllowFullScreen="true" mozallowfullscreen="true" allowFullScreen="true"></iframe>
+    </apex:define>
+
+  </apex:composition>
+
+</apex:page>

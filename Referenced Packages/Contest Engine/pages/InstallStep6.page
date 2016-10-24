@@ -1,0 +1,31 @@
+<apex:page sidebar="false" controller="ePrize_Zemzu.InstallGuideController" tabStyle="ePrizeSupport__tab" readonly="false">
+
+  <apex:composition template="ePrize_Zemzu__SetupWizardTemplate">
+
+    <apex:define name="contentLeft">
+      <apex:form id="form">
+        <div class="inner Compete-setupWizardFont">
+          <h1 class="Compete-subheadline">All Done!</h1>
+          <p class="u-paddingBm">Congratulations! You have successfully finished the setup wizard. Time to crank up the competition!</p>
+
+          <div class="u-marginBm">
+            <a class="l11-Button l11-Button--tertiary" href="/apex/AdvancedSettings">edit Advanced Settings (optional)</a>
+            <a class="l11-Button l11-Button--primary u-marginLm" href="/apex/Welcome">start building contests</a>
+          </div>
+
+          <p class="u-paddingBm">P.S. (We’re excited for you!)</p>
+
+          <div class="u-marginBm">
+            <apex:commandLink styleClass="l11-Button l11-Button--primaryAlt" action="{!previousStep}" value="Back" />
+          </div>
+         </div>
+      </apex:form>
+    </apex:define>
+
+    <apex:define name="contentRight">
+      <img style="width:415px;" src="{!URLFOR($Resource.compete, 'images/ss_leaderboard_700.png')}" />
+    </apex:define>
+
+  </apex:composition>
+
+</apex:page>

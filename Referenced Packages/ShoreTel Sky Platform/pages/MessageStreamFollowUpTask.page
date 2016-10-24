@@ -1,0 +1,2 @@
+<apex:page standardController="skyplatform__Message_Stream__c" extensions="skyplatform.MessageStreamFollowUpTaskController" action="{!createFollowUpTask}" sidebar="true">
+</apex:page>

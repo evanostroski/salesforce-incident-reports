@@ -1,0 +1,99 @@
+<apex:page controller="XactlyExpress.XactlySMBDashHomePod" sidebar="false" showHeader="false" standardStylesheets="false"  action="{!redirectWhenAccessIsDenied}">
+
+<style>
+body{
+max-width: 190px;
+min-width: 190px;
+width: 190px;
+background: transparent;
+}
+</style>
+
+    <apex:outputPanel layout="block" styleClass="" rendered="{!error_msg != null}" style="color:#dd2222;" >
+        {!HTMLENCODE(error_msg)}
+    </apex:outputPanel>
+
+    <apex:outputPanel layout="block" styleClass="" rendered="{!(error_msg == null || error_msg == '') && UPPER(pod_type) == 'TARGETPAYOUT'}">
+    
+        <div class="currentPeriodResult {!IF(pod.pod.XactlyExpress__maximized__c,'',' hidden')}"> 
+            <apex:outputText value="{!pod.creditCreditStr}" styleClass="currPeriodResultVal" escape="false"/>
+            <apex:outputText value="{!$Label.xactlyexpress__YTDPayout}" styleClass="leftText"/>
+        </div>
+        <div class="clear"></div>
+        <apex:outputPanel layout="block" styleClass="currentPeriodResult {!IF(pod.pod.XactlyExpress__maximized__c,'',' hidden')}">
+
+            <apex:outputPanel rendered="{!pod.alert != null && pod.alert != ''}">
+                <span class="AUTOM_NO_ESTM_ASTR_Q1" style="color:#dd0000;cursor:pointer;float:right;width:10px;" onmouseout="XactlyBubbleHide('xactlyBubble')" onmouseover="XactlyBubble('xactlyBubble', '{!JSENCODE(pod.alert)}', null, getTopOffset(this).left + 10, getTopOffset(this).top + 10);">*</span>
+            </apex:outputPanel>
+
+            <apex:outputText value="{!pod.creditQuotaStr}" styleClass="currPeriodResultVal" escape="false"/> 
+
+            <apex:outputText value="{!$Label.xactlyexpress__YTDTargetPayout}" styleClass="leftText"/>
+        </apex:outputPanel>  
+        <div class="currentPeriodResult {!IF(pod.pod.XactlyExpress__maximized__c,'',' hidden')}" style="border-top:1px #F0F0F0 solid;color: #AAAAAA;border-bottom:1px #F0F0F0 solid;padding-bottom: 5px;padding-top: 5px;">
+            <c:XactlySMBLongTextBubble maxLength="{!pod.contentLength}" text="{!pod.PeriodTypeStr}"/>
+            <apex:outputText escape="false" styleClass="currPeriodResultVal"  value="{!pod.creditStr}"/>
+            <div class="clear"></div>
+        </div>                  
+        <c:XactlySMBChart type="Target Payout" cid="0" values="{!pod.gauge}"/>
+    
+    </apex:outputPanel>
+
+
+    <apex:outputPanel layout="block" styleClass="" rendered="{!(error_msg == null || error_msg == '') && UPPER(pod_type) == 'TOTALPAYOUT'}">
+    
+         <div class="currentPeriodResult {!IF(pod.pod.XactlyExpress__maximized__c,'',' hidden')}"> 
+             <apex:outputText value="{!pod.creditCreditStr}" styleClass="currPeriodResultVal" escape="false"/>
+             <apex:outputText value="{!pod.totalpayoutlabel}" styleClass="leftText"/>
+         </div>
+         <div class="clear"></div>
+         <div class="currentPeriodResult {!IF(pod.pod.XactlyExpress__maximized__c,'',' hidden')}" style="border-top:1px #F0F0F0 solid;color: #AAAAAA;border-bottom:1px #F0F0F0 solid;padding-bottom: 5px;padding-top: 5px;">
+             <c:XactlySMBLongTextBubble maxLength="{!pod.contentLength}" text="{!pod.PeriodTypeStr}"/>
+             <apex:outputText escape="false" styleClass="currPeriodResultVal"  value="{!pod.creditStr}"/>
+             <div class="clear"></div>
+         </div>
+         <c:XactlySMBChart type="Total Payout" cid="0" values="{!pod.resultChartBar}"/>
+    
+    </apex:outputPanel>
+
+
+    <div class="hidden">
+        <input class="hidden" id="url_right_lib" value="{!URLFOR($Resource.XactlySMBResources, 'js/right.js')}" />
+        <input class="hidden" id="label_complete_all_data" value="{!$Label.completeAllData}" />
+        <input class="hidden" id="url_img_gauge_needle_1" value="{!URLFOR($Resource.XactlySMBResources, 'img/layout/express-needle.png')}" />
+        <input class="hidden" id="url_img_gauge_needle_2" value="{!URLFOR($Resource.XactlySMBResources, 'img/layout/express-needle2.png')}" />
+    </div>
+    
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'components/css/XactlySMBCharts.css')}" /> 
+     
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'css/XactlySMBStyles.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'css/XactlySMBDashboardStyles.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'pages/css/XactlySMBDashboardHome.css')}" />
+    
+    <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources, 'js/XactlySMBJavascript.js')}"></script>
+    <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources, 'components/js/XactlySMBCharts.js')}"></script>
+    
+    
+
+<script>
+
+var nbrDecimal = '{!JSENCODE(nbrDecimal)}';
+var nbrSeparator = '{!JSENCODE(nbrSeparator)}';
+
+jQuery(document).ready(function(){
+    
+    setTimeout('runGauges(true)', 70);
+
+});
+
+function minimaze(){
+    jQuery('.currentPeriodResult').hide();
+}
+function maximaze(){
+    jQuery('.currentPeriodResult').show();
+}
+
+
+</script>
+
+</apex:page>

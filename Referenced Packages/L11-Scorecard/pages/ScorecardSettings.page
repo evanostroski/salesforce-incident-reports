@@ -1,0 +1,38 @@
+<apex:page showHeader="true" sidebar="true" controller="l11_sc.ScorecardSettingsController" tabStyle="Scorecard_Settings__tab" action="{!confirmJobStatus}">
+  <apex:pageMessages />
+  <apex:sectionHeader title="Scorecard Settings" />
+  <apex:form >
+    <apex:pageBlock title="Update Settings">
+      <apex:pageBlockButtons >
+        <apex:commandButton action="{!save}" value="Save" />
+      </apex:pageBlockButtons>
+      <apex:pageBlockSection columns="1">
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="Send Digest Emails" for="send-digest" />
+          <apex:inputCheckbox id="send-digest" value="{!sendDigestEmails}" />
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="Multi-Currency Enabled" for="multi-currency" />
+          <apex:inputCheckbox disabled="{!disableMultiCurrency}" id="multi-currency" value="{!multiCurrencyEnabled}" />
+        </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+    <apex:pageBlock title="Background Job">
+      <apex:pageBlockButtons >
+        <apex:commandButton action="{!scheduleJob}" value="Schedule Scorecard Job" rendered="{!!isJobRunning}" />
+        <apex:commandButton action="{!unscheduleJob}" value="Unschedule Scorecard Job" rendered="{!isJobRunning}" />
+      </apex:pageBlockButtons>
+      <apex:pageBlockSection columns="1">
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="Job Status" for="status"/>
+          <apex:outputText id="status" value="{!jobStatus}" />
+        </apex:pageBlockSectionItem>
+        <apex:pageBlockSectionItem >
+          <apex:outputLabel value="Job Id" for="jobid"/>
+          <apex:outputText id="jobid" value="{!jobId}" />
+        </apex:pageBlockSectionItem>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+  </apex:form>
+  <c:GA />
+</apex:page>

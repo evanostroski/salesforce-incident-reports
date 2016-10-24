@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QuickAction xmlns="http://soap.sforce.com/2006/04/metadata">
+    <description>Account-specific action to scan business cards.</description>
+    <height>15</height>
+    <icon>SBC_S1_Tile</icon>
+    <label>Scan Business Card</label>
+    <optionsCreateFeedItem>false</optionsCreateFeedItem>
+    <page>SBCAccountLink</page>
+    <type>VisualforcePage</type>
+    <width>-100</width>
+</QuickAction>

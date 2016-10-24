@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Clarizen Integration V3 UI controls for V2 organizations %28upgrade%29</fullName>
+    <apiAccessLevel>Unrestricted</apiAccessLevel>
+    <namespacePrefix>CLZV6BP_V2</namespacePrefix>
+    <types>
+        <members>ClarizenV3UIGantt</members>
+        <members>ClarizenV3UIRoadmap</members>
+        <members>ClarizenV3UIViewMilestoneInClarizen</members>
+        <members>ClarizenV3UIViewProjectInClarizen</members>
+        <members>EmptyPageMilestone</members>
+        <members>EmptyPageProject</members>
+        <name>ApexPage</name>
+    </types>
+    <types>
+        <members>clzV5__Clarizen_Milestone__c-Clarizen Milestone Layout V3</members>
+        <members>clzV5__Clarizen_Project__c-ClarizenProject Layout V3</members>
+        <name>Layout</name>
+    </types>
+    <version>36.0</version>
+</Package>

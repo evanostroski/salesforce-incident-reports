@@ -1,0 +1,331 @@
+<apex:page controller="lmscons.SearchCatalogNew" showHeader="false" sideBar="false">
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<title>{!$Label.SearchCatalog_Title}</title>
+			
+		<apex:includescript value="{!URLFOR($Resource.lmscons__LMSSearch, 'js/jquery.1.11.min.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.lmscons__LMSSearch, 'js/jquery.tmpl.min.js')}"/>
+		
+		<apex:includeScript value="{!URLFOR($Resource.lmscons__LMSSearch, 'js/lightbox.js')}"/>
+		<apex:includeScript value="{!URLFOR($Resource.lmscons__LMSSearch, 'js/lms-search.js')}"/>
+		<apex:stylesheet value="{!URLFOR($Resource.lmscons__LMSSearch, 'css/lms-lightbox.css')}"/>
+		<apex:stylesheet value="{!URLFOR($Resource.lmscons__LMSSearch, 'css/my.css')}"/>						
+	
+		<style>
+			.datePicker	{position: fixed;}
+		</style>
+	</head>
+	<body>		
+		
+		<script>					
+			// load first data from org.								
+		    var firstLevelData = JSON.parse('{!JSENCODE(FirstLevelData)}');	
+		    
+		    function updateDataIfNoErrors(){
+		        //Case 10749: Catalog Search doesn't work in IE9
+		        //console.log(jQuery('input[id$="retrievedData"]').val());
+		        
+		        if (jQuery('span[id$="messages"]').is(':empty')) {
+		            updateData();    
+		        }
+		    }
+		    
+		    function updateData(){
+		        updateAllData(getRetrievedData());    
+		    }
+		    
+		    function getRetrievedData(){
+		        return jQuery('input[id$="retrievedData"]').val();
+		    }
+		    
+		</script>
+		
+		<!-- Action functions -->
+		<apex:Form >
+			<apex:actionFunction name="SortCol" action="{!sortCatalog}" oncomplete="updateData(); hideStatus();" reRender="main-table, retrievedData">
+				<apex:param name="sortColumnIndex" value="" assignTo="{!sortColumnIndex}"/>
+			</apex:actionFunction>
+			
+			<apex:actionFunction name="ChildData" action="{!GetChild}" oncomplete="updateChildData('{!JSENCODE(ChildData)}'); hideStatus();">
+				<apex:param name="parentId" value="" assignTo="{!parentData.parentId}"/>
+				<apex:param name="parentType" value="" assignTo="{!parentData.parentType}"/>
+				<apex:param name="parentDomId" value="" assignTo="{!parentData.parentDomId}"/>
+			</apex:actionFunction>
+			
+			<apex:actionFunction name="EnrollContent" action="{!EnrollContent}" oncomplete="processEnrollResult('{!JSENCODE(getLastEnrollResult)}'); hideStatus();" reRender="messages">
+				<apex:param name="objectId" value="" assignTo="{!EnrollObjectId}"/>
+				<apex:param name="objectType" value="" assignTo="{!EnrollObjectType}"/>
+			</apex:actionFunction>																						
+		</apex:Form>
+		
+		<apex:pageMessages id="messages" ></apex:pageMessages>
+		
+		
+        <apex:form style="display: none;">
+            <apex:inputText value="{!FirstLevelData}" id="retrievedData"></apex:inputText>
+        </apex:form>
+		<!-- Page content -->
+		
+		<div class="head">
+			<div id="search-box" class="b-search search-layaout">
+				<apex:form >
+					<apex:actionFunction name="ToggleSearch" action="{!ToggleSearch}" status="loadStatus" reRender="advancedBox"/>
+					
+					<div class="b-search-controls">
+						<apex:inputText value="{!searchString}" id="searchString" onkeypress="return handleKeyPress(event)" styleClass="search-input"/>
+						<a class="b-btn" href="JavaScript:Search()"><span class="b-icon">&nbsp;</span>{!$Label.ConsumerUser_value_Search}</a>						
+						<apex:actionStatus id="loadStatus">
+							<apex:facet name="start">
+								<apex:image url="/img/loading.gif" />
+							</apex:facet>
+						</apex:actionStatus>
+						<div class="b-checkbox" style="float: none; display: inline; margin-left: 20px;">
+							<apex:inputCheckbox value="{!searchDescription}" id="searchDescription"/>
+							<label for="searchDescription">{!$Label.SearchCatalog_Search_Description}</label>
+						</div>
+						<apex:commandButton id="btn-search" status="loadStatus" style="display: none;" value="{!$Label.Search}" action="{!SearchCatalog}" rerender="messages, retrievedData" oncomplete="updateDataIfNoErrors()"/>						
+					</div>
+					
+					
+					
+					<div class="b-advanced-link">
+						<a href="javascript:ToggleSearch()" class="m-toggle-link">{!$Label.SearchCatalog_Advanced_Search}</a>
+					</div>																															
+					<br/>
+					<apex:outputPanel id="advancedBox">
+						<apex:outputPanel rendered="{!AdvancedSearch}">					
+							<div class="b-advanced-box">
+								
+								<div class="b-box">						
+									<apex:outputLabel value="{!$Label.SearchCatalog_SelectCatalog}" />&nbsp;&nbsp;
+									<apex:selectList value="{!CatalogId}" multiselect="false" size="1" style="width: 100px;">
+										<apex:selectOptions value="{!CatalogSelectOptions}"/>
+									</apex:selectList>
+								</div>
+								
+								<div class="b-box">	
+									<apex:inputCheckbox value="{!objectsForLoad.isQuizesLoad}"/>
+									<label for="option0">{!$Label.Quizzes}</label>&nbsp;
+								</div>
+								
+								<div class="b-box">	
+									<apex:inputCheckbox value="{!objectsForLoad.isModulesLoad}"/>
+									<label for="option1">{!$Label.SearchCatalog_Modules}</label>&nbsp;
+								</div>
+								
+								<div class="b-box">	
+									<apex:inputCheckbox value="{!objectsForLoad.isCoursesLoad}"/>
+									<label for="option2">{!$Label.SearchCatalog_Courses}</label>
+								</div>
+								
+								<div class="b-box">	
+									<apex:inputCheckbox value="{!objectsForLoad.isLearningPathsLoad}"/>
+									<label for="option3">{!$Label.SearchCatalog_LearningPaths}</label>&nbsp;
+								</div>
+								
+								<div class="b-box">	
+									<apex:inputCheckbox value="{!objectsForLoad.isCurriculumsLoad}"/>
+									<label for="option4">{!$Label.SearchCatalog_Curriculums}</label>
+								</div>					
+							</div>
+						</apex:outputPanel>
+					</apex:outputPanel>
+				</apex:form>								
+			</div>
+		</div>
+				
+		<div class="content">
+			
+			<div class="no-result"><br/>{!$Label.No_results_found_Please_search_again}</div>
+										
+			<!-- MainTable -->	
+			<apex:outputPanel id="main-table">
+			<table class="main-table">
+				<thead>
+					<tr>
+						<th class="th-title">
+							<a href="JavaScript:SortCol(1);" onclick="showStatus();" class="{!IF(sortColumnIndex == 1 && sortAsc == true, 'm-sort1', '')}{!IF(sortColumnIndex == 1 && sortAsc == false, 'm-sort2', '')}">{!$Label.SearchCatalog_Column_Title}</a>
+						</th>
+						<th>
+							{!$Label.SearchCatalog_Column_Description}
+						</th>
+						<th>
+							{!$Label.SearchCatalog_Column_Type}
+						</th>
+						<th>
+							
+						</th>
+					</tr>
+				</thead>
+				<tbody></tbody>
+			</table>
+			</apex:outputPanel>
+			
+		</div>
+		
+		<div class="footer"></div>					
+		
+		<!-- loading lightbox -->
+	    <div class="b-lightbox-loading">
+	        <table border="0" cellpadding="4" cellspacing="0" style="width: 100%; height: 100%">
+	        <tr>
+	        <td style="border-bottom-color:#336699; border-bottom-width:1px; border-bottom-style:solid;vertical-align:middle;">
+	        <img src="/img/loading.gif"/></td>
+	        <td style="border-bottom-color:#336699; border-bottom-width:1px; border-bottom-style:solid;vertical-align:middle;color:darkred;font-size:11pt;font-weight:bold;">
+	        &nbsp;{!$Label.Loading}</td>
+	        </tr>
+	        </table>
+	    </div>			
+							
+		<!-- Select trainee for assign popup -->
+		<div class="b-overlay"></div>
+			<div class="b-lightbox" style="position: fixed">
+				<apex:form id="assign_form">
+					<apex:outputpanel id="ab" layout="none">
+		
+						<apex:actionStatus id="while_assign" onstop="Lightbox()">
+							<apex:facet name="start">
+								<c:EnhancedActionStatus BackColor="#efefef" borderColor="#336699" borderSize="1" height="50px" width="120px" ImageUrl="/img/loading.gif" Message="{!$Label.Consumer_Global_Loading}..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+							</apex:facet>
+						</apex:actionStatus>
+						
+						<apex:actionStatus id="status2">
+							<apex:facet name="start">
+								<c:EnhancedActionStatus BackColor="#efefef" borderColor="#336699" borderSize="1" height="50px" width="120px" ImageUrl="/img/loading.gif" Message="{!$Label.Consumer_Global_Loading}..." messageStyle="color:darkred;font-size:11pt;font-weight:bold;"/>
+							</apex:facet>
+						</apex:actionStatus>
+					
+						<apex:actionFunction status="while_assign" name="ShowUserListForAssign" action="{!ShowUserListForAssign}" reRender="assign_form">
+							<apex:param name="AssignObjectId" value="" assignTo="{!AssignObjectId}"/>
+							<apex:param name="AssignObjectType" value="" assignTo="{!AssignObjectType}"/>
+						</apex:actionFunction>
+			
+						<div class="b-title-bar">
+							<div class="b-title">{!$Label.SearchCatalog_Assign_Learning}</div>
+							<div class="b-close-btn"><a href="javascript:Closelightbox()">{!$Label.SearchCatalog_Close}</a></div>
+						</div>
+						<div class="b-content">
+							<apex:pageMessages id="messages2" ></apex:pageMessages>
+							<p><strong class="m-faded">{!AsignObject.Type}:</strong> {!AsignObject.Title} </p>
+							<p><pre><strong class="m-faded">Description:</strong> {!AsignObject.Description}</pre></p>
+							<div class="b-scroller">
+																					
+								<apex:outputPanel id="TraineesList">					
+									<apex:outputPanel style="float:right;font-size:85%;"  rendered="{!IF((HasPrevTraineePage)||(HasNextTraineePage), true, false)}">
+										<apex:commandLink action="{!PrevTraineePage}" rerender="TraineesList, " rendered="{!HasPrevTraineePage}" status="loadStatus2" onclick="if(intSelectedItemsCount!=0) { if(confirm('{!JSENCODE($Label.AssignTrainingContent_js_Alert)}') == false) {return false;} else {intSelectedItemsCount=0}};">&lt;{!$Label.AssignTrainingContent_oT_Previous_Page}</apex:commandlink>
+										<apex:outputText rendered="{!NOT(HasPrevTraineePage)}">&lt;{!$Label.AssignTrainingContent_oT_Previous_Page}</apex:outputText>
+										&nbsp;|&nbsp;
+										<apex:commandLink action="{!NextTraineePage}" rerender="TraineesList" rendered="{!HasNextTraineePage}" status="loadStatus2" onclick="if(intSelectedItemsCount!=0) { if(confirm('{!JSENCODE($Label.AssignTrainingContent_js_Alert)}') == false) {return false;} else {intSelectedItemsCount=0}};">{!$Label.AssignTrainingContent_oT_Next_Page}&gt;</apex:commandlink>
+										<apex:outputText rendered="{!NOT(HasNextTraineePage)}">{!$Label.AssignTrainingContent_oT_Next_Page}&gt;</apex:outputText>
+									</apex:outputPanel>
+									<br/>
+								   <script type='text/javascript'>
+								   		var intSelectedItemsCount = 0;								   		
+								   </script>
+								   
+									<apex:outputPanel layout="block" rendered="{!Trainee.size > 0}">							
+										<table width="100%" border="0" cellspacing="0" cellpadding="0" class="m-data trainee-list">
+											<thead>
+												<tr>
+													<th width="20px"><apex:inputCheckbox id="selectall" selected="false" onclick="jQuery('[id*=usr_check]').prop('checked', jQuery(this).prop('checked')).change(); refreshSelectedItemsCount();" /> </th>
+													<th>{!$Label.SearchCatalog_Trainees}</th>
+													<th>{!$Label.SearchCatalog_Roles}</th>
+												</tr>
+											</thead>
+											<tbody>
+											<apex:repeat value="{!Trainee}" var="tr">
+												<tr>
+													<td> <apex:inputCheckbox value="{!tr.selected}" id="usr_check" onclick="jQuery('[id*=selectall]').attr('checked', false); refreshSelectedItemsCount();"/> </td>
+													<td>{!tr.user.Name}</td>
+													<td>{!tr.user.UserRole.Name} </td>
+												</tr>
+											</apex:repeat>
+											</tbody>
+										</table>
+									</apex:outputPanel>
+										
+									<apex:outputPanel style="float:right;font-size:85%;"  rendered="{!IF((HasPrevTraineePage)||(HasNextTraineePage), true, false)}">
+										<apex:commandLink action="{!PrevTraineePage}" rerender="TraineesList, " rendered="{!HasPrevTraineePage}" status="loadStatus2" onclick="if(intSelectedItemsCount!=0) { if(confirm('{!JSENCODE($Label.AssignTrainingContent_js_Alert)}') == false) {return false;} else {intSelectedItemsCount=0}};">&lt;{!$Label.AssignTrainingContent_oT_Previous_Page}</apex:commandlink>
+										<apex:outputText rendered="{!NOT(HasPrevTraineePage)}">&lt;{!$Label.AssignTrainingContent_oT_Previous_Page}</apex:outputText>
+										&nbsp;|&nbsp;
+										<apex:commandLink action="{!NextTraineePage}" rerender="TraineesList" rendered="{!HasNextTraineePage}" status="loadStatus2" onclick="if(intSelectedItemsCount!=0) { if(confirm('{!JSENCODE($Label.AssignTrainingContent_js_Alert)}') == false) {return false;} else {intSelectedItemsCount=0}};">{!$Label.AssignTrainingContent_oT_Next_Page}&gt;</apex:commandlink>
+										<apex:outputText rendered="{!NOT(HasNextTraineePage)}">{!$Label.AssignTrainingContent_oT_Next_Page}&gt;</apex:outputText>
+									</apex:outputPanel>							
+								</apex:outputPanel>						
+							</div>
+							<br/>					
+							<apex:outputPanel layout="block" rendered="{!Trainee.size > 0}">
+								<input type="checkbox" onclick="showDueDate()"/>
+								{!$ObjectType.Transcript_Line__c.fields.Due_Date__c.label} &nbsp;&nbsp;&nbsp;
+								<apex:inputField value="{!Dummy.lmscons__Due_Date__c}" id="DueDateId" />
+							</apex:outputPanel>
+		
+		
+							<apex:outputPanel layout="block">						
+								<apex:commandButton style="float:right;" onclick="Closelightbox(); return false;" value="{!$Label.SearchCatalog_Cancel}" />
+								<!-- after the first time clicked this button will disappear -->
+								<apex:commandButton style="float:right;" action="{!AssignContentToUsers}" oncomplete="Closelightbox()" rendered="{!Trainee.size > 0}" rerender="messages" status="loadStatus2" value="{!$Label.SearchCatalog_Assign}" id="AssignButton" onclick="jQuery('input[id$=AssignButton]').addClass('hideElement'); jQuery('input[id$=CopyAssignButton]').removeClass('hideElement');" />
+								<!-- and this button will appear instead but you will be not able to click on it -->
+								<apex:commandButton style="float:right;" value="{!$Label.SearchCatalog_Assign}" id="CopyAssignButton" styleClass="hideElement" disabled="true" />
+							</apex:outputPanel>
+							<apex:actionStatus id="loadStatus2">
+								<apex:facet name="start">
+									<apex:image url="/img/loading.gif" />
+								</apex:facet>
+							</apex:actionStatus>
+							<br/><br/>
+						</div>
+					</apex:outputpanel>									
+					
+				</apex:form>
+			</div>							
+							
+		<!-- Template -->
+		<script id="child-data-template" type="text/x-jquery-tmpl">
+			<tr class="row level-${level}" 
+				data-id="${objectId}" 
+				data-type="${objectType}" 
+				data-parent-id="${parentId}" 
+				data-parent-type="${parentType}" 
+				data-has-children="{{if objectType == 'Module' || objectType == 'Quiz'}}false{{else}}true{{/if}}"
+				data-dom-id="${ CreateGuid() }"
+				data-parent-dom-id = "${parentDomId}" 
+				{{if objectType != 'Module' || objectType != 'Quiz'}} data-children-loaded="false" data-children-visible="false"{{/if}}>
+
+    			<td class="col-name">
+					<div>${objectName}</div>
+				</td>
+				<td class="col-desc">${objectDescription}</td>
+    			<td class="col-type">${objectType}</td>
+				<td class="col-action">
+					{{if showEnrollButton}} 
+						<a class="enroll-button b-btn" href="javascript:EnrollContent('${objectId}', '${objectType}');" onclick="showStatus();">Enroll</a>					
+					{{/if}}
+
+					{{if showAssignButton}} 
+						<a class="assign-button b-btn" href="javascript:AssignTraining('${objectId}', '${objectType}');" onclick="showStatus();">Assign</a>					
+					{{/if}}
+				</td>    			
+			</tr>           
+		</script>	
+		
+		<script>
+			(function($) {
+				resizeModalWindow(); 
+  			})(jQuery);
+
+			function resizeModalWindow(){
+				if (jQuery(window).height() < 900) {
+					jQuery('.b-lightbox').addClass('resizibleWindow');
+					jQuery('.resizibleWindow').css({'overflow':'hidden'}).css({'overflow-y':'scroll'}).css({'height':'78%'});
+					jQuery('.b-lightbox .b-content').css({'padding':'17px 9px 17px 18px'});
+				}
+				else {
+					jQuery('.b-lightbox').removeClass('resizibleWindow');
+					jQuery('.b-lightbox .b-content').css({'padding':'17px 8px 17px 18px'});
+				}
+			}
+		</script>
+		
+	</body>
+</apex:page>

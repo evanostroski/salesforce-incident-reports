@@ -1,0 +1,466 @@
+<!--
+ Developed by Timba Software Corp. www.timbasoftware.com admin@timbasoftware.com
+ This page lists plans
+ @author Guillermo Freire <guillermo.freire@gmail.com>
+-->
+<apex:page id="TermsCreate" controller="XactlyExpress.XactlySMBTermsAndConditionsController" sidebar="false" showHeader="false" standardStylesheets="false" action="{!redirectWhenAccessIsDenied}">
+   <!-- Custom Cursor Loader -->
+   <c:XactlySMBCursor />
+   <!-- Custom Cursor Loader -->
+    <title>{!$Label.ManageTermsAndConditions} : {!$Label.TermsAndConditions}</title>    
+    <!-- PAGE WRAPPER --> 
+    <div class="pageContent" id="pContent">
+        <apex:form id="TermsForm">
+            <!-- HEADER -->
+            <apex:outputPanel layout="block" styleClass="header">
+                <c:XactlySMBHeader isAdmin="{!isAdmin}"  isActive="{!isActive}" nbrSeparator="{!nbrSeparator}" nbrDecimal="{!nbrDecimal}" currentUserOrSlected="{!currentUserOrSlected}" emulatingUserURLAppend="{!emulatingUserURLAppend}" step="1" wqlabel="{!currentSettings.quotasPluralCap}" wclabel="{!currentSettings.creditsPluralCap}" wlabel="{!currentSettings.dealsPluralCap}" wtype="terms" hlabel="{!$Label.xactlyexpress__CreateTermsTitle}" stepHelp="TermsCreate" stepBreadcrumb="{!Terms.Name}" showPrevious="true" showNext="true" showSave="true" showRefresh="true" showExport="false" selected="2" selectedLevel2="1" selectedLevel3="2"/>
+            </apex:outputPanel>
+            
+            
+            <!-- INSUFFICIENT PERMISSIONS -->
+            <apex:outputPanel rendered="{!!isAdmin || !isActive}">
+                <c:XactlySMBErrorMsg error="{!$Label.xactlyexpress__InsufficientPermissions}" />
+            </apex:outputPanel>
+            
+            <div id="shadowContainer" class="shadowContainer">
+            <apex:outputpanel layout="block" id="chatter" styleClass="additionalContent" rendered="{!isAdmin && isActive}">
+                <c:XactlySMBChatterWall objectId="{!$User.Id}" showHeader="true" showWall="true" currentPage="{!$CurrentPage.Name}" chatterCurrentUserImageUrl="{!chatterCurrentUser_ImageUrl}" rendered="{!isChatterEnabled && isChatterLoaded}"/>
+            </apex:outputPanel> 
+            
+            <!-- MAIN CONTENT -->
+            <apex:outputPanel layout="block" styleClass="mainContent" rendered="{!isAdmin && isActive}">
+                <!-- LEFT PANEL -->
+                <apex:outputPanel layout="block" styleClass="leftPanel" style="width:290px !important;"> 
+                     <br />
+                
+                    <div style="margin-top:23px;">
+                        <div class="newPlan newLeftPanel"  style="white-space:nowrap; height:expression('30px')">
+                            <div class="btnToLeft btnAction newLeftPanel">
+                                <div class="leftSide ; white-space:nowrap">
+                              {!$Label.CreateNew}<br />{!$Label.TermsAndConditions}
+                                </div>
+                                <div class="rightSide; white-space:nowrap">
+                                    <apex:commandLink styleClass="discardChanges" action="{!newTC}">
+                                     <div class="xactlyBtnRectWrapper"  onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);"  style="float:left;margin-left:20px;">
+                                                     <div class="xactlyBtnRect">
+                                                       <div class="xactlyBtnRectBackground">
+                                                           <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                               <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                                                    <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel" style="">
+                                                                        <apex:outputtext escape="false" value="{!$Label.xactlyexpress__New}" />
+                                                                    </div>
+                                                                </div>
+                                                           </div>                                                                            
+                                                       </div>
+                                                    </div>                                                                  
+                                    </div>
+                                                        
+                                                     
+                                       </apex:commandLink>
+                                   </div>
+                            </div>
+                        </div>
+                    <apex:outputPanel rendered="{!NOT(ISNULL(Terms.Id))}">
+                        <div class="newPlan newLeftPanel"  style="white-space:nowrap; height:expression('30px')">
+                               <div class="btnToLeft btnAction newLeftPanel" >
+                                <div class="leftSide ; white-space:nowrap">
+                                    {!$Label.DeleteThese}<br />{!$Label.TermsAndConditions}
+                                </div>
+                                <div class="rightSide; white-space:nowrap">
+                                    <apex:commandLink styleclass="actionButton newActionbutton" action="{!deleteTerms}" rendered="{!isDeletable}" onclick="return DeleteTerms();">
+                                        <div class="xactlyBtnRectWrapper"  onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);"  style="float:left;margin-left:20px;">
+                                            <div class="xactlyBtnRect">
+                                              <div class="xactlyBtnRectBackground">
+                                                  <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                      <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                                           <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel" style="">
+                                                               <apex:outputtext escape="false" value="{!$Label.xactlyexpress__Delete}" />
+                                                           </div>
+                                                       </div>
+                                                  </div>                                                                            
+                                              </div>
+                                            </div>                                                                  
+                                        </div>
+                                       </apex:commandLink>
+                                   </div>
+                            </div>
+                           
+                        </div>
+                    </apex:outputPanel>
+                    
+                    </div>
+                    <input type="Hidden" id="selectedIndexHidden" value="{!Terms.name}" />
+                    <div class="leftSelectATermsWrapper">
+                        <c:XactlySMBLeftSelectTerms currentTermsId="{!Terms.id}" currentFiscalYear="{!Terms.XactlyExpress__XCFiscalYearSettingsID__c}"/>
+                    </div>
+                    
+                </apex:outputPanel>
+                
+                <!-- CONTENT -->
+                <apex:outputPanel layout="block" styleClass="content" id="contentTC" style="width:775px !important;">
+                    
+                    <div id="TermsContainer">
+                        <apex:outputPanel id="errorMsg" layout="block" styleClass="errorScrollBox">
+                            <c:XactlySMBErrorMsg error="{!errorMsg}"/>
+                        </apex:outputPanel>
+                         <apex:outputPanel styleClass="totCont" id="totCont" layout="block">
+                            <apex:outputPanel style="margin-left: 20px;width:730px; overflow: visible;" styleClass="stepTableContainer" id="stepTableContainer"> 
+
+                        <div class="box" style="margin-right: 15px; margin-bottom: 15px; margin-left: 15px;">
+                            <div class="img_repeat tm">
+                                <div class="img_no_repeat tl"></div>
+                                <div class="img_no_repeat tr"></div>
+                                <div style="clear:both"></div>
+                            </div> 
+                            <div class="roundedBox">
+                                <div class="boxHeader">
+                                    <div class="PNovaBlack60c5 stepActionNumber">
+                                        A
+                                    </div>
+                                    <div class="titleWrapper">  
+                                        <div class="mainTitle PNovaSemiBold17c3">{!$Label.Name}</div>
+                                        <div class="detailedTitle HelveticaRegular12c3">{!$Label.EnterTermsName}</div>
+                                    </div>
+                                    <div style="clear:both"></div>
+                                </div>
+                                <div class="boxContent"> 
+                                    <apex:inputtext id="inputName" styleClass="inputName" value="{!Terms.Name}" required="false" maxlength="32"/>
+                                    <div style="clear:both;"></div>
+                                </div>    
+                            </div> 
+                            <div class="img_repeat bm">
+                                <div class="img_no_repeat bl"></div>
+                                <div class="img_no_repeat br"></div>
+                            </div> 
+                        </div>
+                        
+                        <div class="box" style="margin-right: 15px; margin-bottom: 15px; margin-left: 15px;">
+                            <div class="img_repeat tm">
+                                <div class="img_no_repeat tl"></div>
+                                <div class="img_no_repeat tr"></div>
+                                <div style="clear:both"></div>
+                            </div> 
+                            <div class="roundedBox">
+                                <div class="boxHeader">
+                                    <div class="PNovaBlack60c5 stepActionNumber">
+                                        B
+                                    </div>
+                                    <div class="titleWrapper">  
+                                        <div class="mainTitle PNovaSemiBold17c3">{!$Label.FiscalYear}</div>
+                                        <div class="detailedTitle HelveticaRegular12c3">{!$Label.TermsAndConditionsFiscalYear}</div>
+                                    </div>
+                                    <div style="clear:both"></div>
+                                </div>
+                                <div class="boxContent"> 
+                                    <apex:selectList id="fiscalyearselect" value="{!Terms.XactlyExpress__XCFiscalYearSettingsID__c}" multiselect="false" size="1" required="false" onchange="waitOn();changeDates();" style="min-width:406px;">
+                                        <apex:selectOptions value="{!fiscalYearOptions}"/>
+                                    </apex:selectList>
+                                    <div style="clear:both;"></div>
+                                </div>    
+                            </div> 
+                            <div class="img_repeat bm">
+                                <div class="img_no_repeat bl"></div>
+                                <div class="img_no_repeat br"></div>
+                            </div> 
+                        </div>
+                        
+                        <div class="box" style="margin-right: 15px; margin-bottom: 15px; margin-left: 15px;">
+                            <div class="img_repeat tm">
+                                <div class="img_no_repeat tl"></div>
+                                <div class="img_no_repeat tr"></div>
+                                <div style="clear:both"></div>
+                            </div>
+                            <div class="roundedBox">
+                                <div class="boxHeader">
+                                    <div class="PNovaBlack60c5 stepActionNumber">
+                                        C
+                                    </div>
+                                    <div class="titleWrapper">  
+                                        <div class="mainTitle PNovaSemiBold17c3">{!$Label.xactlyexpress__PlansAssociatedTitle}</div>
+                                        <div class="detailedTitle HelveticaRegular12c3">{!$Label.PlansAssociatedSubtitle}</div>
+                                    </div>
+                                    <div style="clear:both"></div>
+                                </div>
+                                <div class="boxContent">
+                                    <apex:outputPanel layout="block" rendered="{!isNull(Terms.Id)}" >
+                                        <apex:outputtext value="{!$Label.xactlyexpress__TermsAndConditionsSaveFirst}" />
+                                    </apex:outputPanel>
+                                    <apex:outputPanel layout="block" rendered="{!NOT(isNull(Terms.Id))}" >
+                                        <a id="associateTermsLink" rel="superbox[content#AssociateTermsAndConditionsPopup.xactlySuperBox]" href="#AssociateTermsAndConditionsPopup" Class="actionButton newActionbutton" style="display:none"></a>
+                                           <div class="xactlyBtnRectWrapper"  onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);"  style="float:left;margin-left:10px;" onclick="OpenAssociatePlan();">
+                                            <div class="xactlyBtnRect">
+                                              <div class="xactlyBtnRectBackground">
+                                                  <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                      <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                                           <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel" style="">
+                                                               <apex:outputtext escape="false" value="{!$Label.xactlyexpress__Change}" />
+                                                           </div>
+                                                       </div>
+                                                  </div>                                                                            
+                                              </div>
+                                            </div>                                                                  
+                                           </div>
+                                       </apex:outputPanel>
+                                    <div style="clear:both;"></div>
+                                </div>    
+                            </div> 
+                            <div class="img_repeat bm">
+                                <div class="img_no_repeat bl"></div>
+                                <div class="img_no_repeat br"></div>
+                            </div> 
+                        </div>
+                        
+                        <div class="box" style="margin-right: 15px; margin-bottom: 15px; margin-left: 15px;">
+                            <div class="img_repeat tm">
+                                <div class="img_no_repeat tl"></div>
+                                <div class="img_no_repeat tr"></div>
+                                <div style="clear:both"></div>
+                            </div> 
+                            <div class="roundedBox">
+                                <div class="boxHeader">
+                                    <div class="PNovaBlack60c5 stepActionNumber">
+                                        D
+                                    </div>
+                                    <div class="titleWrapper">  
+                                        <div class="mainTitle PNovaSemiBold17c3">{!$Label.Edit}</div>
+                                        <div class="detailedTitle HelveticaRegular12c3">{!$Label.EditTerms}</div>
+                                    </div>
+                                    <div style="clear:both"></div>
+                                </div>
+                                <div class="boxContent">
+                                    
+                                    <div id="termsAndConditionsDiv" style="width:670px;">
+                                    <div class="backgrounds2 topTable">
+                                    </div>   
+                                        <apex:inputTextArea style="margin-top:-6px;height:600px;" richText="true"  id="inputDescription" styleClass="inputDescription" value="{!Terms.XactlyExpress__TermsAndConditionsRich__c}" rows="11"></apex:inputTextArea> 
+                                        <div id="charLimit">
+                                           <div id="progressC" style="width: 80px;height: 13px !important; max-height:15px !important;  padding-top: 5px; padding-left: 579px; padding-bottom: 7px">
+                                               <div id="progressbarWrapper" style="height:15px; " class="ui-widget-default">
+                                               <div id="progressBar" style="height:100%;"></div>
+                                            </div>
+                                        </div>
+                                        </div>
+                                    <div class="backgrounds2 bottomTable"> 
+                                    </div> 
+                                    </div> 
+                                    <div style="clear:both;"></div>
+                                </div>    
+                            </div> 
+                            <div class="img_repeat bm">
+                                <div class="img_no_repeat bl"></div>
+                                <div class="img_no_repeat br"></div>
+                            </div> 
+                        </div>
+                        
+                               
+                    </apex:outputPanel>
+                    </apex:outputPanel>
+                    </div>
+                           
+                </apex:outputPanel>
+                <div style="clear:both;"></div>
+            </apex:outputPanel>
+            
+            </div>
+            
+            <!-- FOOTER  -->
+            <c:XactlySMBFooter isReadOnlyAdmin="{!isReadOnlyAdmin}" packageVersion="{!packageVersion}" showPrevious="true" showNext="true" showSave="true" showRefresh="true" showExport="false"/>
+            <apex:actionFunction name="saveFN" action="{!saveTerms}"/>
+            <apex:actionFunction name="saveNext" action="{!saveNext}"/>
+            <apex:actionFunction name="changeDates" action="{!genList}" rerender="dummy, editMeasuresContainer" onComplete="waitOff();"/>
+            <apex:actionfunction id="chatterLoader" name="loadChatter" action="{!loadChatter}" rerender="chatter" oncomplete="waitOff();initChatter();jQuery('.innerOcultar a').click();"/>                   
+            <apex:actionFunction name="loadAssociatePlan" action="{!dummy}" oncomplete="OpenAssociatePlan();" rerender="AssociatePlanWrapper">
+                <apex:param assignTo="{!showAssociatePlan}" value="true" name="AssociatePlan" />
+            </apex:actionFunction>
+        </apex:form> 
+    </div>   
+    <!-- POPUP -->
+    <apex:outputPanel id="AssociatePlanWrapper">
+    <input type="hidden" id="AssociatePlanLoaded" value="{!showAssociatePlan}" />
+    <apex:outputPanel rendered="{!showAssociatePlan}" layout="block">      
+    <div id="AssociateTermsAndConditionsPopup" class="content" style="display:none;">
+            <div style="width:555px;height:auto;">
+            
+                           <div id="AssociateTermsAndConditions">
+                               <div class="backgrounds1 header_div_11_4">
+                                   <div class="backgrounds2 header_div_12 header_div_top_left"></div>
+                                   <div class="backgrounds2 header_div_13 header_div_top_right"></div>
+                                   <div style="clear:both"></div>
+                               </div> 
+                               <div style="width:100%;border-right:2px solid #D49761;border-left:2px solid #D49761;background-color:#FFF;">
+                                   <div style="margin-left:20px;margin-right:20px;">
+                                       
+                                        <apex:outputPanel layout="block" styleClass="btn_close_lbox_wrapper" style="margin-top:0px;">
+                                                <apex:outputPanel layout="block" styleClass="btn_close_lbox" style="cursor:pointer;" onclick="jQuery.superbox.overrideSourceWithSuperboxContent();jQuery.superbox.close();">
+                                                    &nbsp;
+                                                </apex:outputPanel>
+                                        </apex:outputPanel>
+    
+                                       <apex:outputText value="{!$Label.xactlyexpress__PlansAssociatedTitle}" styleClass="PNovaBlackTitle1" />
+                                       
+                                       <br/><br/>
+                                       
+                                       <div class="grayBoxTop">
+                                               <div class="grayBox_l"><img src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_roundbox1_c_1.png')}" /></div>
+                                               <div class="grayBox_r"><img src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_roundbox1_c_2.png')}" /></div>
+                                       </div>
+                                       
+                                       <div class="grayBoxBody">
+                                               
+                                               <apex:form id="popupForm">
+                                                <div style="text-align:center">{!$Label.xactlyexpress__PlansAssociatedSubtitle}</div>
+                                                <apex:outputPanel layout="block" id="popupContent">
+                                                    <div class="popupColumns">
+                                                        <apex:outputText value="{!$Label.xactlyexpress__AvailablePlans}"/>
+                                                        <br />
+                                                        <apex:selectList onchange="jQuery.superbox.overrideSourceWithSuperboxContent();" size="6" multiSelect="true" value="{!planNotSelected}" style="width: 200px;">
+                                                            <apex:selectOptions value="{!notselOptions}" />
+                                                        </apex:selectList>
+                                                    </div>
+                                                    
+                                                    <div class="popupColumns">
+                                                        <apex:commandLink action="{!selectTerms}" styleClass="selectBtn" rerender="popupForm" oncomplete="jQuery.superbox.refreshSuperboxContent();waitOff();introAsTab();" onclick="waitOn();">{!gtChar}</apex:commandLink><br/>
+                                                        <apex:commandLink action="{!unselectTerms}" styleClass="selectBtn" rerender="popupForm" oncomplete="jQuery.superbox.refreshSuperboxContent();waitOff();introAsTab();" onclick="waitOn();">{!ltChar}</apex:commandLink>
+                                                    </div>
+                                                    
+                                                    <div class="popupColumns">
+                                                        <apex:outputText value="{!$Label.xactlyexpress__SelectedPlans}"/>
+                                                        <br />
+                                                        <apex:selectList onchange="jQuery.superbox.overrideSourceWithSuperboxContent();" size="6" multiSelect="true" value="{!planSelected}" style="width: 200px;">
+                                                            <apex:selectOptions value="{!selOptions}" />
+                                                        </apex:selectList>
+                                                    </div>
+                                                    
+                                                    <div style="clear: both;" ></div>
+                                                
+                                                </apex:outputPanel>
+                                            </apex:form>
+                                       
+                                       </div>
+    
+                                       <div class="grayBoxBottom">
+                                               <div class="grayBox_l"><img src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_roundbox1_c_3.png')}" /></div>
+                                               <div class="grayBox_r"><img src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_roundbox1_c_4.png')}" /></div>
+                                       </div>
+                                       
+                                       <br/><br/>
+                                       
+                                       
+                                       <div style="clear:both"></div>
+                                   </div>
+                               </div>
+                               <div class="backgrounds1 header_div_10_4">
+                                   <div class="backgrounds2 header_div_12 header_div_bottom_left"></div>
+                                   <div class="backgrounds2 header_div_13 header_div_bottom_right"></div>
+                                   <div style="clear:both"></div>
+                               </div> 
+                           </div>
+        
+            </div>
+    </div>    
+    </apex:outputPanel>
+    </apex:outputPanel>
+    <!-- END POPUP --> 
+        
+    <a href="javascript:;" id="openPopup"></a>
+
+    <div style="display: none;">
+        <div id="fooPopup_px" class="jqpopup_cross"></div>
+        <div class="jqpopup_header" id="fooPopup_ph"></div>
+        <div id="fooPopup_pm" class="jqpopup_message"></div>
+        <div id="'fooPopup'_pc" class="jqpopup_content"></div>
+        <div id="fooPopup_pf" class="jqpopup_footer"></div>
+        <div id="fooPopup_ps" class="jqpopup_resize"></div>
+        <div id="fooPopup_pl" class="jqpopup_center"></div>
+    </div>
+    <input type="hidden" value="{!$Page.XactlySMBPlanList}" id="XactlySMBPlanListURL"/>
+    <apex:styleSheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'pages/css/XactlySMBTermsAndConditions.css')}" />
+    <apex:styleSheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources, 'popup/css/jqpopup.css')}"/>
+    <apex:styleSheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources, 'css/slider.css')}"/>
+    <c:XactlySMBFooterScript isChatterEnabled="{!isChatterEnabled}" loadPerformantJs="true" loadHeaderJs="true" /> 
+        
+    <script type="text/javascript" src="{!URLFOR($Resource.XactlySMBResources, 'popup/js/jqDnR.min.js')}"></script>
+    <script type="text/javascript" src="{!URLFOR($Resource.XactlySMBResources, 'popup/js/jquery.jqpopup.min.js')}"></script>
+    <script type="text/javascript" src="{!URLFOR($Resource.XactlySMBResources, 'pages/js/XactlySMBTermsAndConditions.js')}"></script>
+    <script>
+        var rerenderNoCompare = true;
+      $(document).ready(function (){
+            initSuperbox();
+            introAsTab();
+            storeValues();
+            setTimeout("loadAnltc('XactlySMBTermsAndConditions.php')", 1000);
+        });
+        
+        function OpenAssociatePlan(){
+            waitOn();
+            if(!loadOnDemand('AssociatePlan')){
+            waitOff();
+             jQuery('#associateTermsLink').click();
+             jQuery.superbox.refreshSuperboxContent();
+              
+            }
+        }
+        function previousStepActionPTH(){
+            waitOn();
+            window.location.href = jQuery('#XactlySMBPlanListURL').val();
+        }
+        function nextStepActionPTH(){
+            var txtL= document.getElementById('termsAndConditionsDiv').getElementsByClassName('cke_contents')[0].getElementsByTagName('iframe')[0].contentWindow.document.getElementsByTagName('body')[0].textContent.length ;
+            if(txtL>32000){
+               alert("Terms and Conditions can't be longer than 32000 characters");
+               return;
+            }
+            waitOn();
+            rerenderNoCompare = false;
+            saveNext();
+        }
+        function saveActionPTH(){
+            var txtL= document.getElementById('termsAndConditionsDiv').getElementsByClassName('cke_contents')[0].getElementsByTagName('iframe')[0].contentWindow.document.getElementsByTagName('body')[0].textContent.length ;
+            if(txtL>32000){
+               alert("Terms and Conditions can't be longer than 32000 characters");
+               return;
+            }
+            waitOn();
+            rerenderNoCompare = false;
+            saveFN();
+        }
+        function refreshActionPTH(){
+            discardChangesConfirm(window.location.href);
+        }
+        window.onload = function(){
+                savePageHandler.storeBottomBarOnclickEvents();
+                savePageHandler.setExtraBottomBarClick();
+        };
+        var saveBtn = function(){
+              savePageHandler.disableBottomBar();
+        }
+        function showPopup () {   
+            $('#popup').jqpopup_open('openFormulaPopup');
+            $('#popup').jqpopup_toCenter('openFormulaPopup');
+        }
+        function hidePopup(){
+            if($('#popup_ph').length != 0){   
+                $('#popup').jqpopup_close();
+            }
+        }               
+        function DeleteTerms(){
+        rerenderNoCompare = false;
+            if ('{!plansseleced}' > 0){
+                if(confirm('{!$Label.TermsAssocPlan}')){
+                    return true;}
+                else{
+                    return false;}
+            } 
+        }
+        
+        var ChangesWillNotBeSaved = "{!$Label.ChangesWillNotBeSaved}";
+        window.onbeforeunload = function(){
+            if(compareValues(true,rerenderNoCompare) != undefined){
+                setTimeout('waitOff()', 100);
+            }
+            return compareValues(true,rerenderNoCompare);
+        };
+        
+    </script>
+    <c:XactlySMBFeedbackTab />
+</apex:page>

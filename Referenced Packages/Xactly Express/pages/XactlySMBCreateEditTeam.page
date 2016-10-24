@@ -1,0 +1,357 @@
+<apex:page id="createEditTeam" controller="XactlyExpress.XactlySMBCreateEditTeamController" showHeader="false" sidebar="false"  action="{!redirectWhenAccessIsDenied}">
+    
+    <c:XactlySMBCursor />
+    <title>{!$Label.creatEditTeam}</title>
+        <!-- LIGHT BOX -->
+        <div id="TeamBoxForm" class="AUTOMTeamBoxForm">
+
+            <apex:outputPanel layout="block" styleClass="mainPopupTeamBox">
+            
+                <div class="superboxRRTop"></div>
+                <div class="superboxRRBody">
+                    <div style="clear:both;"></div>
+
+                    <div class="titleBoxContainer">
+                        <div style="float:left;">
+                            <apex:outputtext styleclass="PNovaBlackTitle1" value="{!$Label.xactlyexpress__teamName}" /> &nbsp;
+                        </div>
+                        <div style="float:left;margin-top:10px;">
+                            <apex:outputPanel layout="none" rendered="{!isRO}">
+                                <input type="text" class="AUTOMteamName" style="margin:0px;" id="currentTeamName" value="{!confg.team.name}" disabled="disabled" rendered="{!$ObjectType.XCTeam__c.fields.Name.Updateable}" />
+                            </apex:outputPanel>
+                            <apex:outputPanel layout="none" rendered="{!!isRO}">
+                                <input type="text" class="AUTOMteamName" style="margin:0px;" id="currentTeamName" value="{!confg.team.name}" rendered="{!$ObjectType.XCTeam__c.Updateable}" />
+                            </apex:outputPanel>
+                            <input type="text" style="display:none;" id="currentTeamId" value="{!confg.team.id}" />
+                            <input type="text" style="display:none;" id="lastTeamName" value="{!confg.team.name}" />
+                            <input type="text" style="display:none;" id="currentPlanId" value="{!confg.planId}" />
+                        </div>
+                        <div style="width:3px;height:24px;background-color:#ff0000;float:left;margin-top:10px;">&nbsp;</div>
+                    </div>
+
+                    <apex:outputPanel layout="block" styleClass="btn_close_lbox_wrapper AUTOMcloseTeamBox1" style="margin-top:-55px;">
+                        <apex:outputLink styleClass="a_btn_close_lbox" value="javascript:;" disabled="false" onclick="closeBox();">
+                            <apex:outputPanel layout="block" styleClass="btn_close_lbox">
+                                &nbsp;
+                            </apex:outputPanel>
+                        </apex:outputLink>
+                    </apex:outputPanel>
+
+                    <div class="scrollMessages">
+                    <div id="errorMsg" class="AUTOMerrorMsg" style="color:#663333;margin:10px;margin-left:30px;">
+                        &nbsp;
+                    </div>
+                    </div>
+
+                    <div id="unsaved_changes_wrapper" style="display:none;">
+                        <div id="unsaved_changes_green_number"><div style="margin-top:7px;" id="unsaved_changes_number" class="AUTOMunsaved_changes_number">0</div></div>
+                        <div id="unsaved_changes_middle">
+                            <div id="unsaved_changes_link" class="AUTOMunsaved_changes_link" style="font-weight: bold;cursor:pointer;color:#6B0;float:left;margin-top:7px;margin-left:20px;" onclick="if({!isRO}){return false;}saveMembers(false, 'details');">{!$Label.unsavedChanges}</div>
+                        </div>
+                    </div>
+
+                    <div class="box" style="margin-right: 15px; margin-left: 15px;width:auto;">
+                            <div class="img_repeat tm">
+                               <div class="img_no_repeat tl"></div>
+                               <div class="img_no_repeat tr"></div>
+                               <div style="clear:both"></div>
+                            </div>
+                            <div class="roundedBox">
+                                <div class="boxHeader">
+                                    <div class="titleWrapper">
+                                        <div class="PNovaBlackTitle2"><apex:outputText value="{!$Label.xactlyexpress__SelectTeamMembers}" /></div>
+                                        <div class="PNovaBlackTitle3"><apex:outputText value="{!$Label.xactlyexpress__SelectThePersonToAddOnTeam}" /></div>
+                                    </div>
+                                    <div class="extraTitleStuff"></div>
+                                    <div style="clear:both"></div>
+                                </div>
+                                <div class="boxContent" style="padding-bottom:30px;padding-top:10px;padding-left:0px;padding-right:0px;height:450px;">
+
+
+
+                                    <apex:outputpanel layout="block" styleClass="leftContentPanelTeamBox" id="leftContentPanelTeamBox">
+
+                                        <div style="height:92px;margin-top:40px;margin-bottom:50px;margin-left:0px;">
+
+                                            <div class="PNovaBlackSteps stepContentLatter">A</div>
+                                            <div class="PNovaBlackTitle3" style="float:left;margin:33px 0px 33px 0px;">
+
+                                                <apex:outputText value="{!$Label.xactlyexpress__BuildingTeamFor}" />
+                                                
+                                                <select id="selectUserDropTeamBox"  class="AUTOMselectUserDropTeamBox" style="max-width:170px;width:170px;" size="1" onChange="showLeader(this.value);">
+                                                <apex:repeat value="{!confg.users}" var="u">
+                                                    <option title="{!JSINHTMLENCODE(u.label)}" value="{!JSINHTMLENCODE(u.value)}" style="display:block;">{!u.label}</option>
+                                                </apex:repeat>
+                                                </select>
+
+                                            </div>
+
+                                        </div>
+
+                                        <div class="specialStepB" style="margin-left:0px;">
+
+                                            <div class="PNovaBlackSteps stepContentLatter">B</div>
+                                            <div class="PNovaBlackTitle3" style="float:left;margin:33px 0px 33px 0px;"><apex:outputText value="{!$Label.xactlyexpress__SelectPeopleOrGroupForTeam}" /></div>
+
+                                               <div style="position:relative;left:398px;top:-93px;width:20px;*top:0px;*left:38px;"><img style="height:92px;width:18px;" src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_special_step_b_row.png')}" /></div>
+
+                                        </div>
+
+
+                                    </apex:outputpanel>
+
+
+
+                                    <apex:outputpanel layout="block" styleClass="rightContentPanelTeamBox" id="rightContentPanelTeamBox">
+
+                                        <div class="roundBox1Top">
+
+                                               <div style="float: left;margin-left:-15px;"><img class="img-bgroundbox" src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_roundbox1_c_1.png')}" /></div>
+                                               <div style="float: right;margin-right:-15px;"><img class="img-bgroundbox" src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_roundbox1_c_2.png')}" /></div>
+                                               <div style="clear:both"></div>
+
+                                        </div>
+
+                                        <div class="roundBox1Middle">  <!-- EDIT SECTION START -->
+
+                                            <apex:outputpanel id="chooseByUserGroup" layout="block" style="float:left;margin-left:30px;">
+                                                <apex:outputText styleClass="PNovaBlackTitle3" value="{!$Label.xactlyexpress__AvailableUsers}" />
+                                                <br />
+                                                <div style="margin-top:5px;">
+                                                    <select id="selectChooseByUserGroup" class="AUTOMselectChooseByUserGroup" style="max-width:170px;" size="1" onChange="updateSelectMembersUI();">
+                                                    <apex:repeat value="{!confg.source}" var="s">
+                                                        <option title="{!JSINHTMLENCODE(s.label)}" value="{!JSINHTMLENCODE(s.value)}" style="display:block;">{!JSINHTMLENCODE(s.label)}</option>
+                                                    </apex:repeat>
+                                                    </select>
+                                                </div>
+                                            </apex:outputpanel>
+
+                                            <apex:outputpanel id="selectedUserGroup" layout="block" style="float:right;margin-right:60px;">
+                                                <apex:outputText styleClass="PNovaBlackTitle3" value="{!$Label.xactlyexpress__SelectedTeamMember}" />
+                                                <br />
+                                                <div style="margin-top:5px;">
+                                                    <apex:outputText styleClass="detailedTitle HelveticaRegular12c3" value="{!$Label.xactlyexpress__For}" />
+                                                    <span id="leaderSelectedName" class="AUTOMleaderSelectedName">&nbsp;</span>
+                                                </div>
+                                            </apex:outputpanel>
+
+                                            <br />
+                                            <apex:outputpanel id="selectAreaUserGroup" styleClass="selectAreaUserGroup" layout="block">
+
+                                                <table cellspacing="0" cellpadding="0" border="0">
+                                                
+                                                <tr><td>
+                                                
+                                                <input type="text" id="search_members_options" class="AUTOMsearch_members_options" style="width:160px;float:left;" value="{!$Label.search}" />
+                                                <div style="text-align:center;float:left;margin-left:5px;">
+                                                    <div id="search_btn1" class="search_btn search_btn_search">&nbsp;</div>
+                                                </div>
+                                                
+                                                <br />
+                                                <select id="availableOptionsTeamBox" class="selectMembersTeamBox needTitle AUTOMavailableOptionsTeamBox" size="17" multiple="multiple">
+                                                    <option value="...">{!$Label.WaitLoading}</option>
+                                                </select>
+
+
+
+                                                </td><td style="min-width:60px;">
+
+                                                    <div style="text-align:center;">
+                                                        <a href="javascript:;" class="AUTOMlinkAddOption" onclick="if({!isRO}){return false;}moveOptions(true);">
+                                                            <apex:outputText value="{!$Label.xactlyexpress__Add}"/><br/>
+                                                            <apex:image styleClass="img-btnStd" url="{!URLFOR($Resource.XactlyExpress__XactlySMBResources, 'img/buttons/btnAdd.png')}"/>
+                                                        </a>
+                                                    </div>
+                                                    <br/>
+                                                    <div style="text-align:center;">
+                                                        <a href="javascript:;" class="AUTOMlinkRemoveOption" onclick="if({!isRO}){return false;}moveOptions(false);">
+                                                            <apex:image styleClass="img-btnStd" url="{!URLFOR($Resource.XactlyExpress__XactlySMBResources, 'img/buttons/btnRemove.png')}"/><br/>
+                                                            <apex:outputText value="{!$Label.xactlyexpress__removeCap}"/>
+                                                        </a>
+                                                    </div>
+
+                                                </td><td>
+
+                                                <input type="text" id="search_members_selected" class="AUTOMsearch_members_selected" style="width:160px;float:left;" value="{!$Label.search}" />
+                                                <div style="text-align:center;float:left;margin-left:5px;">
+                                                    <div id="search_btn2" class="search_btn search_btn_search">&nbsp;</div>
+                                                </div>
+
+                                                <br />
+                                                <select id="selectedOptionsTeamBox" name="selectedOptionsTeamBox" class="selectMembersTeamBox needTitle AUTOMselectedOptionsTeamBox" size="17" multiple="multiple">
+                                                    <option value="...">{!$Label.WaitLoading}</option>
+                                                </select>
+
+                                                </td></tr>
+                                                </table>
+
+                                            </apex:outputpanel>
+
+                                        </div>            <!-- EDIT SECTION END -->
+
+                                        <div class="roundBox1Bottom">
+
+                                               <div style="float: left;margin-left:-15px;"><img class="img-bgroundbox" src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_roundbox1_c_3.png')}" /></div>
+                                               <div style="float: right;margin-right:-15px;"><img class="img-bgroundbox" src="{!URLFOR($Resource.XactlySMBResources ,'img/layout/background_roundbox1_c_4.png')}" /></div>
+                                               <div style="clear:both"></div>
+
+                                        </div>
+
+                                        <apex:outputpanel layout="block" styleClass="rolesAndGroupsLegend">
+                                          {!$Label.TeamBoxListRole}: {!$Label.RoleInIncent} {!$Label.AsSetupInSalesforce}<br />
+                                          {!$Label.TeamBoxListRoleAndSubordinate}: {!$Label.RoleAndSubordinate} {!$Label.AsSetupInSalesforce}<br />
+                                          {!$Label.TeamBoxListGroup}: {!$Label.Group} {!$Label.AsSetupInSalesforce}
+                                        </apex:outputpanel>
+
+                                    </apex:outputpanel>
+
+                                </div>
+                            </div>
+                            <div class="img_repeat bm">
+                                <div class="img_no_repeat bl"></div>
+                                <div class="img_no_repeat br"></div>
+                            </div>
+                    </div>
+                </div>
+           </apex:outputPanel>
+
+
+                       <!-- FOOTER -->
+                    <apex:outputpanel layout="block" id="superboxRRFooter" styleClass="superboxRRFooter">
+                        <apex:outputpanel rendered="{!IF(true, true, false)}">
+                            <div class="btnAction saveAsPanel">
+
+                                                    <div id="saveAsBtn" style="{!IF(ISNULL(confg.team.id), 'display:none;', '')}" class="btn_silver_wrapper AUTOMsaveAsBtn" onmouseover="btnSilverOver(this);" onmouseout="btnSilverOut(this);" onclick="if({!isRO}){return false;}saveAsPreload();">
+                                                        <span class="btn_silver">
+                                                            <span class="btn_silver_r">
+                                                                <apex:outputText styleClass="a_btn_silver a_btn_silver_gray" value="{!$Label.xactlyexpress__SaveAs}" />
+                                                            </span>
+                                                        </span>
+                                                    </div>
+
+                            </div>
+                        </apex:outputpanel>
+                        <div class="btnToCenter btnAction saveAndCancel">
+
+                                                    <div id="cancelBtn" class="btn_silver_wrapper AUTOMcancelBtn" onmouseover="btnSilverOver(this);" onmouseout="btnSilverOut(this);" onclick="closeBox();">
+                                                        <span class="btn_silver">
+                                                            <span class="btn_silver_r">
+                                                                <apex:outputText styleClass="a_btn_silver a_btn_silver_gray" value="{!$Label.xactlyexpress__discardAllChanges}" />
+                                                            </span>
+                                                        </span>
+                                                    </div>
+                                                    <div id="saveBtn" class="btn_silver_wrapper AUTOMsaveBtn" onmouseover="btnSilverOver(this);" onmouseout="btnSilverOut(this);" onclick="if({!isRO}){return false;}saveMembers(false, 'all');">
+                                                        <span class="btn_silver">
+                                                            <span class="btn_silver_r">
+                                                                <apex:outputText styleClass="a_btn_silver a_btn_silver_blue" value="{!$Label.xactlyexpress__saveAllChanges}" />
+                                                            </span>
+                                                        </span>
+                                                    </div>
+
+
+                      </div>
+
+                </apex:outputpanel><!-- END FOOTER -->
+
+
+                <div id="saveAllDetails" class="AUTOMsaveAllDetails" style="display:none;">
+
+                    <div id="saveAllDetailsOverlay" class="AUTOMsaveAllDetailsOverlay">&nbsp;</div>
+                    
+                    <div class="saveAllDetailsLeaderContainerScroll">
+                    
+                        <div class="btn_close_detail_box_wrapper">
+                            <div id="a_btn_close_detail_box" class="btn_close_detail_box_normal AUTOMbtn_close_detail_box_normal" onmouseover="this.className = 'btn_close_detail_box_hover'" onmouseout="this.className = 'btn_close_detail_box_normal'" onclick="cancelMembersInDetails();">
+                                    &nbsp;
+                            </div>
+                        </div>
+                    
+                    
+                        <div class="saveAllDetailsLeaderContainerScrollTop">
+                        
+                            <div class="btn_to_normal floatleft" style="margin-left:30px;">
+                                <div id="right_panel_btn_to_left" class="AUTObtn_right_to_left btn_to_disabled_left" onmouseover="jQuery(jQuery(this).parent()).removeClass('btn_to_normal');jQuery(jQuery(this).parent()).addClass('btn_to_hover');" onmouseout="jQuery(jQuery(this).parent()).addClass('btn_to_normal');jQuery(jQuery(this).parent()).removeClass('btn_to_hover');">
+                                    &nbsp;
+                                </div>
+                            </div>
+                    
+                            <div id="saveAllDetailsLeaderContainerWrapper" class="AUTOMsaveAllDetailsLeaderContainerWrapper">
+                                <div id="saveAllDetailsLeaderContainer" class="AUTOMsaveAllDetailsLeaderContainer">
+                    
+                                </div>
+                            </div>
+                        
+                            <div class="btn_to_normal floatright" style="margin-right:37px;">
+                                <div id="right_panel_btn_to_right" class="AUTObtn_right_to_right btn_to_disabled_right" onmouseover="jQuery(jQuery(this).parent()).removeClass('btn_to_normal');jQuery(jQuery(this).parent()).addClass('btn_to_hover');" onmouseout="jQuery(jQuery(this).parent()).addClass('btn_to_normal');jQuery(jQuery(this).parent()).removeClass('btn_to_hover');">
+                                    &nbsp;
+                                </div>
+                            </div>
+                        
+                        </div>
+
+                        <div style="clear:both;height:0px;"></div>
+                              
+                        <div id="discar_note" style="margin:5px;margin-left:50px;font-size:10px;">
+                            &nbsp;
+                        </div>
+                          
+                        <div style="clear:both;height:0px;"></div>
+                        
+                        <div class="saveAllDetailsLeaderContainerScrollBottom">
+                          
+                              <div class="greenBtnWrapper">
+                              
+                              
+                                        <div id="btn_save_close_wrapper" class="btnAction AUTOMsaveCloseDetailBox">
+                                            <a id="btn_save_close" href="javascript:;" onclick="saveMembersInDetails();">
+                                                <apex:outputText styleClass="greenBtn greenButton" value="{!$Label.xactlyexpress__saveClose}" />
+                                            </a>
+                                        </div>
+                              
+                              </div>
+                              
+                              <div style="clear:both;height:0px;"></div>
+                              
+                              <div id="paginator_wrapper_right_side" class="AUTOpaginator_wrapper_right paginator_wrapper">
+                                    &nbsp;
+                              </div>
+                          
+                        </div>
+                                   
+                    </div>
+                    
+                    
+                </div>
+            
+
+
+           </div>
+
+        <div class="hidden">
+            <input type="hidden" id="orgName" value="{!URLENCODE($Organization.Name)}" />
+            <input type="hidden" id="orgId" value="{!URLENCODE($Organization.Id)}" />
+            <input type="hidden" id="currentUserProfile" value="{!URLENCODE(currentUserProfile)}" />
+            <input type="hidden" id="currentUserName" value="{!URLENCODE($User.FirstName + ' ' + $User.LastName)}" />
+
+            <input type="hidden" id="lbl_processing" value="{!JSENCODE($Label.processing)}" />
+            <input type="hidden" id="lbl_failed" value="{!JSENCODE($Label.Failed)}" />
+            <input type="hidden" id="lbl_success" value="{!JSENCODE($Label.success)}" />
+            <input type="hidden" id="lbl_modifyTeamMembersBefore" value="{!JSENCODE($Label.modifyTeamMembersBefore)}" />
+            <input type="hidden" id="lbl_status" value="{!JSENCODE($Label.status)}" />
+            <input type="hidden" id="lbl_empty_name" value="{!JSENCODE($Label.quotaNameEmpty)}" />
+            <input type="hidden" id="lbl_search" value="{!JSENCODE($Label.search)}" />
+            <input type="hidden" id="lbl_changes_lost" value="{!JSENCODE($Label.changesLost)}" />
+            
+        </div>
+
+        <c:XactlySMBFooterScript isChatterEnabled="{!isChatterEnabled}" loadHeaderJs="false" loadPerformantJs="true" />
+        <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'pages/css/XactlySMBCreateEditTeam.css')}" />
+        <script type="text/javascript" src="{!URLFOR($Resource.XactlySMBResources, 'pages/js/XactlySMBCreateEditTeam.js')}"></script>
+
+    <input class="hidden" id="RA_loadOptions" value="{!$RemoteAction.XactlySMBCreateEditTeamController.loadOptions}" />
+    <input class="hidden" id="RA_saveAs" value="{!$RemoteAction.XactlySMBCreateEditTeamController.saveAsTeam}" />
+    <input class="hidden" id="RA_save" value="{!$RemoteAction.XactlySMBCreateEditTeamController.saveMembers}" />
+    <input class="hidden" id="RA_delete" value="{!$RemoteAction.XactlySMBCreateEditTeamController.deleteMembers}" />
+    <input class="hidden" id="RA_loadAlreadyMembers" value="{!$RemoteAction.XactlySMBCreateEditTeamController.loadAlreadyMembers}" />
+    <input class="hidden" id="RA_save_team_name" value="{!$RemoteAction.XactlySMBCreateEditTeamController.saveOnlyTeamName}" />
+</apex:page>

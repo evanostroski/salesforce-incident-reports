@@ -1,0 +1,106 @@
+<apex:page docType="html-5.0" showHeader="false" sidebar="false" controller="l11_sc.ScorecardController" standardStylesheets="false" applyBodyTag="false" applyHtmlTag="true" cache="false">
+<head>
+  <c:ManagerControllerAttacher />
+  <meta charset="utf-8"/>
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+  <title>LevelEleven Scorecard - <apex:insert name="title"/></title>
+  <meta name="description" content=""/>
+  <meta name="viewport" content="width=device-width"/>
+  <meta http-equiv="pragma" content="no-cache"/>
+
+  <apex:outputPanel layout="none" rendered="{!!$Setup.ScorecardSettings__c.Local_Mode__c}">
+
+    <apex:outputPanel layout="none" rendered="{!isInLightningIframe}">
+      <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.homepage, '/homepage/styles/lightning.css')}" />
+    </apex:outputPanel>
+    <apex:outputPanel layout="none" rendered="{!!isInLightningIframe}">
+      <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.homepage, '/homepage/styles/main.css')}" />
+    </apex:outputPanel>
+
+  </apex:outputPanel>
+
+  <apex:outputPanel layout="none" rendered="{!isInCirrusInsights}">
+    <style>
+    .MetricList-item {
+      border-left: none !important;
+      border-right: none !important;
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      left: 0;
+    }
+    .MetricList li {
+      border-bottom: 1px solid #D8DDE7 !important;
+    }
+
+    .Homepage-main {
+      min-height: 240px;
+    }
+
+    .Detail-metricTitle {
+      position: absolute;
+      border-top: 0;
+      border-left: 0;
+      border-right: 0;
+      bottom: -3px;
+    }
+    </style>
+  </apex:outputPanel>
+
+</head>
+<body>
+
+  <script type="text/javascript">
+    (function(){
+      window.L11 = window.L11 || {};
+      window.L11.resourceUrl = '{!URLFOR($Resource.l11_sc__scorecard)}';
+      window.L11.isSalesforce = true;
+      window.L11.isSalesforce1 = !!(window.sforce && window.sforce.one);
+      window.L11.scorecardUrl = '{!URLFOR($Page.l11_sc__ScorecardHome)}';
+      window.L11.managerUrl = '{!URLFOR($Page.l11_sc__ScorecardManager)}';
+      window.L11.user = {
+        Id: '{!$User.Id}',
+        FirstName: '{!JSENCODE($User.FirstName)}',
+        LastName: '{!JSENCODE($User.LastName)}',
+      };
+
+      var root = document.getElementsByTagName('html')[0];
+      root.setAttribute('class', root.getAttribute('class') + ' ' + (window.L11.isSalesforce1 ? 'is-sf1' : 'not-sf1'));
+    }());
+
+  </script>
+  <script type="text/javascript">
+    if (typeof window.SVGElement !== 'undefined') {
+      window.SVGElement.prototype.getElementsByClassName = window.SVGElement.prototype.getElementsByClassName || function() { return []; }
+    }
+  </script>
+
+  <c:JSExternals />
+  <c:DemoMode />
+  <c:PageSettings />
+
+  <apex:outputPanel layout="none" rendered="{!(isInLightningIframe || isInCirrusInsights)}">
+    <div id="app" role="application" class="cScorecard_Mini"></div>
+  </apex:outputPanel>
+  <apex:outputPanel layout="none" rendered="{!(!isInLightningIframe && !isInCirrusInsights)}">
+    <div id="app" role="application" style="width: 200px"></div>
+  </apex:outputPanel>
+
+  <c:GA />
+
+    <!-- Adding CND for now -->
+  <script type="text/javascript" src="https://code.highcharts.com/adapters/standalone-framework.js"></script>
+  <script type="text/javascript" src="https://code.highcharts.com/highcharts.src.js"></script>
+  <script type="text/javascript" src="https://code.highcharts.com/highcharts-more.js"></script>
+  <script type="text/javascript" src="https://code.highcharts.com/modules/solid-gauge.js"></script>
+
+  <apex:outputPanel layout="none" rendered="{!$Setup.ScorecardSettings__c.Local_Mode__c}">
+    <script type="text/javascript" src="https://localhost:1337/homepage/scripts/app.js"></script>
+  </apex:outputPanel>
+  <apex:outputPanel layout="none" rendered="{!!$Setup.ScorecardSettings__c.Local_Mode__c}">
+    <script type="text/javascript" src="{!URLFOR($Resource.homepage, '/homepage/scripts/app.js')}"></script>
+  </apex:outputPanel>
+</body>
+</apex:page>

@@ -1,0 +1,1052 @@
+<!--
+ Developed by Timba Software Corp. www.timbasoftware.com admin@timbasoftware.com
+ This page lists plans
+ @author Guillermo Freire <guillermo.freire@gmail.com>
+-->   
+<apex:page id="planQuotas" controller="XactlyExpress.XactlySMBPlanController" sidebar="false" showHeader="false" standardStylesheets="false" action="{!redirectWhenAccessIsDenied}">
+   <!-- Custom Cursor Loader -->
+   <c:XactlySMBCursor /> 
+   <!-- Custom Cursor Loader -->
+    <title>{!$Label.xactlyexpress__ManagePlans}</title>  
+   <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'pages/css/XactlySMBPlanFlow.css')}" />
+     
+
+    <!-- PAGE WRAPPER -->
+    <div class="pageContent" id="pContent" style="height: auto;overflow: visible;">
+        <apex:form id="theForm" >
+            <!-- HEADER -->
+            <apex:outputPanel layout="block" styleClass="header">
+                <c:XactlySMBHeader isSaveNext="true" isAdmin="{!isAdmin}"  isActive="{!isActive}" nbrSeparator="{!nbrSeparator}" nbrDecimal="{!nbrDecimal}" currentUserOrSlected="{!currentUserOrSlected}" emulatingUserURLAppend="{!emulatingUserURLAppend}" wclabel="{!currentSettings.creditsPluralCap}" wId="{!plan.id}" step="2" wlabel="{!currentSettings.dealsPlural}" wqlabel="{!currentSettings.quotasPluralCap}" wtype="plan" hlabel="{!DefineQuotasForThePeopleLabel}" stepHelp="PlanCreateStep3" renderPlanListToQuota="false" showPrevious="true" showNext="true" showSave="true" showRefresh="true" showExport="false" selected="2" selectedLevel2="4" selectedLevel3="2"/>
+            </apex:outputPanel>
+            
+            
+            <!-- INSUFFICIENT PERMISSIONS -->
+            <apex:outputPanel rendered="{!!isAdmin}">
+                <c:XactlySMBErrorMsg error="{!$Label.xactlyexpress__InsufficientPermissions}" />
+            </apex:outputPanel>
+            
+            <div id="shadowContainer" class="shadowContainer">
+            
+            <apex:outputpanel layout="block" id="chatter" styleClass="additionalContent" rendered="{!isAdmin && isActive}">
+				<c:XactlySMBChatterWall objectId="{!$User.Id}" showHeader="true" showWall="true" currentPage="{!$CurrentPage.Name}" chatterCurrentUserImageUrl="{!chatterCurrentUser_ImageUrl}" rendered="{!isChatterEnabled && isChatterLoaded}"/>
+	        </apex:outputpanel>
+            
+            <!-- MAIN CONTENT -->
+            <apex:outputPanel layout="block" styleClass="mainContent" rendered="{!IF(AND(isAdmin,!isNull(pqm.currentQuota)),true,false)}">
+                <!-- LEFT PANEL -->
+                
+                <apex:outputPanel id="leftPanel" layout="block" styleClass="leftPanel" style="min-height: 540px;">
+                    <c:XactlySMBLeftPanelAccordeon id="XactlySMBLeftPanelAccordeon" currentSettings="{!currentSettings}" fiscalYear="{!plan.XactlyExpress__XCFiscalYearSettingsID__c}" currentPlan="{!plan.id}" step="3.1" planId="{!plan.id}" currentQuota="{!pqm.currentQuota.id}" indexSelected="1" havePreviousYear="{!havePreviousYear}" namePreviousYear="{!namePreviousYear}" haveNextYear="{!haveNextYear}" nameNextYear="{!nameNextYear}"/>
+                  
+                           <table  style="margin-left:18%;">
+                                <apex:outputPanel layout="none" rendered="{!!ISNULL(pqm.currentQuota.Id)}">
+                           <tr>
+                           <td>
+                           <apex:commandLink id="deleteQuotaLink" action="{!pqm.deleteQuota}" onclick="return deleteQuota();">
+                                   <div class="xactlyBtnRectWrapper"  onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);"  style="float:left;">
+                                                     <div class="xactlyBtnRect">
+                                                       <div class="xactlyBtnRectBackground">
+                                                           <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                               <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                                                    <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel" style="width:160px;">
+                                                                        <apex:outputtext escape="false"value="{!$Label.xactlyexpress__deleteThisQuota}">
+                                                                                  <apex:param value="{!currentSettings.quotasCap}"/>
+                                                                       </apex:outputtext>
+                                                                    </div>
+                                                                </div>
+                                                           </div>                                                                            
+                                                       </div>
+                                                    </div>                                                                  
+                                    </div>                                        
+                               </apex:commandLink>
+                           </td>
+                           </tr>
+                             </apex:outputPanel>
+                           <tr>
+                           <td>
+                              <a id="backToOverviewLink" href="{!$Page.XactlySMBPlanCreateQuotaOverview}?id={!plan.Id}&step=3.1" class="HelveticaRegular12c1">
+                               <div class="xactlyBtnRectWrapper"  onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);"  style="float:left;">
+                                                     <div class="xactlyBtnRect">
+                                                       <div class="xactlyBtnRectBackground">
+                                                           <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                               <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                                                    <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel" style="width:160px;">
+                                                                       {!$Label.backToOverview}
+                                                                    </div>
+                                                                </div>
+                                                           </div>                                                                            
+                                                       </div>
+                                                    </div>                                                                  
+                                    </div> 
+                            </a>
+                           </td>
+                           </tr>
+                            <apex:outputPanel layout="block" rendered="{!!ISNULL(pqm.currentQuota.Id)}">
+                           <tr>
+                           <td>
+                            <a rel="superbox[content#saveAsName.xactlySuperBox][380][250]" href="#saveAsLightBox" id="saveAsName"></a>
+                              <div class="xactlyBtnRectWrapper"  onmouseover="xactlyBtnRectMouseOver(this);" onclick="openSaveAs()" onmouseout="xactlyBtnRectMouseOut(this);"  style="float:left;">
+                                                     <div class="xactlyBtnRect">
+                                                       <div class="xactlyBtnRectBackground">
+                                                           <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                               <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                                                    <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel" style="width:160px;">
+                                                                         {!$Label.SaveAs}
+                                                                    </div>
+                                                                </div>
+                                                           </div>                                                                            
+                                                       </div>
+                                                    </div>                                                                  
+                              </div>
+                             
+                                 
+                           </td>
+                           </tr>
+                            </apex:outputPanel>
+                           </table>
+
+                    <!-- BehindSaveAs -->
+                    <apex:outputPanel id="SaveAsWrapper">
+                    <input type="hidden"  value="{!showSaveAs}" id="SaveAsLoaded" />
+                    <apex:outputPanel rendered="{!showSaveAs}">
+                       <div id="saveAsLightBox" style="display:none;">
+                         <div class="backgrounds1 header_div_11" style="height:15px;margin-left:15px;margin-right:11px;background-repeat:repeat-x;">
+						    <div class="img-topLeftOrange backgrounds2 header_div_top_left" style="float: left;margin-left:-15px;width:18px;height:15px"></div>
+						    <div class="img-topRightOrange backgrounds2 header_div_top_right" style="width:18px;height:15px;float:right;margin-right:-18px;"></div>
+						    <div style="clear:both"></div>
+						</div>
+                           <div style="width:100%;border-right:2px solid #D49761;border-left:2px solid #D49761;background-color:#FFF;">
+                               <div style="margin-left:20px;">
+                                   
+                                   <apex:outputPanel layout="block" styleClass="btn_close_lbox_wrapper" style="margin-top:0px;">
+                                            <apex:outputPanel layout="block" styleClass="btn_close_lbox" style="cursor:pointer;"onclick="jQuery.superbox.close();">
+                                                &nbsp;
+                                            </apex:outputPanel>
+                                   </apex:outputPanel>
+                                   <apex:outputText value="{!$Label.xactlyexpress__SaveAs} {!currentSettings.quotas}" styleClass="PNovaBlackTitle1" />
+                                   
+                                   <br/><br/>
+                                   
+                                   <div style="width:auto;height:30px;">
+                                   <div style="float:left">
+                                        <apex:outputText value="{!$Label.xactlyexpress__nameForNewQuota}" styleClass="PNovaSemiBold18c3">
+                                            <apex:param name="credit" value="{!currentSettings.quotas}" />
+                                        </apex:outputText>
+                                   </div>
+                                   &nbsp;&nbsp;&nbsp;
+                                   <div style="float:left;margin-left:20px;">
+                                        <apex:inputText value="{!pqm.saveAsName}" id="inputSaveAs" styleClass="AUTOM_INPUT_SAVEAS_NAME"/>
+                                   </div>
+                                   <div style="width:3px;height:24px;background-color:#ff0000;float:left;">&nbsp;</div>
+                                   </div>
+                                   
+                                   <br/><br/><br/>
+                                   
+                                   <div style="width:280px;margin-left:auto;margin-right:auto;">
+                                   
+                                                    <apex:outputPanel layout="block" styleClass="btn_silver_wrapper" onmouseover="btnSilverOver(this);" onmouseout="btnSilverOut(this);" onclick="rerenderNoCompare = false;waitOn();jQuery.superbox.overrideSourceWithSuperboxContent();saveAs();">
+                                                        <apex:outputPanel layout="inline" styleClass="btn_silver">
+                                                            <apex:outputPanel layout="inline" styleClass="btn_silver_r">
+                                                                <apex:outputText styleClass="a_btn_silver a_btn_silver_blue" value="{!$Label.xactlyexpress__saveClose}" />
+                                                            </apex:outputPanel>                                             
+                                                        </apex:outputPanel>
+                                                    </apex:outputPanel>
+                                   
+                                                    <apex:outputPanel layout="block" styleClass="btn_silver_wrapper" onmouseover="btnSilverOver(this);" onmouseout="btnSilverOut(this);" onclick="jQuery.superbox.close();">
+                                                        <apex:outputPanel layout="inline" styleClass="btn_silver">
+                                                            <apex:outputPanel layout="inline" styleClass="btn_silver_r">
+                                                                <apex:outputText styleClass="a_btn_silver a_btn_silver_gray" value="{!$Label.xactlyexpress__cancelClose}" />
+                                                            </apex:outputPanel>                                             
+                                                        </apex:outputPanel>
+                                                    </apex:outputPanel>
+                        
+                                   
+                                   </div>
+                                   
+                                   <div style="clear:both"></div>
+                               </div>
+                           </div>
+                         <div class="backgrounds1 header_div_10" style="height:15px;margin-left:15px;margin-right:11px;background-repeat:repeat-x;">
+						    <div class="img-topLeftOrange backgrounds2 header_div_bottom_left" style="float: left;margin-left:-15px;width:18px;height:15px"></div>
+						    <div class="img-topRightOrange backgrounds2 header_div_bottom_right" style="width:18px;height:15px;float:right;margin-right:-18px;"></div>
+						    <div style="clear:both"></div>
+						</div>
+                       </div>
+                       </apex:outputPanel>
+                       </apex:outputPanel>
+                       <!-- EndSaveAs -->
+                </apex:outputPanel>
+                 
+                <!-- CONTENT -->
+
+                        
+                <!-- QUOTAS TABLE -->
+                <apex:outputPanel id="quotaContent" layout="block" styleClass="content" style="overflow:visible;height:auto;">    
+                 <!-- Collapse -->                                        
+                    <div style="margin: 7px 60px 0 10px;">
+                    
+                        <apex:outputPanel id="errorMsg" layout="block">
+                            <c:XactlySMBErrorMsg error="{!errorMsg}"/> 
+                        </apex:outputPanel>
+                        
+                        <div style="clear: both;"></div>
+                        
+                        <div class="box">
+                            <div class="img_repeat tm">
+							    <div class="img_no_repeat tl"></div>
+							    <div class="img_no_repeat tr"></div>
+							    <div style="clear:both"></div>
+							</div>
+                            <div class="roundedBox">
+                                <div class="boxHeader">
+                                    <div class="PNovaBlack60c5 stepActionNumber">
+                                     A
+                                    </div>
+                                    <div class="titleWrapper">  
+                                        <div class="mainTitle PNovaSemiBold17c3">{!pqm.quotaNameLabel}</div>
+                                        <div class="detailedTitle HelveticaRegular12c3">{!pqm.whatQuotaNameLabel}</div>
+                                    </div>
+                                    <div class="extraTitleStuff"></div>
+                                    <div style="clear:both"></div>
+                                </div> 
+                                <div class="boxContent"> 
+                                    <apex:inputText maxlength="35" value="{!pqm.currentQuota.name}" size="25" id="quotaNameInput" styleClass="quotaNameInput" />
+                                </div>    
+                            </div>      
+                            <div class="img_repeat bm">
+								<div class="img_no_repeat bl"></div>
+								<div class="img_no_repeat br"></div>
+							</div>
+                        </div>
+                        
+                        <div style="height:10px">&nbsp;</div>
+                        
+                        <div class="box">
+                            <div class="img_repeat tm">
+							    <div class="img_no_repeat tl"></div>
+							    <div class="img_no_repeat tr"></div>
+							    <div style="clear:both"></div>
+							</div>
+                            <div class="roundedBox" style="position: relative;">
+                                <div class="boxHeader">
+                                    <div class="PNovaBlack60c5 stepActionNumber">
+                                     B
+                                    </div>
+                                    <div class="titleWrapper floatNone">  
+                                        <div class="mainTitle PNovaSemiBold17c3">{!pqm.enterQuotaValuesLabel}</div>
+                                        <div class="detailedTitle HelveticaRegular12c3">{!pqm.youCanEnterQuotaValuesLabel}</div>
+                                    </div>
+                                </div>
+                                 
+                                <div class="boxContent">
+                                        <div>
+                                           <apex:outputPanel id="importExportQuotaLink" rendered="{!pqm.currentQuota.Id!=null}">
+                                            <div class="xactlyBtnRectWrapper AUTOM_ImportExportQuotaOpen" onmouseover="xactlyBtnRectMouseOver(this);" onclick="openImportExportQuota();" onmouseout="xactlyBtnRectMouseOut(this);" style="float:right; margin-right:20px;" >
+                                                <div class="xactlyBtnRect">
+                                                    <div class="xactlyBtnRectBackground">
+                                                        <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                            <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                                                <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel">
+                                                                    <apex:outputText value="{!$Label.xactlyexpress__ImportQuota}"><apex:param value="{!quotaPluralTerminology}"/></apex:outputText>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                           </apex:outputPanel>
+                                        
+                                            <div style="float: left; padding-right: 40px;color:#143E49;">
+                                                <apex:outputpanel layout="none" rendered="{!IF(pqm.currentQuota.XactlyExpress__EnterByPerson__c == false,true,false)}">
+                                                   <input type="radio" name="radios" id="radios1" value = "enterQuotaByPerson" checked="checked" />
+                                                </apex:outputpanel>
+                                                <apex:outputpanel layout="none" rendered="{!IF(pqm.currentQuota.XactlyExpress__EnterByPerson__c == false,false,true)}">
+                                                   <input type="radio" name="radios" id="radios1" value = "enterQuotaByPerson" />
+                                                </apex:outputpanel>
+                                                <label for="radios1">
+                                                    <span style="color:#143E49;font-size:12px;font-weight:bold;">
+                                                        {!pqm.enterQuotaByPlanLabel} 
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div style="float: left; padding-right: 40px;color:#143E49;">
+                                       
+                                                <apex:outputpanel layout="none" rendered="{!IF(pqm.currentQuota.XactlyExpress__EnterByPerson__c == true,true,false)}">
+
+                                                    <apex:outputpanel layout="none" rendered="{!IF(hasUsers = true, 'true', 'false')}">
+                                                        <input type="radio" name="radios" id="radios2" value = "enterQuotaByPlan" checked="checked"/>
+                                                    </apex:outputpanel>
+                                                    <apex:outputpanel layout="none" rendered="{!IF(hasUsers = false, 'true', 'false')}">
+                                                        <input type="radio" name="radios" id="radios2" value = "enterQuotaByPlan" checked="checked" disabled="true" />
+                                                    </apex:outputpanel>
+
+                                                </apex:outputpanel>
+                                                <apex:outputpanel layout="none" rendered="{!IF(pqm.currentQuota.XactlyExpress__EnterByPerson__c == true,false,true)}">
+
+                                                    <apex:outputpanel layout="none" rendered="{!IF(hasUsers = true, 'true', 'false')}">
+                                                        <input type="radio" name="radios" id="radios2" value = "enterQuotaByPlan" />
+                                                    </apex:outputpanel>
+                                                    <apex:outputpanel layout="none" rendered="{!IF(hasUsers = false, 'true', 'false')}">
+                                                        <input type="radio" name="radios" id="radios2" value = "enterQuotaByPlan" disabled="true" />
+                                                    </apex:outputpanel>
+
+                                                </apex:outputpanel>
+                                                <label for="radios2">
+                                                    <span style="color:#143E49;font-size:12px;font-weight:bold;">
+                                                        {!pqm.enterQuotaByPersonLabel} 
+                                                    </span>
+                                                </label>
+                                            </div>
+                                            <div style="clear: both;"></div>
+                                        </div>
+                                </div>
+                                 
+                                
+                                <div style="background-color:#FFFFFF; padding: 0 5px 0 5px;">
+                                
+                                    <!-- Quota by Person table -->
+                                    <apex:outputPanel id="quotasTablePanel" styleClass="quotaByPersonBlock" layout="block" style="{!IF(pqm.currentQuota.XactlyExpress__EnterByPerson__c == false,'display:none','')};width:711px;margin-left:auto;margin-right:auto;">
+                                            <div class='backgrounds2 topTable hideable tochgsize' id='topTableBor' style="margin-left:0px;"></div>
+                                            
+                                             <!-- Top Panel -->
+                                                <apex:outputPanel id="tableContainer" styleClass="tableContainer2" layout="block">            
+                                                    <div class="FixedCelsTable" style="background:#eeeeee;">
+                                                    
+                                                        <div id="fixedSide" style="height:30px;">
+                                                        
+
+                                                           <div id="tableHolderHeaders" style="height:30px;width:100%;position:absolute;overflow:hidden;">
+                                                                    <table id="tcontPrim" cellpadding="0" class="payTable" cellspacing="0" border="0" style="margin-top: -1px;position:absolute;top:0px;left:0px;z-index:90;width:375px;">
+                                                                        <tr class="even" >
+                                                                             <td>&nbsp;</td>
+                                                                             <td style="white-space: nowrap">{!$Label.Override}</td>
+                                                                             <td style="white-space: nowrap">{!$Label.FirstName}</td>
+                                                                             <td style="white-space: nowrap">{!$Label.LastName}</td>
+                                                                        </tr>
+                                                                   </table>
+                                                           
+                                                                   <div id="colsContainer" class="colsContainer" style="position:absolute;top:0px;left:0px;z-index:80">
+                                                                       <div id="cols"  class="columns" style="margin-left: 375px;">
+                                                                           <table id="tcont" class="payTable" cellspacing="0" border="0" style="margin-top: 0px;">
+                                                                                <tr class="even" >
+                                                                                <!-- 
+                                                                                    <td>&nbsp;</td>
+                                                                                    <td style="white-space: nowrap">{!$Label.Override}</td>
+                                                                                    <td style="white-space: nowrap">{!$Label.FirstName}</td>
+                                                                                    <td style="white-space: nowrap">{!$Label.LastName}</td>
+                                                                                     -->
+                                                                                    <td style="white-space: nowrap">
+                                                                                      <span style="white-space: nowrap">
+                                                                                        <apex:outputtext value="{!$Label.xactlyexpress__AnnualQuota}">
+                                                                                            <apex:param value="{!currentSettings.quotasCap}" />
+                                                                                        </apex:outputtext>
+                                                                                        <span class="openAnnual displayNone" onclick="openAnnual();">&gt;&gt;</span>
+                                                                                        <span class="closeAnnual" onclick="closeAnnual();">&lt;&lt;</span>
+                                                                                      </span>
+                                                                                    </td>
+                                                                                    <td style="white-space: nowrap" class="quotaGroup">
+                                                                                        Q1 {!fiscalYearName}
+                                                                                        <span class="openQuarter1 displayNone" onclick="openQuarter(1);">&gt;&gt;</span>
+                                                                                        <span class="closeQuarter1" onclick="closeQuarter(1);">&lt;&lt;</span>
+                                                                                    </td>
+                                                                                    <td style="white-space: nowrap" class="quarter1Months">M1 {!fiscalYearName}</td>
+                                                                                    <td style="white-space: nowrap" class="quarter1Months">M2 {!fiscalYearName}</td>
+                                                                                    <td style="white-space: nowrap" class="quarter1Months">M3 {!fiscalYearName}</td>
+                                                                                    <td style="white-space: nowrap" class="quotaGroup">
+                                                                                        Q2 {!fiscalYearName}
+                                                                                        <span class="openQuarter2 displayNone" onclick="openQuarter(2);">&gt;&gt;</span>
+                                                                                        <span class="closeQuarter2" onclick="closeQuarter(2);">&lt;&lt;</span>
+                                                                                    </td>
+                                                                                    <td style="white-space: nowrap" class="quarter2Months">M4 {!fiscalYearName}</td>
+                                                                                    <td style="white-space: nowrap" class="quarter2Months">M5 {!fiscalYearName}</td>
+                                                                                    <td style="white-space: nowrap" class="quarter2Months">M6 {!fiscalYearName}</td>
+                                                                                    <td style="white-space: nowrap" class="quotaGroup">
+                                                                                        Q3 {!fiscalYearName}
+                                                                                        <span class="openQuarter3 displayNone" onclick="openQuarter(3);">&gt;&gt;</span>
+                                                                                        <span class="closeQuarter3" onclick="closeQuarter(3);">&lt;&lt;</span>
+                                                                                    </td>
+                                                                                    <td style="white-space: nowrap" class="quarter3Months">M7 {!fiscalYearName}</td>
+                                                                                    <td style="white-space: nowrap" class="quarter3Months">M8 {!fiscalYearName}</td>
+                                                                                    <td style="white-space: nowrap" class="quarter3Months">M9 {!fiscalYearName}</td>
+                                                                                    <td style="white-space: nowrap" class="quotaGroup">
+                                                                                        Q4 {!fiscalYearName}
+                                                                                        <span class="openQuarter4 displayNone" onclick="openQuarter(4);">&gt;&gt;</span>
+                                                                                        <span class="closeQuarter4" onclick="closeQuarter(4);">&lt;&lt;</span>
+                                                                                    </td>
+                                                                                    <td style="white-space: nowrap" class="quarter4Months">M10 {!fiscalYearName}</td>
+                                                                                    <td style="white-space: nowrap" class="quarter4Months">M11 {!fiscalYearName}</td>
+                                                                                    <td style="white-space: nowrap" class="quarter4Months">M12 {!fiscalYearName}</td>
+                                                                                </tr>
+                                                                            </table>
+                                                                       </div>
+                                                                   </div>
+                                                                                                                                                
+                                                           </div>
+                                                       
+                                                                                                               
+                                                        
+                                                        
+
+                                                                <div id="FixedCelsTableGrid2" style="z-index: 12; position: absolute; height: 364px;width:375px;overflow: hidden;">
+                                                                   
+                                                                   <div style="max-height: 360px;position:absolute;top:30px;width:100%;" id="leftQuotaTablePersonCell">
+
+                                                                       <table id="quotasTablePrim" cellspacing="0" border="0" cellpadding="0" style="width:100%;">
+                                                                               <apex:variable var="rowCount" value="{!0}"/>
+                                                                              <apex:repeat value="{!pqm.currentQuotaDetails}" var="quota" id="quotaGeneratorPrim">
+                                                                                      <tr>
+                                                                                           <td style="white-space: nowrap">
+                                                                                               <apex:commandLink id="addCommentLink" styleClass="{!IF(quota.qd.XactlyExpress__Comment__c=='','inteactionIconSprite addCommentLink','inteactionIconSprite editCommentLink')}" action="{!pqm.setComment}" rerender="commentBox,errorMsg" status="ajaxStatus" onclick="waitOn();" oncomplete="introAsTab();waitOff();" >
+                                                                                                   <apex:param value="{!quota.qd.ProfilePlanId__r.ProfileId__r.UserId__r.Id}" name="activeId"/>
+                                                                                               </apex:commandLink>
+                                                                                           </td>
+                                                                                           <td style="white-space: nowrap">
+                                                                                               <apex:inputCheckbox value="{!quota.qd.XactlyExpress__OverrideDefault__c}" styleClass="checkClassPeople{!FLOOR(rowCount)}" onclick="quotaValuesHandler.doQuotaByPersonRowEditable(this);"/>
+                                                                                               <span style="overflow:hidden">
+                                                                                                <apex:outputLabel value="{!quota.currencyProfile }"/>
+                                                                                               </span>
+                                                                                           </td>
+                                                                                           <td style="white-space: nowrap">
+                                                                                               <apex:outputLabel value="{!quota.qd.ProfilePlanId__r.ProfileId__r.UserId__r.FirstName}"/>
+                                                                                           </td>
+                                                                                           <td style="white-space: nowrap">
+                                                                                               <apex:outputLabel value="{!quota.qd.ProfilePlanId__r.ProfileId__r.UserId__r.LastName}"/>
+                                                                                           </td>
+                                                                                       </tr>
+                                                                                    <apex:variable var="rowCount" value="{!rowCount + 1}"/>
+                                                                              </apex:repeat>
+                                                                       </table> 
+                                                                   </div>
+                                                               </div>
+                                                               
+                                                                                                                       
+                                                        </div>
+                                                    
+                                                    
+                                                       <div class="tablesHolder" style="height: 350px;margin-left: 375px;">
+                                                       
+                                                           <apex:outputPanel id="FixedCelsTableGrid">
+                                                           
+                                                           
+                                                               
+                                                               <div id="recordsList" class="recordsList">
+
+                                                                   <!-- Cells Panel -->
+                                                                   <div id="cellContainer" class="cellContainer">
+                                                                       <div id="cells" class="cells" style="margin-left: 0px;overflow:inherit;margin-top:0px;">
+                                                                           <table id="quotasTable" cellspacing="0" border="0" cellpadding="0">
+                                                                               <apex:variable var="rowCount" value="{!0}"/>
+                                                                               <apex:repeat value="{!pqm.currentQuotaDetails}" var="quota" id="quotaGenerator">
+                                                                                       <tr>
+                                                                                       <!--
+                                                                                            <td style="white-space: nowrap">
+                                                                                                <apex:commandLink id="addCommentLink" styleClass="{!IF(quota.qd.XactlyExpress__Comment__c=='','inteactionIconSprite addCommentLink','inteactionIconSprite editCommentLink')}" action="{!pqm.setComment}" rerender="commentBox,errorMsg" status="ajaxStatus" onclick="waitOn();" oncomplete="introAsTab();waitOff();" >
+                                                                                                    <apex:param value="{!quota.qd.ProfilePlanId__r.ProfileId__r.UserId__r.Id}" name="activeId"/>
+                                                                                                </apex:commandLink>
+                                                                                            </td>
+                                                                                            <td style="white-space: nowrap">
+                                                                                                <input type="checkbox" class="checkClassPeople{!FLOOR(rowCount)}"/>
+                                                                                                <span style="overflow:hidden">
+                                                                                                 <apex:outputLabel value="{!quota.currencyProfile }"/>
+                                                                                                </span>
+                                                                                            </td>
+                                                                                            <td style="white-space: nowrap">
+                                                                                                <apex:outputLabel value="{!quota.qd.ProfilePlanId__r.ProfileId__r.UserId__r.FirstName}"/>
+                                                                                            </td>
+                                                                                            <td style="white-space: nowrap">
+                                                                                                <apex:outputLabel value="{!quota.qd.ProfilePlanId__r.ProfileId__r.UserId__r.LastName}"/>
+                                                                                            </td>
+                                                                                            -->
+                                                                                            <td style="white-space: nowrap" class="annualTd">
+                                                                                                <input type="checkbox" class="checkClassPeople{!FLOOR(rowCount)}" style="display:none;" />
+                                                                                                <div class="showVal" style="text-align:right;" onmouseover="changeCursor(this, 'annual')">{!quota.AnnualAmount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="annualIndividual" value="{!quota.AnnualAmount}" styleClass="hiddenVal row{!FLOOR(rowCount)}" style="display:none;" onblur="$J(this).val($J.trim($J(this).val()));$J(this).val(unformatNumber($J(this).val()));if (isNaN($J(this).val())){$J(this).val(zero);}$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                                         
+                                                                                            <td style="white-space: nowrap" class="quotaGroup">    
+                                                                                              <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')"> <span>{!quota.Q1Amount}</span></div>
+                                                                                              <apex:inputText id="q1Individual" value="{!quota.Q1Amount}" styleClass="hiddenVal qbpQuarter" style="display:none;" onblur="calculateQuarterly(this,1);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                                       
+                                                                                            <td style="white-space: nowrap" id="{!quota.qd.id}-1-" class="quarter1Months">
+                                                                                                <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')">{!quota.M1Amount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="m1Individual" value="{!quota.M1Amount}" styleClass="hiddenVal" style="display:none;" onblur="calculateAnnual(this);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            <td style="white-space: nowrap" id="{!quota.qd.id}-2-" class="quarter1Months">
+                                                                                                <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')">{!quota.M2Amount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="m2Individual" value="{!quota.M2Amount}" styleClass="hiddenVal" style="display:none;" onblur="calculateAnnual(this);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            <td style="white-space: nowrap" id="{!quota.qd.id}-3-" class="quarter1Months">
+                                                                                                <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')">{!quota.M3Amount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="m3Individual" value="{!quota.M3Amount}" styleClass="hiddenVal" style="display:none;" onblur="calculateAnnual(this);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            
+                                                                                            <td style="white-space: nowrap" class="quotaGroup">
+                                                                                              <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')"> <span>{!quota.Q2Amount}</span></div>
+                                                                                              <apex:inputText id="q2Individual" value="{!quota.Q2Amount}" styleClass="hiddenVal qbpQuarter" style="display:none;" onblur=" calculateQuarterly(this,2);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            
+                                                                                            <td style="white-space: nowrap" id="{!quota.qd.id}-4-" class="quarter2Months">
+                                                                                                <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')">{!quota.M4Amount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="m4Individual" value="{!quota.M4Amount}" styleClass="hiddenVal" style="display:none;" onblur="calculateAnnual(this);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            <td style="white-space: nowrap" id="{!quota.qd.id}-5-" class="quarter2Months">
+                                                                                                <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')">{!quota.M5Amount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="m5Individual" value="{!quota.M5Amount}" styleClass="hiddenVal" style="display:none;" onblur="calculateAnnual(this);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            <td style="white-space: nowrap" id="{!quota.qd.id}-6-" class="quarter2Months">
+                                                                                                <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')">{!quota.M6Amount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="m6Individual" value="{!quota.M6Amount}" styleClass="hiddenVal" style="display:none;" onblur="calculateAnnual(this);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            
+                                                                                            <td style="white-space: nowrap" class="quotaGroup">
+                                                                                              <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')"> <span>{!quota.Q3Amount}</span></div>
+                                                                                              <apex:inputText id="q3Individual" value="{!quota.Q3Amount}" styleClass="hiddenVal qbpQuarter" style="display:none;" onblur=" calculateQuarterly(this,3);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            
+                                                                                            <td style="white-space: nowrap" id="{!quota.qd.id}-7-" class="quarter3Months">
+                                                                                                <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')">{!quota.M7Amount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="m7Individual" value="{!quota.M7Amount}" styleClass="hiddenVal" style="display:none;" onblur="calculateAnnual(this);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            <td style="white-space: nowrap" id="{!quota.qd.id}-8-" class="quarter3Months">
+                                                                                                <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')">{!quota.M8Amount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="m8Individual" value="{!quota.M8Amount}" styleClass="hiddenVal" style="display:none;" onblur="calculateAnnual(this);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            <td style="white-space: nowrap" id="{!quota.qd.id}-9-" class="quarter3Months">
+                                                                                                <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')">{!quota.M9Amount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="m9Individual" value="{!quota.M9Amount}" styleClass="hiddenVal" style="display:none;" onblur="calculateAnnual(this);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            
+                                                                                            <td style="white-space: nowrap" class="quotaGroup">
+                                                                                              <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')"> <span>{!quota.Q4Amount}</span></div>
+                                                                                              <apex:inputText id="q4Individual" value="{!quota.Q4Amount}" styleClass="hiddenVal qbpQuarter" style="display:none;" onblur="calculateQuarterly(this,4);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            
+                                                                                            <td style="white-space: nowrap" id="{!quota.qd.id}-10-" class="quarter4Months">
+                                                                                                <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')">{!quota.M10Amount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="m10Individual" value="{!quota.M10Amount}" styleClass="hiddenVal" style="display:none;" onblur="calculateAnnual(this);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            <td style="white-space: nowrap" id="{!quota.qd.id}-11-" class="quarter4Months">
+                                                                                                <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')">{!quota.M11Amount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="m11Individual"value="{!quota.M11Amount}" styleClass="hiddenVal" style="display:none;" onblur="calculateAnnual(this);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                            <td style="white-space: nowrap" id="{!quota.qd.id}-12-" class="quarter4Months">
+                                                                                                <div class="showVal" style="width:75px;text-align:right" onmouseover="changeCursor(this, 'period')">{!quota.M12Amount}<span>&nbsp;</span></div>
+                                                                                                <apex:inputText id="m12Individual" value="{!quota.M12Amount}" styleClass="hiddenVal" style="display:none;" onblur="calculateAnnual(this);$J(this).val(unformatNumber($J(this).val()));$J(this).val(formatNumberEx(parseFloat(parseFloat(($J(this).val())).toFixed(2)), false));"/>
+                                                                                            </td>
+                                                                                        </tr>
+                                                                                    <apex:variable var="rowCount" value="{!rowCount + 1}"/>
+                                                                                </apex:repeat>
+                                                                           </table>
+                                                                       </div>
+                                                                   </div>
+                                                               </div>
+                                                           </apex:outputPanel>
+                                                       </div>
+                                                   </div>      
+                                               </apex:outputPanel>
+                                          <div class='backgrounds2 bottomTable hideable tochgsize' id='bottomTableBor' style="margin-left:0px;"> </div>
+                                       </apex:outputPanel>
+                                       
+                                       
+                                       <!-- Quota by Plan table -->
+                                       <table cellspacing="0" cellpadding="0" style="width: 100%;{!IF(pqm.currentQuota.EnterByPerson__c == true,'display:none','')}" id="quotaByPlanBlock" class="quotaByPlanBlock">
+                                            <thead>
+                                               <tr class="gray">
+                                                   <th style="width: 190px;" colspan="2">
+                                                     <div style="width: 50%; padding-top: 3px;" class="frequency">
+                                                         <label for="Year">{!$Label.yearlabel}</label>
+                                                     </div>
+                                                     <div style="width: 50%;">
+                                                         <input type="radio" value="Year" id="Year" onclick="quotaValuesHandler.quotaByPlanColumnEditionHandler(this.value);introAsTab();" name="freq" />
+                                                     </div>
+                                                   </th>
+                                                   <th colspan="2">
+                                                     <div id="QuarterTH" style="padding-top: 3px; width: 55%;" class="frequency">
+                                                         {!$Label.QuarterLabel}
+                                                     </div>
+                                                     <div style="width: 36%;">
+                                                         <input type="radio" value="Quarter" id="Quarter" onclick="quotaValuesHandler.quotaByPlanColumnEditionHandler(this.value);introAsTab();" name="freq" />
+                                                     </div>
+                                                     <div id="disableQuarter" style="float: right; padding: 3px 3px 0pt 0pt;cursor:pointer;">
+                                                         <div class="cancelQuotaButton" onmouseover="jQuery(this).css('background-position','bottom');"  onmouseout="jQuery(this).css('background-position','top');"></div>
+                                                     </div>
+                                                     <div id="enableQuarter" style="float: right; padding: 3px 3px 0pt 0pt;display:none;cursor:pointer;">
+                                                         <div style="margin-right: 5px;" onmouseover="jQuery(this).css('color','#FFFFFF');" onmouseout="jQuery(this).css('color','#264D5B');">{!$Label.ACTIVATE}</div>
+                                                         <img src="{!URLFOR($Resource.XactlySMBResources ,'img/buttons/activate.png')}" width="12" height="12"/>
+                                                     </div>
+                                                   </th>
+                                                   <th colspan="2">
+                                                     <div id="MonthTH" style="padding-top: 3px; width: 40%;" class="frequency">
+                                                         {!$Label.MonthLabel}
+                                                     </div>
+                                                     <div style="width: 40%; text-align: right;">
+                                                         <input type="radio" value="Month" id="Month" onclick="quotaValuesHandler.quotaByPlanColumnEditionHandler(this.value);introAsTab();" name="freq" />
+                                                     </div>
+                                                     <div id="disableMonth" style="float: right; padding: 3px 3px 0pt 0pt;cursor:pointer;">
+                                                         <div class="cancelQuotaButton" onmouseover="jQuery(this).css('background-position','bottom');"  onmouseout="jQuery(this).css('background-position','top');"></div>
+                                                     </div>
+                                                     <div id="enableMonth" style="float: right; padding: 3px 3px 0pt 0pt;display:none;cursor:pointer;">
+                                                         <div style="margin-right: 5px;" onmouseover="jQuery(this).css('color','#FFFFFF');" onmouseout="jQuery(this).css('color','#264D5B');">{!$Label.ACTIVATE}</div>
+                                                         <img src="{!URLFOR($Resource.XactlySMBResources ,'img/buttons/activate.png')}" width="12" height="12"/>
+                                                     </div>
+                                                   </th>
+                                                   
+                                                   <!-- <th>    Do not ERASE this, commented i
+                                                      <div style="padding-top: 3px;">
+                                                         PERCENT
+                                                      </div>
+                                                      <div style="text-align: right;">
+                                                         <input type="checkbox" value="percent" name="percent" id="percent" disabled>
+                                                     </div>
+                                                   </th>
+                                                    -->
+                                               </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                     <td class="gray fontBold">
+                                                         <span style="white-space: nowrap;">
+                                                            {!$Label.yearlabel}-{!pqm.fiscalYear.name}
+                                                         </span> 
+                                                     </td>
+                                                     <td style="width: 105px;" class="grayLight Year" id="year">
+                                                         <apex:inputText id="quotaAnnual" value="{!pqm.currentQuotaDetailsWithoutProfileId.AnnualAmount}" style="display: none;"/>
+                                                         <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.AnnualAmount}</apex:outputPanel>   
+                                                     </td>
+                                                     <td class="gray">
+                                                         
+                                                     </td>
+                                                     <td style="width: 105px;" class="grayLight">
+                         
+                                                     </td>
+                                                     <td class="gray">
+                                                        
+                                                     </td>
+                                                     <td style="width: 105px;" class="grayLight">
+                                                         
+                                                     </td>
+                                                     <td style="width: 99px;" class="gray percent" id="totalPercent">
+                                                         <input type="text" value="100" style="display: none;" datatype="percentage" />
+                                                         <div class="disable">100%</div>
+                                                     </td>
+                                                 </tr>
+                                             <tr>
+                                                 <td rowspan="16" class="gray">
+                                                     
+                                                 </td>
+                                                 <td rowspan="16" class="grayLight">
+                                                   
+                                                 </td>
+                                                 <td class="gray fontBold QuarterLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!$Label.PeriodQuarterAbb}-1-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight Quarter" id="quarter1">
+                                                     <apex:inputText id="quarter1" value="{!pqm.currentQuotaDetailsWithoutProfileId.Q1Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.Q1Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray">
+                                                     
+                                                 </td>
+                                                 <td class="grayLight">     
+                                                     
+                                                 </td>
+                                                 <td class="gray percentQuarter percent" id="quarterPorcentage1">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>   
+                                             <tr>
+                                                 <td rowspan="3" class="gray">
+                                                     
+                                                 </td>
+                                                 <td rowspan="3" class="grayLight">
+                                                    
+                                                 </td>
+                                                 <td class="gray MonthLabel">
+                                                     <span style="white-space: nowrap;">
+                                                     {!pqm.Period1}-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight monthFromQuarter1 Month" id="month1">
+                                                     <apex:inputText id="period1" value="{!pqm.currentQuotaDetailsWithoutProfileId.M1Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.M1Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray percentageFromQuarter1 monthlyPercentage percent" id="percentage1">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td class="gray MonthLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!pqm.Period2}-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight monthFromQuarter1 Month" id="month2">
+                                                     <apex:inputText id="period2" value="{!pqm.currentQuotaDetailsWithoutProfileId.M2Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.M2Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray percentageFromQuarter1 monthlyPercentage percent" id="percentage2">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td class="gray MonthLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!pqm.Period3}-{!pqm.fiscalYear.name}
+                                                     </span>                        
+                                                 </td>
+                                                 <td class="grayLight monthFromQuarter1 Month" id="month3">
+                                                     <apex:inputText id="period3" value="{!pqm.currentQuotaDetailsWithoutProfileId.M3Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.M3Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray percentageFromQuarter1 monthlyPercentage percent" id="percentage3">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td class="gray fontBold QuarterLabel">
+                                                     <span style="white-space: nowrap;">                
+                                                         {!$Label.PeriodQuarterAbb}-2-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight Quarter" id="quarter2">
+                                                     <apex:inputText id="quarter2" value="{!pqm.currentQuotaDetailsWithoutProfileId.Q2Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.Q2Amount}</apex:outputPanel> 
+                                                 </td>
+                                                 <td class="gray">
+                                                     
+                                                 </td>
+                                                 <td class="grayLight">
+                                                     
+                                                 </td>
+                                                 <td class="gray percentQuarter percent" id="quarterPorcentage2">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td rowspan="3" class="gray">
+                                                     
+                                                 </td>
+                                                 <td rowspan="3" class="grayLight">
+                                                    
+                                                 </td>
+                                                 <td class="gray MonthLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!pqm.Period4}-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight monthFromQuarter2 Month" id="month4">
+                                                     <apex:inputText id="period4" value="{!pqm.currentQuotaDetailsWithoutProfileId.M4Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.M4Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray percentageFromQuarter2 monthlyPercentage percent" id="percentage4">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td class="gray MonthLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!pqm.Period5}-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight monthFromQuarter2 Month" id="month5"> 
+                                                     <apex:inputText id="period5" value="{!pqm.currentQuotaDetailsWithoutProfileId.M5Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.M5Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray percentageFromQuarter2 monthlyPercentage percent" id="percentage5">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td class="gray MonthLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!pqm.Period6}-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight monthFromQuarter2 Month" id="month6">
+                                                     <apex:inputText id="period6" value="{!pqm.currentQuotaDetailsWithoutProfileId.M6Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.M6Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray percentageFromQuarter2 monthlyPercentage percent" id="percentage6">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td class="gray fontBold QuarterLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!$Label.PeriodQuarterAbb}-3-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight Quarter" id="quarter3">
+                                                     <apex:inputText id="quarter3" value="{!pqm.currentQuotaDetailsWithoutProfileId.Q3Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.Q3Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray">
+                                                     
+                                                 </td>
+                                                 <td class="grayLight">
+                                                     
+                                                 </td>
+                                                 <td class="gray percentQuarter percent" id="quarterPorcentage3">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td rowspan="3" class="gray">
+                                                     
+                                                 </td>
+                                                 <td rowspan="3" class="grayLight">
+                                                    
+                                                 </td>
+                                                 <td class="gray MonthLabel">
+                                                     <span style="white-space: nowrap;">
+                                                     {!pqm.Period7}-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight monthFromQuarter3 Month"  id="month7">
+                                                     <apex:inputText id="period7" value="{!pqm.currentQuotaDetailsWithoutProfileId.M7Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.M7Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray percentageFromQuarter3 monthlyPercentage percent" id="percentage7">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td class="gray MonthLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!pqm.Period8}-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight monthFromQuarter3 Month" id="month8">
+                                                     <apex:inputText id="period8" value="{!pqm.currentQuotaDetailsWithoutProfileId.M8Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.M8Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray percentageFromQuarter3 monthlyPercentage percent" id="percentage8">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td class="gray MonthLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!pqm.Period9}-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight monthFromQuarter3 Month" id="month9">
+                                                     <apex:inputText id="period9" value="{!pqm.currentQuotaDetailsWithoutProfileId.M9Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.M9Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray percentageFromQuarter3 monthlyPercentage percent"  id="percentage9">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td class="gray fontBold QuarterLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!$Label.PeriodQuarterAbb}-4-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight Quarter" id="quarter4">
+                                                     <apex:inputText id="quarter4" value="{!pqm.currentQuotaDetailsWithoutProfileId.Q4Amount}" style="display: none;"/>
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.Q4Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray">
+                                                     
+                                                 </td>
+                                                 <td class="grayLight">
+                                                     
+                                                 </td>
+                                                 <td class="gray percentQuarter percent" id="quarterPorcentage4">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td rowspan="3" class="gray">
+                                                     
+                                                 </td>
+                                                 <td rowspan="3" class="grayLight">
+                                                    
+                                                 </td>
+                                                 <td class="gray MonthLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!pqm.Period10}-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight monthFromQuarter4 Month" id="month10">
+                                                     <apex:inputText id="period10" value="{!pqm.currentQuotaDetailsWithoutProfileId.M10Amount}" style="display: none;" />
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.M10Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray percentageFromQuarter4 monthlyPercentage percent" id="percentage10">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td class="gray MonthLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!pqm.Period11}-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight monthFromQuarter4 Month" id="month11">
+                                                     <apex:inputText id="period11" value="{!pqm.currentQuotaDetailsWithoutProfileId.M11Amount}" style="display: none;" />
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.M11Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray percentageFromQuarter4 monthlyPercentage percent" id="percentage11">
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr>
+                                                 <td class="gray MonthLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!pqm.Period12}-{!pqm.fiscalYear.name}
+                                                     </span>
+                                                 </td>
+                                                 <td class="grayLight monthFromQuarter4 Month" id="month12">
+                                                     <apex:inputText id="period12" value="{!pqm.currentQuotaDetailsWithoutProfileId.M12Amount}" style="display: none;" />
+                                                     <apex:outputPanel layout="block">{!pqm.currentQuotaDetailsWithoutProfileId.M12Amount}</apex:outputPanel>
+                                                 </td>
+                                                 <td class="gray percentageFromQuarter4 monthlyPercentage percent" id="percentage12"> 
+                                                     <input type="text"  style="display: none;" datatype="percentage" />
+                                                     <div class="disable"></div>
+                                                 </td>
+                                             </tr>
+                                             <tr class="gray fontBold">
+                                                 <td class="YearLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!$Label.YearTotal}:
+                                                     </span>
+                                                 </td>
+                                                 <td>
+                                                    <div style="text-align:right;" id="totalYear"></div>
+                                                 </td>
+                                                 <td class="QuarterLabel">
+                                                     <span style="white-space: nowrap;">
+                                                         {!$Label.QuarterTotal}:
+                                                     </span>
+                                                 </td>
+                                                 <td>
+                                                    <div style="text-align:right;" id="totalQuarter"></div>
+                                                 </td>
+                                                 <td class="MonthLabel">
+                                                    <span style="white-space: nowrap;">
+                                                        {!$Label.Total}:
+                                                    </span>
+                                                 </td>
+                                                 <td>
+                                                     <div style="text-align:right;" id="totalMonth"></div>
+                                                 </td>
+                                                 <!-- 
+                                                 <td>
+                                                     
+                                                 </td> -->
+                                             </tr>
+                                         </tbody></table>
+                                         
+
+                                         <!-- COMMENT  BOX -->
+                                       <apex:outputPanel layout="block" id="commentBox" styleClass="comment">
+                                           <apex:outputPanel layout="block" rendered="{!IF(ISNULL(pqm.toCommentQuota),'false','true')}" styleClass="commentBox" style="margin:10px 0 0 0;width:705px">
+                                               <div class="commentHeader">
+                                                    <apex:outputText value="{!$Label.xactlyexpress__UsersComments}">
+                                                       <apex:param value="{!pqm.toCommentQuota.ProfilePlanId__r.ProfileId__r.UserId__r.Name}" />
+                                                       <apex:param value="'" />
+                                                   </apex:outputText>
+                                                   <apex:commandLink id="closeCommentLink" action="{!pqm.closeComment}"  styleClass="commentBoxBtn" rerender="commentBox, addCommentLink,errorMsg" onclick="waitOn();" oncomplete="introAsTab();waitOff();stripeRows();fixCelsDimensions(); quotaByPersonHandler.init();"  />              
+                                               </div>
+                                               <div>
+                                                   <apex:inputTextarea id="commentBody" value="{!pqm.toCommentQuota.XactlyExpress__Comment__c}" styleClass="commentTextArea" style="width:703px"  onkeyup="this.value = this.value.substring(0,1024);"/>
+                                               </div>
+                                           </apex:outputPanel>
+                                       </apex:outputPanel>                                        
+                                         
+                                        </div>
+                                    
+                            </div>      
+                            <div class="img_repeat bm">
+								<div class="img_no_repeat bl"></div>
+								<div class="img_no_repeat br"></div>
+							</div>
+                        </div>
+                        
+                       
+                    </div>
+                    <apex:inputHidden id="quotaStatus" value="{!pqm.status}" />                    
+                    <apex:inputHidden id="quotaFrequency" value="{!pqm.currentQuota.XactlyExpress__Frequency__c}" />
+                    <apex:inputHidden id="afterchange"/>
+                    <apex:inputHidden id="enterByPerson" value="{!pqm.currentQuota.XactlyExpress__EnterByPerson__c}" />
+                    <input class="hidden" id="quota_status_id" value="{!$Component.quotaStatus}" />
+                    <input class="hidden" id="quota_frequency_hidden_id" value="{!$Component.quotaNameInput}" />
+                        
+                </apex:outputPanel>
+                <div style="clear:both"></div>
+            </apex:outputPanel>
+            
+              
+            
+            <apex:outputPanel rendered="{!ISNULL(pqm.currentQuota)}">
+                <apex:outputtext value="{!$Label.xactlyexpress__YouMustSelectAMeasure}">
+                    <apex:param value="{!currentSettings.components}" />
+                </apex:outputtext>
+            </apex:outputPanel>     
+            
+            </div>
+            
+            <!-- FOOTER  -->
+            <apex:actionFunction name="loadSaveAs" action="{!dummyRefresh}" oncomplete="openSaveAs();waitOff();" rerender="SaveAsWrapper">
+                <apex:param assignTo="{!showSaveAs}" value="true" name="SaveAs" />
+            </apex:actionFunction>
+            <c:XactlySMBFooter isReadOnlyAdmin="{!isReadOnlyAdmin}" isSaveNext="true" packageVersion="{!packageVersion}" showPrevious="true" showNext="true" showSave="true" showRefresh="true" showExport="false"/>
+            <apex:actionFunction name="saveFN" action="{!savePlan}"/>
+            <apex:actionFunction name="saveNext" action="{!saveNext}"/>
+
+            <apex:actionFunction name="changeQuotaStatus" action="{!pqm.changeStatus}"  rerender="commentBox,errorMsg"  oncomplete="introAsTab();"/>
+            <apex:actionFunction action="{!changeSelectedYear}" name="changeFyscalYear" rerender="startDate, endDate, leftPanel,errorMsg,mainId" oncomplete="waitOff();">
+                <apex:param name="move" assignTo="{!fyscalYearOption}" value="" />
+            </apex:actionFunction>   
+            <apex:actionFunction action="{!pqm.saveAs}" name="saveAs"/>
+            
+            <apex:actionFunction name="saveFunction" action="{!savePlan}" oncomplete="introAsTab();"/>
+            <apex:actionFunction name="refreshLeftPanel" rerender="errorMsg" oncomplete="introAsTab();"/> 
+            <apex:actionFunction name="reloadPage" action="{!pqm.dummy}" rerender="quotaContent,errorMsg" oncomplete="introAsTab();"/>
+            <apex:actionfunction id="chatterLoader" name="loadChatter" action="{!loadChatter}" rerender="chatter" oncomplete="waitOff();initChatter();jQuery('.innerOcultar a').click();"/>
+        </apex:form>
+    </div>  
+    
+    <div class="hidden">
+        <input class="hidden" id="url_plan_create_woid" value="{!JSINHTMLENCODE($Page.XactlySMBPlanCreate)}" />
+        <input class="hidden" id="plan_id" value="{!JSINHTMLENCODE(plan.Id)}" />
+        <input class="hidden" id="url_plan_create_step_3" value="{!JSINHTMLENCODE($Page.XactlySMBPlanCreateStep3)}" />
+        <input class="hidden" id="quota_id" value="{!JSINHTMLENCODE(pqm.quota)}" />
+        <input class="hidden" id="label_add_quota_name" value="{!JSINHTMLENCODE(pqm.AddQuotaNameLabel)}" />
+        <input class="hidden" id="label_select_a_quota_type" value="{!JSINHTMLENCODE(pqm.SelectAQuotaTypeLabel)}" />
+        <input class="hidden" id="label_max_total_percent_100" value="{!JSINHTMLENCODE($Label.MaxTotalPorcent100)}" />
+        <input class="hidden" id="label_some_values_negative" value="{!JSINHTMLENCODE($Label.SomeValuesNegative)}" />
+        <input class="hidden" id="delete_quota_error" value="{!JSINHTMLENCODE(pqm.DeleteQuotaError)}" />
+        <input class="hidden" id="delete_quota_confirm" value="{!JSINHTMLENCODE(pqm.DeleteQuotaConfirm)}" />
+        <input class="hidden" id="label_warning_rounding_will_occur" value="{!JSINHTMLENCODE($Label.warningRoundingWillOccur)}" />
+        <input class="hidden" id="quota_frequency" value="{!JSINHTMLENCODE(pqm.currentQuota.Frequency__c)}" />
+    </div>
+    
+    <c:XactlySMBFooterScript isChatterEnabled="{!isChatterEnabled}" loadHeaderJs="true" loadPerformantJs="true" /> 
+    <script type="text/javascript" src="{!URLFOR($Resource.XactlySMBResources ,'js/jquery.tools.min.js')}"></script>
+    <script type="text/javascript" src="{!URLFOR($Resource.XactlySMBResources, 'js/jquery.arrayUtils.js')}"></script>
+    <script type="text/javascript" src="{!URLFOR($Resource.XactlySMBResources ,'components/js/XactlySMBLeftPanelAccordeon.js')}"></script>   
+    <script type="text/javascript" src="{!URLFOR($Resource.XactlySMBResources ,'pages/js/XactlySMBDefineQuotas.js')}"></script>
+    <c:XactlySMBImportExportQuota />
+    <c:XactlySMBFeedbackTab />
+</apex:page>

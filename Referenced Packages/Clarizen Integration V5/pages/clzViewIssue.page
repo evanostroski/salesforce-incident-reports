@@ -1,0 +1,152 @@
+<apex:page standardController="clzV5__Clarizen_Issue__c" extensions="clzV5.clzViewIssueController">
+	<chatter:feedWithFollowers showHeader="true" entityId="{!clzV5__Clarizen_Issue__c.Id}" />
+    <apex:messages />
+    <apex:form > 
+    	<apex:outputPanel rendered="{!!IsToDisableV2}">
+	        <div id="debugDiv" style="display:none; background-repeat:no-repeat; background-position:5px 5px; padding:5px 5px 5px 25px; background-color:#ffc; border:1px solid #ccc; -webkit-border-radius:5px; -moz-border-radius:5px; border-radius:5px;">
+	            Debug...
+	        </div>
+	
+	         <div id="errorContainer">             
+	             <div id="errMessage" style="display:none; padding:5px; background-color:#ffc; border:1px solid #ccc; -webkit-border-radius:5px; -moz-border-radius:5px; border-radius:5px; color:#800">
+	             	<div id="errMessageTxt"></div>
+	             </div>
+	         </div>
+	
+			<style type="text/css">
+			.msg-clr{
+				position: relative;
+				padding:-30px 20px -30px 115px;
+			}
+			
+			.btn-clr, .btn-clr:hover {
+				border:1px solid #a8c6eb;
+				margin-top:5px;
+				color:#036;
+				font-weight:normal;
+				cursor:pointer;
+				padding:2px 8px;
+				position: relative;
+				top: 24px;
+				left: 3px;
+				background: #f5f9ff; /* Old browsers */
+				background: -moz-linear-gradient(top, #f5f9ff 0%, #dae8fd 50%, #c9ddf8 51%, #d5e7fe 100%); /* FF3.6+ */
+				background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f5f9ff), color-stop(50%,#dae8fd), color-stop(51%,#c9ddf8), color-stop(100%,#d5e7fe)); /* Chrome,Safari4+ */
+				background: -webkit-linear-gradient(top, #f5f9ff 0%,#dae8fd 50%,#c9ddf8 51%,#d5e7fe 100%); /* Chrome10+,Safari5.1+ */
+				background: -o-linear-gradient(top, #f5f9ff 0%,#dae8fd 50%,#c9ddf8 51%,#d5e7fe 100%); /* Opera 11.10+ */
+				background: -ms-linear-gradient(top, #f5f9ff 0%,#dae8fd 50%,#c9ddf8 51%,#d5e7fe 100%); /* IE10+ */
+				background: linear-gradient(top, #f5f9ff 0%,#dae8fd 50%,#c9ddf8 51%,#d5e7fe 100%); /* W3C */
+				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f5f9ff', endColorstr='#d5e7fe',GradientType=0 ); /* IE6-9 */
+			}
+			</style>
+	
+			<button type="button" class="btn-clr" onclick="callDoSyncFirstTime();" id="btnSync">Clarizen Refresh</button>        
+	        <div id="messageContainer" class="msg-clr" style="display:none;">
+	             <div id="statusMessage" style="display:block; background-image:url({!$Resource.loadingImage}); background-repeat:no-repeat; background-position:5px 5px; padding:5px 5px 5px 25px; background-color:#ffc; border:1px solid #ccc; -webkit-border-radius:5px; -moz-border-radius:5px; border-radius:5px; ">
+	                 Clarizen Sync...
+	             </div>
+	        </div>
+         
+	        <apex:actionFunction name="SyncFromClarizen" action="{!SyncFromClarizen}" rerender="detailsPanel, hiddenFields" onComplete="onAtferSync();"/>
+	        <apex:actionFunction name="UpdateObject" action="{!UpdateObject}" rerender="hiddenFields,detailsPanel"/>
+	
+	        <apex:outputPanel id="hiddenFields">    
+	            <apex:inputHidden value="{!isExistInClarizen}" id="hdnIsExistInClarizen" />
+	        </apex:outputPanel>
+	                
+	        <apex:outputText value=" {!clzV5__Clarizen_Issue__c.clzV5__LastSyncStatus__c} {!clzV5__Clarizen_Issue__c.clzV5__Last_Synch_Time__c} {!clzV5__Clarizen_Issue__c.CreatedDate} {!clzV5__Clarizen_Issue__c.clzV5__Clarizen_ID__c} {!clzV5__Clarizen_Issue__c.clzLastSynchObject__r.clzV5__Errors__c} {!clzV5__Clarizen_Issue__c.clzLastSynchObject__r.clzV5__Error_Message__c}" rendered="false"/>
+	                
+	        <script type="text/javascript">
+	            isDebug = false;
+	            var startTime = new Date().getTime();
+	            
+	            function onAtferSync()
+	            {
+	                UpdateObject();
+	                showStatusAnimation(false);
+	            }
+	                        
+	            function showStatusAnimation(value)
+	            {
+	                msgContainer = document.getElementById('messageContainer');
+	        		//if(msgContainer)
+	        		//{
+		                if(value)
+		                    msgContainer.style.display = "block";
+		                else
+		                    msgContainer.style.display = "none";
+		            //}
+	            }
+	        
+	        	function callDoSyncFirstTime()
+	        	{
+		            startTime = new Date().getTime();
+		            showStatusAnimation(true);
+	        		doSync();
+	        	}
+	        	
+	            function doSync()
+	            {
+	                debugWrite('doSync enter');
+	                var currentTime = new Date().getTime();
+	                if(currentTime > startTime + 10000)
+	                {
+	                    debugWrite('timeout');
+	                    showStatusAnimation(false);
+	                    return;
+	                }
+	                
+	                isExistInClarizen = getIsExistInClarizen();
+	                debugWrite('isExistInClarizen: ' + isExistInClarizen);
+	                
+	                if(isExistInClarizen == "false")
+	                {
+	                    debugWrite('call UpdateObject');
+	                    UpdateObject();
+	                    isExistInClarizen = getIsExistInClarizen();
+	                    debugWrite('isExistInClarizen: ' + isExistInClarizen);
+	                }
+	                
+	                if(isExistInClarizen == "true")
+	                {
+	                    debugWrite('call SyncFromClarizen');
+	                    window.setTimeout(SyncFromClarizen, 1);
+	                    //SyncFromClarizen();
+	                }
+	                else
+	                {
+	                    debugWrite('call setTimeout');
+	                    window.setTimeout(doSync, 1000);
+	                }   
+	            }
+	            
+	            function getIsExistInClarizen()
+	            {
+	                isExistelement = document.getElementById('{!$Component.hdnIsExistInClarizen}');
+	                if (isExistelement!=null)
+	                    return isExistelement.value;
+	                else
+	                    return "false";
+	            }
+	           
+	            function debugWrite(msg)
+	            {
+	                if(isDebug)
+	                {
+	                    debugDivElement = document.getElementById('debugDiv');
+	                    if(debugDivElement != null)
+	                    {
+	                        debugDivElement.appendChild(document.createElement("BR"));
+	                        debugDivElement.appendChild(document.createTextNode(msg));
+	                    }
+	                }
+	            }
+	        </script>
+	    </apex:outputPanel>
+	        
+        <apex:panelGroup id="detailsPanel" rendered="true">
+        	<apex:detail id="detailsContent" rendered="true" subject="{!sObj}"/>
+        </apex:panelGroup>
+	        
+    </apex:form>
+</apex:page>

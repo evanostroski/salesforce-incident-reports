@@ -1,0 +1,297 @@
+<apex:page standardController="clzV5__Clarizen_Project__c" extensions="clzV5.clzViewProjectController">
+	<chatter:feedWithFollowers showHeader="true" entityId="{!clzV5__Clarizen_Project__c.Id}" />
+    <apex:form > 
+    	<apex:outputPanel rendered="{!!IsToDisableV2}">
+	    	<apex:messages id="messagesDivId" rendered="true"/>
+	        
+	        <div id="debugDiv" style="display:none; background-repeat:no-repeat; background-position:5px 5px; padding:5px 5px 5px 25px; background-color:#ffc; border:1px solid #ccc; -webkit-border-radius:5px; -moz-border-radius:5px; border-radius:5px;">
+	            Debug...
+	        </div>
+	
+			<apex:outputPanel rendered="true" layout="block" id="errMessage">
+				{!LastSyncError} <BR/> 
+			</apex:outputPanel>        
+			
+			<style type="text/css">
+			.msg-clr{
+				position: relative;
+				padding:-30px 20px -30px 115px;
+			}
+			
+			.btn-clr, .btn-clr:hover {
+				border:1px solid #a8c6eb;
+				margin-top:5px;
+				color:#036;
+				font-weight:normal;
+				cursor:pointer;
+				padding:2px 8px;
+				position: relative;
+				/*top: 24px;
+				left: 3px;*/
+				background: #f5f9ff; /* Old browsers */
+				background: -moz-linear-gradient(top, #f5f9ff 0%, #dae8fd 50%, #c9ddf8 51%, #d5e7fe 100%); /* FF3.6+ */
+				background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f5f9ff), color-stop(50%,#dae8fd), color-stop(51%,#c9ddf8), color-stop(100%,#d5e7fe)); /* Chrome,Safari4+ */
+				background: -webkit-linear-gradient(top, #f5f9ff 0%,#dae8fd 50%,#c9ddf8 51%,#d5e7fe 100%); /* Chrome10+,Safari5.1+ */
+				background: -o-linear-gradient(top, #f5f9ff 0%,#dae8fd 50%,#c9ddf8 51%,#d5e7fe 100%); /* Opera 11.10+ */
+				background: -ms-linear-gradient(top, #f5f9ff 0%,#dae8fd 50%,#c9ddf8 51%,#d5e7fe 100%); /* IE10+ */
+				background: linear-gradient(top, #f5f9ff 0%,#dae8fd 50%,#c9ddf8 51%,#d5e7fe 100%); /* W3C */
+				filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f5f9ff', endColorstr='#d5e7fe',GradientType=0 ); /* IE6-9 */
+			}
+			</style>
+	        
+			<button type="button" class="btn-clr" onclick="callDoSyncFirstTime();" id="btnSync">Clarizen Refresh</button>
+	        <div id="messageContainer" class="msg-clr">
+	             <div id="statusMessage" style="display:block; background-image:url({!$Resource.loadingImage}); background-repeat:no-repeat; background-position:5px 5px; padding:5px 5px 5px 25px; background-color:#ffc; border:1px solid #ccc; -webkit-border-radius:5px; -moz-border-radius:5px; border-radius:5px; ">
+	                 Clarizen Sync...
+	             </div>
+	        </div>
+	
+	        <apex:panelGroup id="RoadmapPanel" rendered="true">
+	            <apex:iframe id="RoadmapFrame" rendered="true" height="250px" scrolling="true" src="{!RoadmapURL}"/>
+	        </apex:panelGroup>
+	        
+	        <apex:actionFunction name="SyncFromClarizen" action="{!SyncFromClarizen}" rerender="hdnRoadmapURL, detailsPanel, hiddenFields, messagesDivId, errMessage" onComplete="onAfterSyncObject();"/>
+	        <apex:actionFunction name="SyncChildMilestonesFromClarizen" action="{!SyncChildMilestonesFromClarizen}" rerender="hdnRoadmapURL, detailsPanel, hiddenFields, messagesDivId, errMessage" onComplete="onAfterSyncChildMilestones();"/>
+			<apex:actionFunction name="SyncChildProjectsFromClarizen" action="{!SyncChildProjectsFromClarizen}" rerender="hdnRoadmapURL, detailsPanel, hiddenFields, messagesDivId, errMessage" onComplete="onAfterSyncChildProjects();"/>
+			<apex:actionFunction name="SyncChildIssuesFromClarizen" action="{!SyncChildIssuesFromClarizen}" rerender="hdnRoadmapURL, detailsPanel, hiddenFields, messagesDivId, errMessage" onComplete="onAfterSyncChildIssues();"/>        
+	        <apex:actionFunction name="UpdateObject" action="{!UpdateObject}" rerender="hdnRoadmapURL, detailsPanel, hiddenFields, messagesDivId, errMessage" onComplete="onAtferUpdateObj();"/>
+	        <apex:actionFunction name="UpdateObject1" action="{!UpdateObject}" rerender="detailsContent, hiddenFields, messagesDivId, errMessage"/>
+	        <apex:actionFunction name="RefreshStatus" action="{!RefreshStatus}" rerender="hiddenFields" onComplete="onAtferRefreshStatus();"/>
+	        
+	
+	        <apex:outputPanel id="hiddenFields">    
+	            <apex:inputHidden value="{!isExistInClarizen}" id="hdnIsExistInClarizen" />
+	            <apex:inputHidden value="{!RoadmapURL}" id="hdnRoadmapURL" />
+	            <apex:inputHidden value="{!IsNewObject}" id="hdnIsNewObject"/>
+	            <apex:inputHidden value="{!IsAsyncMode}" id="hdnIsAsyncMode"/>
+				<apex:inputHidden value="{!IsFinishAsyncJobs}" id="hdnIsFinishAsyncJobs"/>
+				<apex:inputHidden value="{!HasErrorOnCreate}" id="hdnHasErrorOnCreate"/>
+	        </apex:outputPanel>
+	                
+	        <apex:outputText value=" {!clzV5__Clarizen_Project__c.clzV5__LastSyncStatus__c} {!clzV5__Clarizen_Project__c.clzV5__Last_Synch_Time__c} {!clzV5__Clarizen_Project__c.CreatedDate} {!clzV5__Clarizen_Project__c.clzV5__Clarizen_ID__c} {!clzV5__Clarizen_Project__c.clzLastSynchObject__r.clzV5__Errors__c} {!clzV5__Clarizen_Project__c.clzV5__RoadmapURL__c } {!clzV5__Clarizen_Project__c.clzLastSynchObject__r.clzV5__Error_Message__c}" rendered="false"/>
+	                
+	        <script type="text/javascript">
+	            var isDebug = false;
+	            var startTime = new Date().getTime();
+	            var isFinishSyncObject = false;
+	            var isFinishSyncChildMilestones = false;
+	            var isFinishSyncChildProjects = false;
+	            var isFinishSyncChildIssues = false;
+	            
+	            showStatusAnimation(false);
+	            if(isNew())
+	            	callDoSyncFirstTime();
+	
+				window.setTimeout(refresh, 5000);
+				
+				function IsFinishAsyncJobs()
+				{
+					var isFinish = document.getElementById('{!$Component.hdnIsFinishAsyncJobs}');
+					var result = (isFinish && (isFinish.value.toLowerCase()=='true'));
+					return result;			
+				}
+				
+				function IsAsyncMode()
+				{
+					var asyncMode = document.getElementById('{!$Component.hdnIsAsyncMode}');
+					var result = (asyncMode && (asyncMode.value.toLowerCase()=='true'));
+					return result;
+				}
+				
+				function isNew()
+				{
+					var isNewProj = document.getElementById('{!$Component.hdnIsNewObject}');
+					var result = (isNewProj && (isNewProj.value.toLowerCase()=='true'));
+					return result;
+				}
+				
+				function getRoadMapUrl()
+				{
+					var rmUrl = document.getElementById('{!$Component.hdnRoadmapURL}');
+					if(rmUrl)
+						return rmUrl.value;
+				}
+				
+				function isFinishAllSyncs()
+				{
+					if(IsAsyncMode())
+						return IsFinishAsyncJobs();
+					else
+						return(isFinishSyncObject && isFinishSyncChildMilestones && isFinishSyncChildProjects && isFinishSyncChildIssues)
+				}
+				
+	            function getLastError()
+	            {
+	            	debugWrite("getLastError");
+	                var lastErrorElement = document.getElementById('{!$Component.hdnLastError}');
+	                if (lastErrorElement!=null)
+	                    return lastErrorElement.value;
+	                else
+	                    return ''; 
+	            }
+	        
+				function onAtferRefreshStatus()
+				{
+					var finishjobs = IsFinishAsyncJobs();
+					
+				}
+				
+				function onAfterSyncObject()
+				{
+					isFinishSyncObject = true;
+					SyncChildMilestonesFromClarizen();
+					SyncChildIssuesFromClarizen();
+					SyncChildProjectsFromClarizen();
+					onAfterSync();
+				}
+	
+				function onAfterSyncChildMilestones()
+				{
+					isFinishSyncChildMilestones = true;				
+					onAfterSync();
+				}
+	
+				function onAfterSyncChildProjects()
+				{
+					isFinishSyncChildProjects = true;
+					onAfterSync();
+				}
+	
+				function onAfterSyncChildIssues()
+				{
+					isFinishSyncChildIssues = true;
+					onAfterSync();
+				}
+				                        
+	            function onAfterSync()
+	            {
+	            	if(isFinishAllSyncs())
+	            	{
+	                	UpdateObject();                
+	                	showStatusAnimation(false);
+	               	}
+	               	else
+	               	{
+	               		if(IsAsyncMode())
+	               		{
+	               			RefreshStatus();
+	               			window.setTimeout(onAfterSync, 1000);
+	               		}
+	               	}
+	            }
+	                        
+				function onAtferUpdateObj()
+				{
+					if (!getIsExistInClarizen())
+						return;               
+	                var roadmapIframe = document.getElementById('RoadmapFrame');
+	
+	               	var srcIsNotFillYet = false;
+	               	if(roadmapIframe.src)
+	               	{
+	                	var host = location.host.toLowerCase();
+	                	srcIsNotFillYet = (roadmapIframe.src.toLowerCase().indexOf(host, 0) >= 0);
+	                }
+	              	
+	                if(roadmapIframe)
+	                {
+		              	//if(!roadmapIframe.src || srcIsNotFillYet)
+	    	          		roadmapIframe.src = getRoadMapUrl();
+	               	}
+	                return;
+				}
+				                        
+	            function showStatusAnimation(value)
+	            {
+	                var msgContainer = document.getElementById('messageContainer');
+	                if(value)
+	                    msgContainer.style.display = "block";
+	                else
+	                    msgContainer.style.display = "none";
+	            }
+	            
+	            function callDoSyncFirstTime()
+	            {
+		            isFinishSyncObject = false;
+		            isFinishSyncChildMilestones = false;
+		            isFinishSyncChildProjects = false;
+		            isFinishSyncChildIssues = false;
+	            	startTime = new Date().getTime();
+	            	showStatusAnimation(true);
+	            	doSync();
+	            }
+	            
+	            function refresh()
+	            {
+	               	UpdateObject1();                
+	            }
+	            
+	            function doSync()
+	            {
+	                debugWrite('doSync enter');
+	                
+	                var currentTime = new Date().getTime();
+	                if((getHasErrorOnCreate()) || (currentTime > startTime + 10000))
+	                {
+	                    debugWrite('timeout');
+	             		UpdateObject();
+	                    showStatusAnimation(false);
+	                    return;
+	                }
+	                
+	                var isExistInClarizen = getIsExistInClarizen();
+	                debugWrite('isExistInClarizen: ' + isExistInClarizen);
+	                
+	                if(!isExistInClarizen)
+	                {
+	                    debugWrite('call UpdateObject');
+	                    UpdateObject();
+	                    window.setTimeout(doSync, 1000);
+	                }
+					else
+	                {
+	                    debugWrite('call SyncFromClarizen');
+	                  	window.setTimeout(SyncFromClarizen, 1);
+	                    //SyncFromClarizen();
+	                }
+	            }
+	            
+	            function getIsExistInClarizen()
+	            {
+	                var isExistelement = document.getElementById('{!$Component.hdnIsExistInClarizen}');
+	                if (isExistelement!=null)
+	                    return isExistelement.value === "true";
+	                else
+	                    return false;
+	            }
+	           
+	            function getHasErrorOnCreate()
+	            {
+	                var hasErrorOnCreatElement = document.getElementById('{!$Component.hdnHasErrorOnCreate}');
+	                if (hasErrorOnCreatElement!=null)
+	                    return hasErrorOnCreatElement.value === "true";
+	                else
+	                    return false;
+	            }
+	
+	            function debugWrite(msg)
+	            {
+	                if(isDebug)
+	                {
+	                    var debugDivElement = document.getElementById('debugDiv');
+	                    if(debugDivElement != null)
+	                    {
+	                        debugDivElement.appendChild(document.createElement("BR"));
+	                        debugDivElement.appendChild(document.createTextNode(msg));
+	                    }
+	                }
+	            }
+	        </script>
+		</apex:outputPanel>        
+        
+        <apex:panelGroup id="detailsPanel" rendered="true">
+            <apex:detail id="detailsContent" rendered="true" subject="{!sObj}"/>
+        </apex:panelGroup>
+        
+    </apex:form>
+</apex:page>

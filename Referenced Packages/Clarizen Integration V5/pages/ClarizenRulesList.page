@@ -1,0 +1,50 @@
+<apex:page controller="clzV5.ClarizenRulesListController">
+    
+    <apex:form id="mainFrm">                               
+       <apex:messages layout="table" style="color:red !important;" styleClass="pbError" />
+                                                                                  
+        <apex:pageBlock title="Clarizen Project & Issue Creation Triggers" >        
+            <apex:pageBlockButtons location="top">                         
+                 <apex:commandButton id="newRule" value="New" action="{!newRule}"  />                                                                                                                                      
+            </apex:pageBlockButtons>
+        
+            <apex:outputPanel id="rowsPanel">                       
+                <apex:pageBlockTable id="recordsTable" value="{!ruleRecords}" var="row" style="width:100%;">
+                    <apex:column headerValue="Action" styleClass="actionColumn">
+                        <apex:outputPanel layout="none">                       
+                                <apex:commandLink action="{!editRule}" value="Edit" styleClass="actionLink">
+                                    <apex:param name="currentIndexToEdit" assignTo="{!currentIndexToEdit}" value="{!row.indexInList}"/>
+                                </apex:commandLink>
+                                &nbsp;|&nbsp;
+                                <apex:commandLink action="{!deleteRule}" value="Del" styleClass="actionLink" status="loading" reRender="rowsPanel, pageErrorPanel" onclick="if(!confirm('Are you sure you would like to delete this rule?')){return false;}" >
+                                    <apex:param name="currentIndexToEdit" assignTo="{!currentIndexToEdit}" value="{!row.indexInList}"/>
+                                </apex:commandLink>
+                        </apex:outputPanel>    
+                    </apex:column>
+                    <apex:column headerValue="Trigger Name" style="width:25%;">
+                        <apex:outputText value="{!row.record.Name}" />                                                                                        
+                    </apex:column>
+                    <apex:column headerValue="Trigger Object" style="width:15%;">
+                        <apex:outputText value="{!row.record.clzV5__Object__c}"/>                            
+                    </apex:column>                   
+                    <apex:column headerValue="Description" style="width:35%;">
+                        <apex:outputField value="{!row.record.clzV5__Description__c}"/>                                                                                                                             
+                    </apex:column> 
+                    <apex:column headerValue="Last Modified Date/Time" style="width:14%;">
+                        <apex:outputField value="{!row.record.LastModifiedDate}"/>                                                                                                                             
+                    </apex:column> 
+                    <apex:column style="width:5%;">    
+                            <apex:actionstatus id="loading" onstart="document.getElementById('{!$Component.statusImage}').style.display = 'none';">
+                            <apex:facet name="start">
+                                <apex:outputPanel layout="block">
+                                    <img height="16" width="16" src="/img/loading.gif" />
+                                </apex:outputPanel>
+                            </apex:facet>    
+                            <apex:facet name="stop" />
+                        </apex:actionstatus>
+                    </apex:column>                                                                  
+                </apex:pageBlockTable>                                                                  
+            </apex:outputPanel>                                                                                                                                            
+        </apex:pageBlock>                                                                              
+   </apex:form>
+</apex:page>

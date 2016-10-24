@@ -1,0 +1,35 @@
+<apex:page controller="XactlyExpress.XactlySMBSettingsDealsController" sidebar="false" showHeader="false" standardStylesheets="false">
+    <!-- Custom Cursor Loader -->
+    <c:XactlySMBCursor />
+    <!-- Custom Cursor Loader -->
+ 
+    <!-- PAGE WRAPPER -->
+    <div class="pageContent" id="pContent">
+		{!$Label.Updating}...
+	</div>
+<script>
+
+<apex:repeat value="{!iSources}" var="iterImport">
+	ifrm = document.createElement("iframe");
+	
+	ifrm.setAttribute("src", "{!$Page.XactlySMBUpdateEstimator}?importSource={!iterImport.Name}");
+	
+	ifrm.style.display = "none";
+	
+	document.body.appendChild(ifrm);
+	
+</apex:repeat>
+	function checkIframes(){
+		var temp = true;
+		for(var i = 0; i < document.getElementsByTagName("iframe").length;i++){
+			temp = temp && document.getElementsByTagName("iframe")[i].contentDocument.getElementById("message_box") != null && document.getElementsByTagName("iframe")[i].contentDocument.getElementById("message_box").innerHTML != "{!$Label.Updating}...";
+		}
+		if(temp){
+			window.location.href = "{!$Page.XactlySMBHomePage}";
+		}else{
+			setTimeout("checkIframes();",500);
+		}
+	}
+	window.onload = function(){setTimeout("checkIframes();",500);}
+</script>
+</apex:page>

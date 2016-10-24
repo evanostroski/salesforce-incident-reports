@@ -1,0 +1,173 @@
+<apex:page id="ImportReleases"  sidebar="false" showHeader="false" standardStylesheets="true"  controller="XactlyExpress.XactlySMBCalculateManagePaymentsMHR">
+    <apex:form >
+        <div id="ImportReleases">
+            <div class="contentIR">
+                   
+                   <div class="superboxIRTop"></div>
+                   <div class="superboxIRBody" id="formulaWrapper">
+                        <apex:outputpanel layout="block" style="position:relative; overflow: hidden;" id="header">
+                            <div class="titleBoxContainer">
+                                <apex:outputtext styleclass="titleLabelIR" value="{!$Label.xactlyexpress__importReleaseFile}" /> &nbsp;
+                            </div>
+                        </apex:outputpanel>
+                        <div style="color: #888A8C;font-size: 12px;margin-bottom: 20px;margin-left: 20px;margin-right: 35px;" class="detailedTitle">{!$Label.importReleasePopupDescription}</div>
+                        <div style="clear:both;"></div>
+                        <div style="margin-left:110px;">
+                            <div class="tableTopIRTop"></div>
+                            <div class="tableTopIRBody">
+                               <div class="IR_steptext">
+                                   <div class="IR_steptextNumber PNovaBlack30c4">1</div>
+                                   <div class="IR_steptextText PNovaSemiBold14c2">{!$Label.SelectFileToImport}</div>
+                               </div>
+                               <div class="IR_text_space">
+                                    <div style="clear:both;"></div>
+                                    <apex:inputFile style="float:left;" value="{!document.body}"  filename="{!document.name}" contentType="{!document.contentType}"/>                                
+                                    <apex:selectRadio id="haveHeaders" value="{!settings.XactlyExpress__haveHeaders__c}" style="float:left;">
+                                        <apex:selectOptions value="{!yesNo}" />
+                                    </apex:selectRadio>
+                                    
+                                    <div style="clear:both;"></div>
+                               </div>
+                               <div class="IR_steptext">
+                                   <div class="IR_steptextNumber PNovaBlack30c4">2</div>
+                                   <div class="IR_steptextText PNovaSemiBold14c2">{!$Label.ImportAndProcessFile}</div>
+                               </div>
+                               <div class="IR_text_space">
+                                   <div style="clear:both;"></div>
+                                   <apex:outputPanel style="float:left;" layout="block" styleClass="btnAction {!IF(importStatus='job','disable','')}">
+                                       <apex:commandLink action="{!importCSV}"  onclick="{!IF(importStatus='job','return false;','')}waitOn();" >
+                                           <div class="rightBtnSilverRR">
+                                               <div class="leftBtnSilverRR">
+                                                   <div class="middleBtnSilverRR"  style="text-transform: none;">{!$Label.ImportAndRelease}</div>
+                                               </div>
+                                           </div>
+                                       </apex:commandLink>
+                                   </apex:outputPanel>
+                                   <div  class="internalTextContainer PNovaSemiBold18c3">
+                                       {!$Label.AllowHoldstoBeDeleted}
+                                   </div>
+                                   <apex:inputText id="deleteHolds" style="display:none;" styleClass="deleteHolds" value="{!importReleaseType}" />
+                                   <input type="checkbox" class="{!IF(importStatus='job','disable','')}" onclick="if(this.checked){jQuery('#botonToAbleDelete').removeClass('disable');}else{jQuery('#botonToAbleDelete').addClass('disable');} " id="ableToDeleteHolds" style="float:left" />
+                                   <div style="float:left;cursor:pointer;" id="botonToAbleDelete" class="btnAction disable" onclick="importAndDeleteHolds();">
+                                       <div class="rightBtnSilverRR">
+                                           <div class="leftBtnSilverRR">
+                                               <div class="middleBtnSilverRR" style="text-transform: none;">{!$Label.ImportAndDeleteHolds}</div>
+                                           </div>
+                                       </div>
+                                   </div>
+                                   <div style="clear:both;"></div>
+                               </div>
+                               <div class="IR_steptext">
+                                   <div class="IR_steptextNumber PNovaBlack30c4">3</div>
+                                   <div class="IR_steptextText PNovaSemiBold14c2">{!$Label.MonitorImportStatus}</div>
+                               </div>
+                               <div class="IR_text_space">
+                                    <apex:outputpanel layout="block" id="variableContainer" rendered="{!importStatus!='none'}" >
+                                        <div style="clear:both;"></div>
+                                        <input type="hidden" value="{!importStatus}" id="importStatusValue"/>
+                                        <div  class="internalTextContainer PNovaSemiBold18c3" style="width: 125px;">
+                                             {!IF(importStatus='job',$Label.ImportInProgress,IF(importStatus='end',$Label.ImportSuccessful,$Label.ImportErrors))}
+                                        </div>
+                                        <img id="progressBar" class="img-progressBar" src="{!URLFOR($Resource.XactlySMBResources, IF(importStatus='job','img/icons/progressBar.gif','img/icons/progressBar.PNG'))}" />
+                                        
+                                        <div style="float:left;cursor:pointer;" id="botonToAbleDelete" class="btnAction {!IF(importStatus='job','disable','')}" onclick="{!IF(importStatus='job','','viewLog();')}">
+                                           <div class="rightBtnSilverRR">
+                                               <div class="leftBtnSilverRR">
+                                                   <div class="middleBtnSilverRR" style="text-transform: none;">{!$Label.ViewReleaseLog}</div>
+                                               </div>
+                                           </div>
+                                        </div>
+                                        <div style="clear:both;"></div>
+                                    </apex:outputpanel>
+    
+                               </div>
+                            </div>
+                            <div class="tableTopIRBottom"></div>
+                        </div>
+                        <div style="clear:both;"></div>
+                    </div>
+                    <apex:outputpanel layout="block" id="superboxIRFooter" styleClass="superboxIRFooter">
+    
+                        <div class="btnToCenter btnAction saveAndCancel">
+                         
+                         <div class="xactlyBtnRectWrapper {!IF(importStatus!='job','','disable')}" onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);" onclick="{!IF(importStatus=='job','return false;','')}rerenderNoCompare = false;{!IF(importStatus!='none','window.parent.waitOn();window.parent.refreshView();window.parent.loadOldPage();','')}window.parent.jQuery('.close a').trigger('click');">
+                            <div class="xactlyBtnRect">
+                                <div class="xactlyBtnRectBackground">
+                                    <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                        <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                            <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel">
+                                                 <apex:outputText value="{!$Label.xactlyexpress__Close}"/>
+                                            </div>
+                                        </div>
+                                    </div>     
+                              </div>
+                            </div>
+                         </div>                           
+                      </div>
+                   </apex:outputpanel>
+            </div>
+        </div>
+        <input type="hidden" id="importStatusVal" value="{!importStatus}"/>
+        <input type="hidden" id="XactlySMBCalculateManagePaymentsMHRURL" value="{!$Page.XactlySMBCalculateManagePaymentsMHR}"/>
+        <input type="hidden" id="importFinishSuccessLabel" value="{!$Label.importFinishSuccess}"/>
+        <input type="hidden" id="importFinishErrorLabel" value="{!$Label.importFinishError}"/>
+        <input type="hidden" id="NotACSVFileLabel" value="{!$Label.NotACSVFile}"/>
+        <apex:actionFunction name="refreshImportStatus" action="{!refreshImportStatusC}"/>
+        <apex:actionFunction name="ultimateRefreshImportStatus" action="{!refreshImportStatusC}"/>
+        <apex:actionFunction name="importDelete" action="{!importCSV}"/>
+    </apex:form>    
+
+    <div class="hidden">
+        <input class="hidden" id="orgName" value="{!URLENCODE($Organization.Name)}" />
+        <input class="hidden" id="orgId" value="{!URLENCODE($Organization.Id)}" />
+        <input class="hidden" id="currentUserProfile" value="{!URLENCODE(currentUserProfile)}" />
+        <input class="hidden" id="currentUserName" value="{!URLENCODE($User.FirstName + ' ' + $User.LastName)}" />
+    </div>
+    
+    <c:XactlySMBFooterScript isChatterEnabled="false" rendered="{!AND(isAdmin,!isEmulatedManager,!emulatingUser)}" loadHeaderJs="false" loadPerformantJs="true"/>
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'pages/css/XactlySMBImportReleases.css')}" />
+
+    <script>
+        
+        jQuery(document).ready(function(){
+            setTimeout("loadAnltc('XactlySMBImportReleases.php')", 1000);
+        
+            if(jQuery('#importStatusValue').val()=='job'){
+                refreshingImport();
+            }            
+            if(jQuery('#importStatusValue').val()=='nonecsv'){
+                alert(jQuery('#NotACSVFileLabel').val());
+            }
+            if(jQuery('#importStatusVal').val()=="job"){
+                jQuery("#ableToDeleteHolds")[0].disabled = true;
+            }
+        });
+        
+        function viewLog(){
+            window.parent.waitOn();
+            window.parent.document.location.href = jQuery('#XactlySMBCalculateManagePaymentsMHRURL').val()+'?page=releases';
+            window.parent.jQuery('.close a').trigger('click');
+        }
+    
+        function refreshingImport () {
+           if(document.getElementById('importStatusValue').value=='job'){
+               setTimeout('refreshImportStatus()', 3000);
+           }else{
+               if(document.getElementById('importStatusValue').value=='end'){
+                    setTimeout("alert(jQuery('#importFinishSuccessLabel').val())",3000);
+               }else{
+                    alert("jQuery('#importFinishErrorLabel').val()");
+               }
+               setTimeout('ultimateRefreshImportStatus()',3000);
+           }
+        }
+        
+        function importAndDeleteHolds(){
+            if(document.getElementById('ableToDeleteHolds').checked){
+                jQuery('.deleteHolds')[0].value = 'deleteHolds';
+                importDelete();
+            }
+        }
+
+    </script>      
+</apex:page>

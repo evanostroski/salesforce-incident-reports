@@ -1,0 +1,35 @@
+<apex:page controller="skyplatform.ShoreTelSkyHomeController" action="{!start}" sidebar="true">
+    <apex:form id="form">
+
+        <apex:pageBlock id="topBlock" title="ShoreTel Sky Home Page" >
+           	<apex:pageMessages id="pm"/>
+           	
+           	<apex:pageBlock >  
+
+				<apex:pageBlockButtons location="top" >
+                	<apex:commandButton value="Reconcile Calls" action="{!showCalls}" />
+                	<apex:commandButton value="Reconcile SMS Message Streams" action="{!showSmsMessages}" />
+                	<apex:commandButton value="Reconcile Voicemails" action="{!showVoicemails}" />
+               </apex:pageBlockButtons> 
+               
+               <apex:pageBlockSection columns="1" >
+               		<apex:pageBlockSectionItem >
+               			<apex:outputLabel value="Ureconciled Calls" for="unreconciledCalls" />
+						<apex:outputText id="unreconciledCalls" value="{!unreconciledCallsCount}" />
+               		</apex:pageBlockSectionItem>
+               		<apex:pageBlockSectionItem >
+               			<apex:outputLabel value="Ureconciled SMS Message Streams" for="unreconciledSms" />
+						<apex:outputText id="unreconciledSms" value="{!unreconciledSmsCount}" />
+               		</apex:pageBlockSectionItem>
+               		<apex:pageBlockSectionItem >
+               			<apex:outputLabel value="Ureconciled Voicemails" for="unreconciledVms" />
+						<apex:outputText id="unreconciledVms" value="{!unreconciledVmsCount}" />
+               		</apex:pageBlockSectionItem>
+               </apex:pageBlockSection>
+               
+			</apex:pageBlock>
+
+        </apex:pageBlock> 
+               
+    </apex:form>
+</apex:page>

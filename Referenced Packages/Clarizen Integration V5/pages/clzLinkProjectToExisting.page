@@ -1,0 +1,3 @@
+<apex:page controller="clzV5.clzLinkProjectToExistingController" action="{!CreateAndLinkToExisting}">
+	<apex:outputText value="{!DebugMessage}"/>
+</apex:page>

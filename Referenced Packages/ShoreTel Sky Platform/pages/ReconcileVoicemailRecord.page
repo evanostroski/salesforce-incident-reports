@@ -1,0 +1,69 @@
+<apex:page controller="skyplatform.ReconcileVoicemailsController" sidebar="true">
+    <apex:form id="form">
+
+        <apex:pageBlock id="topBlock" title="Reconcile ShoreTel Sky Voicemail Record" >
+           	<apex:pageMessages id="pm"/> 
+           	
+			<apex:pageBlockButtons location="top" > 
+                	<apex:commandButton value="Add Personal Contact" action="{!addPersonalContact}" onclick="return confirm('Create a new Personal Contact for this Call?')" />
+               	<apex:commandButton value="Clear" action="{!clear}" /> 
+               	<apex:commandButton value="Done" action="{!done}" />
+               	<apex:commandButton value="Apply to all matching Voicemails" action="{!applyMatching}" onclick="return confirm('Are you sure?  This will update multiple voicemails')"/>
+              </apex:pageBlockButtons> 
+
+			<apex:pageBlock title="Voicemail Information" > 
+				<apex:pageBlockSection columns="1" >
+					<apex:outputField value="{!theCallRecord.CallType}" />
+					<apex:outputField value="{!theCallRecord.skyplatform__From_Phone__c}" />
+					<apex:outputField value="{!theCallRecord.skyplatform__To_Phone__c}" />
+					<apex:outputField value="{!theCallRecord.WhoId}" />
+					<apex:outputField value="{!theCallRecord.WhatId}" />
+					<apex:inputField value="{!theCallRecord.Subject}" />  
+					<apex:inputField value="{!theCallRecord.skyplatform__Is_Personal__c}" /> 
+					<apex:pageBlockSectionItem > 
+						<apex:outputLabel value="Number of matching Voicemails" for="sameNumberCount" />
+						<apex:outputText id="sameNumberCount" value="{!sameNumberCount}" />
+					</apex:pageBlockSectionItem>
+				</apex:pageBlockSection>			
+			</apex:pageBlock>
+			
+			<apex:pageBlock title="Matching Contacts"  > 
+	           	<apex:pageBlockTable title="Matching Contacts" value="{!matchingContacts}" var="x" >
+					<apex:column headerValue="Action">
+						<apex:commandLink value="Select Contact" action="{!selectContact}"  style="color:#015ba7" >
+							<apex:param name="selectedContact" value="{!x.Id}" assignTo="{!selectedContactId}" />
+						</apex:commandLink> 
+						<apex:outputText value=" | "  style="color:#015ba7" />
+						<apex:commandLink value="Select Account" action="{!selectAccount}" style="color:#015ba7" rendered="{!x.AccountId <> null}">
+							<apex:param name="selectedContact" value="{!x.Id}" assignTo="{!selectedContactId}" />
+						</apex:commandLink> 
+					</apex:column>
+<!-- 	           	<apex:column headerValue="Contact Name" ><apex:outputLink value="/{!x.Id}" >{!x.Name}</apex:outputLink></apex:column>   -->
+	           		<apex:column value="{!x.Name}" />
+	           		<apex:column value="{!x.Account.Name}" />
+	           		<apex:column value="{!x.skyplatform__Is_Personal__c}" />
+	           		<apex:column value="{!x.Phone}" />
+	           		<apex:column value="{!x.MobilePhone}" />
+	           		<apex:column value="{!x.HomePhone}" />
+	           		<apex:column value="{!x.OtherPhone}" /> 
+	           	</apex:pageBlockTable>
+           	</apex:pageBlock>
+
+			<apex:pageBlock title="Matching Leads"  >
+	           	<apex:pageBlockTable title="Matching Leads" value="{!matchingLeads}" var="x" >
+					<apex:column headerValue="Action">
+						<apex:commandLink value="Select Lead" action="{!selectLead}"  style="color:#015ba7" >
+							<apex:param name="selectedLead" value="{!x.Id}" assignTo="{!selectedLeadId}" />  
+						</apex:commandLink> 
+					</apex:column>
+<!-- 	           	<apex:column headerValue="Lead Name" ><apex:outputLink value="/{!x.Id}" >{!x.Name}</apex:outputLink></apex:column>   -->
+	           		<apex:column value="{!x.Name}" />
+	           		<apex:column value="{!x.Phone}" />
+	           		<apex:column value="{!x.MobilePhone}" />
+	           	</apex:pageBlockTable>
+	        </apex:pageBlock>
+
+        </apex:pageBlock>
+           	               
+    </apex:form>
+</apex:page>

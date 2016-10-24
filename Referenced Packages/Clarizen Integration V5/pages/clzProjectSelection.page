@@ -1,0 +1,54 @@
+<apex:page controller="clzV5.clzProjectSelectionController">
+
+    <apex:form >
+        <apex:outputPanel id="projectSelectionPanel"> <!-- rendered="{!showProjectSelectionPanel}"-->    
+            <BR/>
+            <apex:Outputlabel value="Search All Clarizen Projects" style="font-size:12pt;font-weight:bold;"/><BR/>
+            <apex:inputText size="50" value="{!projetPattern}" Id="ID_ProjectPattern"/><apex:commandButton id="btnSearch" action="{!SearchProjects}" value="Search" reRender="ID_TooManyRecords,ID_ProjectList,ID_SearchResult"/><BR/>
+            <apex:outputLabel value="Project Name or Project ID Number" style="font-size:10pt;font-style:italic;color:#909090;"/><BR/><BR/>
+            <apex:outputPanel id="ID_SearchResult">
+                <apex:Outputlabel value="Most Recently Modified" style="font-size:12pt;font-weight:bold;" rendered="{!showMostRecentLabel}"/>
+                <apex:Outputlabel value="Search Results (most recently modified)" style="font-size:12pt;font-weight:bold;" rendered="{!showSearchResultLabel}"/>
+                <apex:outputLabel value="{!Error}" rendered="{!showErrorPanel}" style="font-size:10pt;color:#FF462C;font-style:italic;"/>
+            </apex:outputPanel>
+            <BR/>
+            <apex:outputPanel id="ID_TooManyRecords">
+                <apex:Outputlabel rendered="{!showTooManyRecords}" value="Your search returned more than 25 records. Please refine your search terms." style="font-size:10pt;color:#FF462C;font-style:italic;"/><BR/>
+            </apex:outputPanel>
+
+            <p>
+                <apex:commandButton id="btnNext1" action="{!Next}" value="Next"/>
+                <apex:commandButton id="btnCancel1" action="{!Cancel}" value="Cancel"/>
+            </p>
+            
+            <apex:outputPanel id="ID_ProjectList">
+                <apex:selectRadio value="{!selectedProjectId}" layout="pageDirection" onselect="enableNextButtons();" onclick="enableNextButtons();">
+                    <apex:selectOptions value="{!projectsOptions}"/>
+                </apex:selectRadio>
+            </apex:outputPanel>
+            
+            <p>
+                <apex:commandButton id="btnNext2" action="{!Next}" value="Next"/>
+                <apex:commandButton id="btnCancel2" action="{!Cancel}" value="Cancel"/>
+            </p>
+            <script type="text/javascript">
+                enabledNextButton = false;
+                btnNext1 = document.getElementById('{!$Component.btnNext1}');
+                btnNext2 = document.getElementById('{!$Component.btnNext2}');
+                btnNext1.disabled = true;
+                btnNext2.disabled = true;
+                
+                function enableNextButtons()
+                {
+                    if(!enabledNextButton)
+                    {
+                        if(btnNext1!=null)
+                            btnNext1.disabled = false;
+                        if(btnNext2!=null)
+                            btnNext2.disabled = false;                      
+                    }
+                }
+            </script>
+        </apex:outputPanel>
+    </apex:form>
+</apex:page>

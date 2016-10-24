@@ -1,0 +1,38 @@
+<!--
+ Developed by Timba Software Corp. www.timbasoftware.com admin@timbasoftware.com
+ This page defines plans
+ @author Julio Viera <jviera@timbasoftware.com>
+-->
+<apex:page id="XactlySMBTermsForReviewPlan" controller="XactlyExpress.XactlySMBTermsForReviewPlan" sidebar="false" showHeader="false" standardStylesheets="false"> 
+ 
+ 
+	<apex:form id="termsEditRichText">
+		<apex:outputpanel layout="block" style="padding:20px;" rendered="{!!hasTerms}" >
+			<apex:outputText value="{!$Label.xactlyexpress__noTermsForPlan}" />
+		</apex:outputpanel>
+		<apex:outputpanel layout="block" style="padding:20px;" rendered="{!hasTerms}" >
+    		<div><apex:outputText value="{!$Label.xactlyexpress__Name}: " /><input style="width:550px;" maxlength="80" type="text" id="termsName" value="{!terms.name}"/></div>     		
+    		<br />
+    		<div><apex:inputTextarea richtext="true" cols="160" rows="20" value="{!terms.XactlyExpress__TermsAndConditionsRich__c}" style="border:none;"></apex:inputTextarea></div> 
+		</apex:outputpanel>
+	</apex:form>
+
+    <apex:includeScript value="{!URLFOR($Resource.XactlyExpress__CSN, 'jquery.js')}" />
+    
+    <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources, 'js/XactlySMBJavascript.js')}"></script>
+    <style>.hidden { display: none; }</style>
+    
+    <div class="hidden">
+        <input type="hidden" id="orgName" value="{!URLENCODE($Organization.Name)}" />
+        <input type="hidden" id="orgId" value="{!URLENCODE($Organization.Id)}" />
+        <input type="hidden" id="currentUserProfile" value="{!URLENCODE(currentUserProfile)}" />
+        <input type="hidden" id="currentUserName" value="{!URLENCODE($User.FirstName + ' ' + $User.LastName)}" />
+    </div>
+
+    <script language="javascript" type="text/javascript">
+        jQuery(document).ready(function(){
+            setTimeout("loadAnltc('XactlySMBTermsForReviewPlan.php')", 1000);
+        });
+    </script>
+ 
+</apex:page>

@@ -1,0 +1,41 @@
+<apex:page html-data-app="cfsapp" html-ng-controller="cfsContainer" controller="lmscons.EUI_CompositionTemplateController" extensions="lmscons.EUI_CalendarControllerExt" sidebar="false" action="{!Load}" standardStylesheets="false" showHeader="false">
+
+
+<!-- Css -->
+    <apex:stylesheet value="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700"/>
+    <apex:stylesheet value="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css"/>
+    <apex:stylesheet value="{!URLFOR($Resource.lmscons__styles, '/styles/normalize/3.0.2/normalize.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.lmscons__styles, '/styles/cfs.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.lmscons__styles, '/styles/calendar.css')}"/>
+<!-- Script -->
+    <apex:includeScript value="{!URLFOR($Resource.lmscons__libraries, '/libraries/jquery/1.11.1/jquery.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.lmscons__libraries, '/libraries/angularjs/1.2.25/angular.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.lmscons__libraries, '/libraries/jquery-circle-progress/1.1.2/circle-progress.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.lmscons__libraries, '/libraries/moment/2.9.0/moment-with-locales.js')}"/>
+    <apex:includeScript value="{!URLFOR($Resource.lmscons__libraries, '/libraries/moment/2.9.0/moment-timezone-with-data.js')}"/>
+
+<!-- Sending data to $scope --> 
+
+    <c:EUI_JSComponentHeader DataSourceName="PrefixData" DataSourceValue="{!PrefixPathJSON}"></c:EUI_JSComponentHeader>
+    <c:EUI_JSComponentHeader DataSourceName="TemplateData" DataSourceValue="{!templateJSON}" LabelsList="myTraining,completedTab,catalog,myBadges"></c:EUI_JSComponentHeader>
+    <c:EUI_JSComponentHeader DataSourceName="CalendarData" DataSourceValue="{!CalendarDataJSON}" LabelsList="Calendar_No_events_scheduled,Calendar_VIEW_FULL_CALENDAR,Calendar_View_Future_Event,Calendar_title,Calendar_legend_Available,Calendar_legend_Enrolled,Calendar_legend_Due"></c:EUI_JSComponentHeader>
+    
+<!-- Angular composition template directive -->
+    <div id="cfsWrapper" ng-cloak="">
+        <div data-ng-controller="itemWrapper">
+            <input     type="hidden" data-ng-model="dataSourceName" data-ng-init="dataSourceName='PrefixData'" />
+            <div assign-prefix="assign-prefix"></div>
+        </div>
+
+        <div data-ng-controller="itemWrapper">
+            <input     type="hidden"
+                    data-ng-model="dataSourceName"
+                    data-ng-init="dataSourceName='TemplateData'"
+            />
+            <div composition-template-header="composition-template-header" pathPrefix="{!URLFOR($Resource.templates, '')}"></div>
+<!-- Page Content -->
+            <apex:insert name="body"/>
+        </div>
+    </div>
+
+</apex:page>

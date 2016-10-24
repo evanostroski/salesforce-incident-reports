@@ -1,0 +1,457 @@
+<!--
+ Developed by Timba Software Corp. www.timbasoftware.com admin@timbasoftware.com
+ This page lists plans
+ @author Guillermo Freire <guillermo.freire@gmail.com>
+-->
+<apex:page controller="XactlyExpress.XactlySMBPlanDocumentController" cache="true" sidebar="false" showHeader="false" standardStylesheets="false" contentType="application/{!contentType}#{!documentName}; charset=utf-8" renderAs="{!IF(fileExtension == 'pdf',fileExtension,'')}">
+    <html>
+		<head>
+		    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+				<style type="text/css" media="print">
+					   @page { 				
+							@bottom-left {
+			 					content: element(footer);
+							}			
+						}						
+						div.footer {				
+							display: block;				
+							padding: 3px;		
+							position: running(footer);		
+							height: 100%;
+							text-align: center;	
+						}						
+			 
+						.pagenumber:before {				
+							content: counter(page); 			
+						}						
+						.pagecount:before {				
+							content: counter(pages);  			
+						}			
+			            p.MsoFooter, li.MsoFooter, div.MsoFooter{
+			                 margin:0in;
+			                 margin-bottom:.0001pt;
+			                 mso-pagination:widow-orphan;
+			                 tab-stops:center 3.0in right 6.0in;
+			             }
+			             @page Section1{
+			                 size:8.5in 11.0in; 
+			                 margin:0.5in 0.5in 0.5in 0.5in;
+			                 mso-footer:f1; 
+			                 mso-footer-margin:0.5in;
+			                 mso-paper-source:0;
+			             }
+			             div.Section1{
+			                 page:Section1;
+			             }
+			             #hrdftrtbl{
+			                 margin:0in 0in 0in 9in;
+			             }          
+	            </style>
+		</head>
+		<body>
+			    <apex:repeat value="{!alphaList}" var="crrtAlpha">
+		           <apex:outputPanel rendered="{!IF(fileExtension == 'pdf',true,false)}">
+		              <div class="footer">  		
+							<div>Page <span class="pagenumber"/> of <span class="pagecount"/></div>	
+			    	  </div>
+			    	</apex:outputPanel>
+			      <div class="{!IF(fileExtension == 'pdf','content','Section1')}">
+	       		    <apex:outputpanel layout="none" rendered="{!IF(OR(currentSettingsAttach == null,fileExtension != 'pdf'), false, true)}">
+   				        <center>
+				        	<div>
+				        	    <apex:image url="{!URLFOR($Action.Attachment.Download, URLENCODE(currentSettingsAttach))}" Style="width:{!logoWidth}px;height:{!logoHeight}px" />
+                       		</div>
+                       	</center>
+                    </apex:outputpanel>
+                    <apex:outputpanel layout="none" rendered="{!crrtAlpha.reviewSettings.docTitle}">
+			        	<center><div style="font-weight: bold;font-size:16pt;">{!HTMLENCODE(crrtAlpha.docTitle)}</div></center>
+			        </apex:outputpanel>
+			        <apex:outputpanel layout="none" rendered="{!crrtAlpha.reviewSettings.planTitle}">
+			        	<center><div style="font-weight: bold;font-size:12pt;">{!FiscalYearName} {!HTMLENCODE(crrtAlpha.planName)}</div></center>
+			        </apex:outputpanel>
+			        <apex:outputpanel layout="none" rendered="{!crrtAlpha.reviewSettings.docSubTitle}">
+			        	<center><div style="font-size:12pt;">{!HTMLENCODE(crrtAlpha.subTitle)}</div></center>
+			        </apex:outputpanel>
+			        <br />
+			        <apex:outputpanel layout="none" rendered="{!crrtAlpha.reviewSettings.effectDate}">
+			        	<center><div style="font-style:italic;">{!crrtAlpha.effectiveDate}</div></center>
+					</apex:outputpanel>
+			        <br /><br />
+			        
+			        <center>
+			        
+			        <apex:outputpanel layout="none" rendered="{!crrtAlpha.reviewSettings.displayTic}">
+			            <span style="font-size:12pt;">{!currentSettings.tic}: {!ticS} </span>
+			        </apex:outputpanel>
+			        <apex:outputpanel layout="none" rendered="{!crrtAlpha.reviewSettings.displaySalary}">
+			            <span style="margin-left:10px;font-size:12pt;"> {!$Label.xactlyexpress__Salary}: {!salaryS} </span>
+			        </apex:outputpanel>
+			        <apex:outputpanel layout="none" rendered="{!crrtAlpha.reviewSettings.displayOte}">
+			            <span style="margin-left:10px;font-size:12pt;"> {!$Label.xactlyexpress__OTE}: {!oteS}</span>
+			        </apex:outputpanel>
+			        
+			        </center>
+			
+			        <apex:outputpanel layout="none" rendered="{!crrtAlpha.reviewSettings.displayTic || crrtAlpha.reviewSettings.displaySalary || crrtAlpha.reviewSettings.displayOte}">
+			            <br /><br />
+			        </apex:outputpanel>
+			        
+			        <apex:outputpanel layout="none" rendered="{!profileId != everyoneOnPlan}">
+			            <table border="0" cellspacing="0" cellpadding="0">
+			            	<apex:outputText rendered="{!crrtAlpha.reviewSettings.personName}">
+				                <tr>
+				                    <td>
+				                        <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">
+				                            {!$Label.Name}:
+				                        </span>
+				                    </td>
+				                    <td>
+				                        {!crrtAlpha.userName}
+				                    </td>
+				                </tr>
+				            </apex:outputText>
+				            <apex:outputText rendered="{!crrtAlpha.reviewSettings.personTitle}">
+			                    <tr>
+				                    <td>
+				                        <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">
+				                            {!$Label.RoleInIncent}:
+				                        </span>
+				                    </td>
+				                    <td>
+				                        {!HTMLENCODE(crrtAlpha.userRole)}
+				                    </td>
+			                	</tr>
+			                </apex:outputText>
+			            </table>
+			            <br />
+			        </apex:outputpanel>
+			
+			        <apex:outputpanel layout="none" rendered="{!crrtAlpha.reviewSettings.description && crrtAlpha.pp.PlanId__r.XactlyExpress__Description__c != ''}">
+			            <div style="padding-left:10px;font-size:16pt;color:#0070c0;font-family:Arial, serif;font-weight:bold;border:1px solid black;">
+			                {!$Label.Description}
+			            </div>
+			            <br />
+			            <div style="margin-left:20px;">
+			                {!HTMLENCODE(crrtAlpha.Description)}
+			            </div>
+			            <br />
+			        </apex:outputpanel>
+			
+			        <apex:outputPanel layout="none" rendered="{!crrtAlpha.tooManyStmt}">
+			            <div style="padding-left:10px;font-size:13pt;color:#aa1910;font-family:Arial, serif;">
+			                {!$Label.AmountOfDataLimited}
+			            </div>
+			            <br/>
+			        </apex:outputPanel>
+			
+			        <apex:outputpanel layout="none" rendered="{!crrtAlpha.reviewSettings.quotas}">
+			
+			            <div style="padding-left:10px;font-size:16pt;color:#0070c0;font-family:Arial, serif;font-weight:bold;border:1px solid black;">
+			                {!currentSettings.quotasPluralCap}
+			            </div>
+			            <br />
+			
+			            <div style="margin-left:20px;">
+			                <apex:repeat value="{!crrtAlpha.details}"  var="quotaD">
+			                <apex:outputpanel layout="none" rendered="{!quotaD.isDisplayed}">
+			                
+				                <apex:outputpanel layout="none" rendered="{!quotaD.frequency == 'Year'}">
+				                    <table border="1" cellspacing="2" cellpadding="3" bordercolor="#404040">
+				                        <tr>
+				                            <td>
+				                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">{!HTMLENCODE(quotaD.quotaName)}</span>
+				                            </td>
+				                            <td>
+				                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">{!$Label.Annual}</span>
+				                            </td>
+				                        </tr>
+				                        <tr>
+				                            <td></td>
+				                            <td style="text-align:right">
+				                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.annualAmount}
+				                            </td>
+				                        </tr>
+				                    </table>
+				                    <br />
+				                </apex:outputpanel>
+				
+	                            <apex:outputpanel layout="none" rendered="{!quotaD.frequency == 'Quarter'}">
+				                    <table border="1" cellspacing="2" cellpadding="3" bordercolor="#404040">
+				                        <tr>
+				                            <td>
+				                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">{!HTMLENCODE(quotaD.quotaName)}</span>
+				                            </td>
+				                            <td>
+				                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">Q1</span>
+				                            </td>
+				                            <td>
+				                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">Q2</span>
+				                            </td>
+				                            <td>
+				                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">Q3</span>
+				                            </td>
+				                            <td>
+				                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">Q4</span>
+				                            </td>
+				                        </tr>
+				                        <tr>
+				                            <td></td>
+				                            <td style="text-align:right">
+				                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.Q1Amount}
+				                            </td>
+				                            <td style="text-align:right">
+				                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.Q2Amount}
+				                            </td>
+				                            <td style="text-align:right">
+				                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.Q3Amount}
+				                            </td>
+				                            <td style="text-align:right">
+				                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.Q4Amount}
+				                            </td>
+				                        </tr>
+				                    </table>
+				                    <br />
+				                </apex:outputpanel>
+				                
+				                <apex:outputpanel layout="none" rendered="{!quotaD.frequency == 'Month'}">
+				                    <table border="1" cellspacing="2" cellpadding="3" bordercolor="#404040">
+				                        <tr>
+				                            <td>
+				                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">{!HTMLENCODE(quotaD.quotaName)}</span>
+				                            </td>
+				                            <td>
+				                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">{!$Label.Monthly} {!$Label.Amount}</span>
+				                            </td>
+				                        </tr>
+				                        <apex:outputText rendered="{!quotaD.monthsToRender[0]}">
+					                        <tr>
+					                            <td>
+					                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">M1 {!quotaD.monthNames[0]}</span>
+					                            </td>
+					                            <td style="text-align:right">
+					                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.M1Amount}
+					                            </td>
+					                        </tr>
+				                        </apex:outputText>
+				                        <apex:outputText rendered="{!quotaD.monthsToRender[1]}">
+					                        <tr>
+					                            <td>
+					                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">M2 {!quotaD.monthNames[1]}</span>
+					                            </td>
+					                            <td style="text-align:right">
+					                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.M2Amount}
+					                            </td>
+					                        </tr>
+				                        </apex:outputText>
+				                        <apex:outputText rendered="{!quotaD.monthsToRender[2]}">
+					                       <tr>
+					                           <td>
+					                               <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">M3 {!quotaD.monthNames[2]}</span>
+					                           </td>
+					                           <td style="text-align:right">
+					                               {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.M3Amount}
+					                           </td>
+					                       </tr>
+				                        </apex:outputText>
+				                        <apex:outputText rendered="{!quotaD.monthsToRender[3]}">
+					                        <tr>
+					                            <td>
+					                               <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">M4 {!quotaD.monthNames[3]}</span>
+					                            </td>
+					                            <td style="text-align:right">
+					                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.M4Amount}
+					                            </td>
+					                        </tr>
+				                        </apex:outputText>
+				                        <apex:outputText rendered="{!quotaD.monthsToRender[4]}">
+					                        <tr>
+					                            <td>
+					                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">M5 {!quotaD.monthNames[4]}</span>
+					                            </td>
+					                            <td style="text-align:right">
+					                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.M5Amount}
+					                            </td>
+					                        </tr>
+				                        </apex:outputText>
+				                        <apex:outputText rendered="{!quotaD.monthsToRender[5]}">
+					                        <tr>
+					                            <td>
+					                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">M6 {!quotaD.monthNames[5]}</span>
+					                            </td>
+					                            <td style="text-align:right">
+					                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.M6Amount}
+					                            </td>
+					                        </tr>
+				                        </apex:outputText>
+				                        <apex:outputText rendered="{!quotaD.monthsToRender[6]}">
+						                        <tr>
+						                            <td>
+						                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">M7 {!quotaD.monthNames[6]}</span>
+						                            </td>
+						                            <td style="text-align:right">
+						                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.M7Amount}
+						                            </td>
+						                        </tr>
+				                        </apex:outputText>
+				                        <apex:outputText rendered="{!quotaD.monthsToRender[7]}">
+						                        <tr>
+						                            <td>
+						                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">M8 {!quotaD.monthNames[7]}</span>
+						                            </td>
+						                            <td style="text-align:right">
+						                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.M8Amount}
+						                            </td>
+						                        </tr>
+					                     </apex:outputText>
+					                     <apex:outputText rendered="{!quotaD.monthsToRender[8]}">
+						                        <tr>
+						                            <td>
+						                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">M9 {!quotaD.monthNames[8]}</span>
+						                            </td>
+						                            <td style="text-align:right">
+						                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.M9Amount}
+						                            </td>
+						                        </tr>
+					                      </apex:outputText>
+					                      <apex:outputText rendered="{!quotaD.monthsToRender[9]}">
+						                        <tr>
+						                            <td>
+						                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">M10 {!quotaD.monthNames[9]}</span>
+						                            </td>
+						                            <td style="text-align:right">
+						                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.M10Amount}
+						                            </td>
+						                        </tr>
+					                       </apex:outputText>
+					                       <apex:outputText rendered="{!quotaD.monthsToRender[10]}">
+						                        <tr>
+						                            <td>
+						                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">M11 {!quotaD.monthNames[10]}</span>
+						                            </td>
+						                            <td style="text-align:right">
+						                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.M11Amount}
+						                            </td>
+						                        </tr>
+					                       </apex:outputText>
+					                       <apex:outputText rendered="{!quotaD.monthsToRender[11]}">
+						                        <tr>
+						                            <td>
+						                                <span style="color:#0070c0;font-family:Arial, serif;font-weight:bold;">M12 {!quotaD.monthNames[11]}</span>
+						                            </td>
+						                            <td style="text-align:right">
+						                                {!IF(crrtAlpha.selectedCurrency != null, crrtAlpha.selectedCurrency,'')} {!quotaD.M12Amount}
+						                            </td>
+						                        </tr>
+						                    </apex:outputText>
+				                    </table>
+				                    <br />
+				                </apex:outputpanel>
+			                </apex:outputpanel>
+			                </apex:repeat>
+			                
+			                </div>
+			            <br />
+			        </apex:outputpanel>
+					
+					<apex:outputPanel >
+						<apex:outputPanel rendered="{!IF(fileExtension == 'pdf',true,false)}">
+							<div style="page-break-before:always;"/>
+						</apex:outputPanel>
+						<apex:outputPanel rendered="{!IF(fileExtension == 'pdf',false,true)}">
+							<br style="page-break-before:always;"/>
+						</apex:outputPanel>
+					</apex:outputPanel>
+					
+					<div>
+			        	<c:XactlySMBPaymentStructure displayCloseBtn="false" paymentInstance="{!crrtAlpha.paymentObjInstance}" currency="{!crrtAlpha.selectedCurrency}" setReviewPlanStyles="false" labels="{!crrtAlpha.paymentLabels}" rampType="{!rampTypeResult}"/>
+					</div>
+					
+					<apex:outputPanel >
+						<apex:outputPanel rendered="{!IF(fileExtension == 'pdf',true,false)}">
+							<div style="page-break-before:always;"/>
+						</apex:outputPanel>
+						<apex:outputPanel rendered="{!IF(fileExtension == 'pdf',false,true)}">
+							<br style="page-break-before:always;"/>
+						</apex:outputPanel>
+					</apex:outputPanel>
+			        
+			        <div>
+			        	<c:XactlySMBPlanModeling pm="{!crrtAlpha.modelingObjInstance}" setReviewPlanStyles="false" currency="{!crrtAlpha.selectedCurrency}" rendered="{!crrtAlpha.reviewSettings.modeling}" />
+					</div>
+			        
+			        <apex:outputPanel >
+						<apex:outputPanel rendered="{!IF(fileExtension == 'pdf',true,false)}">
+							<div style="page-break-before:always;"/>
+						</apex:outputPanel>
+						<apex:outputPanel rendered="{!IF(fileExtension == 'pdf',false,true)}">
+							<br style="page-break-before:always;"/>
+						</apex:outputPanel>
+					</apex:outputPanel>
+			
+			        <!-- c:XactlySMBPlanQuota onDash="true" pq="{!crrtAlpha.quotaObjInstance}" setReviewPlanStyles="false"/ -->
+			         
+			        <apex:outputpanel layout="none" rendered="{!crrtAlpha.reviewSettings.termsConditions && crrtAlpha.pp.PlanId__r.TermsAndConditions__r.XactlyExpress__TermsAndConditionsRich__c != ''}">
+			            <div style="padding-left:10px;font-size:16pt;color:#0070c0;font-family:Arial, serif;font-weight:bold;border:1px solid black;">
+			                {!$Label.ExportTermsTitle}
+			            </div>
+			            <br />
+			
+			            <div style="margin-left:20px;">
+			                <apex:outputText escape="false" value="{!crrtAlpha.pp.PlanId__r.TermsAndConditions__r.XactlyExpress__TermsAndConditionsRich__c}"/>
+			            </div>
+			            <br />
+			        </apex:outputpanel>
+			
+			        <div>{!agreeTermsLabel}</div>
+			        <br />
+			        <br />
+			        <br />
+			        <table width="100%" border="0">
+			            <tr>
+			                <td style="border-bottom:1px solid"> </td>
+			            </tr>
+			        </table>
+			        <table width="100%" border="0">
+			            <tr>
+			                <td style="text-align:left;"><div>{!$Label.Signature}</div>
+			                </td>
+			                <td style="text-align:right;"><div>{!$Label.Date}</div>
+			                </td>
+			            </tr>
+			        </table>
+			        <br />
+			        <br />
+			        <br />
+			        <table width="100%" border="0">
+			            <tr>
+			                <td style="border-bottom:1px solid"> </td>
+			            </tr>
+			        </table>
+			        <table width="100%" border="0">
+			            <tr>
+			                <td style="text-align:left;"><div>{!$Label.printedName}</div>
+			                </td>
+			                <td style="text-align:right;"><div>{!$Label.Date}</div>
+			                </td>
+			            </tr>
+			        </table>
+					<apex:outputPanel rendered="{!IF(fileExtension == 'pdf',false,true)}">
+						<div id='hrdftrtbl' style='text-align:center;width: 100%;'>
+		           		   <table cellspacing='0' cellpadding='0' style='width: 100%;'>
+		                  	  <tr>
+		                      	  <td>
+		                            <div style='mso-element:footer' id="f1">
+			                                <p class="MsoFooter">
+												Page <span style='mso-field-code: PAGE '></span> of <span style='mso-field-code: NUMPAGES '></span>
+			                                </p>
+			                            </div>
+			                        </td>
+			                    </tr>
+			                </table>
+						 </div>
+					 </apex:outputPanel>
+           		   </div>
+			    </apex:repeat>
+		</body>
+    </html>
+</apex:page>

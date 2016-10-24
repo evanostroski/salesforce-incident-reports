@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <actionOverrides>
+        <actionName>Accept</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>CancelEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Clone</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Delete</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Edit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>List</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>New</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>SaveEdit</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>Tab</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
+        <actionName>View</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <allowInChatterGroups>false</allowInChatterGroups>
+    <compactLayoutAssignment>SYSTEM</compactLayoutAssignment>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <deprecated>false</deprecated>
+    <description>A record for a scheduled contest</description>
+    <enableActivities>false</enableActivities>
+    <enableBulkApi>true</enableBulkApi>
+    <enableFeeds>false</enableFeeds>
+    <enableHistory>false</enableHistory>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+    <fields>
+        <fullName>Contest_End_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Contest end date and time</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Contest end date and time</inlineHelpText>
+        <label>Contest End Date</label>
+        <required>true</required>
+        <trackTrending>false</trackTrending>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Contest_Name__c</fullName>
+        <deprecated>false</deprecated>
+        <description>The name to be used for the contest. If left blank, the Contest Template&apos;s name will be used with the start date appended.</description>
+        <externalId>false</externalId>
+        <inlineHelpText>The name to be used for the contest. If left blank, the Contest Template&apos;s name will be used with the start date appended.</inlineHelpText>
+        <label>Contest Name</label>
+        <length>255</length>
+        <required>false</required>
+        <trackTrending>false</trackTrending>
+        <type>Text</type>
+        <unique>false</unique>
+    </fields>
+    <fields>
+        <fullName>Contest_Start_Date__c</fullName>
+        <deprecated>false</deprecated>
+        <description>Contest start date and time</description>
+        <externalId>false</externalId>
+        <inlineHelpText>Contest start date and time</inlineHelpText>
+        <label>Contest Start Date</label>
+        <required>true</required>
+        <trackTrending>false</trackTrending>
+        <type>DateTime</type>
+    </fields>
+    <fields>
+        <fullName>Contest_Template__c</fullName>
+        <deprecated>false</deprecated>
+        <description>The contest template to be used</description>
+        <externalId>false</externalId>
+        <inlineHelpText>The contest template to be used</inlineHelpText>
+        <label>Contest Template</label>
+        <lookupFilter>
+            <active>true</active>
+            <errorMessage>The selected contest must be a contest template.</errorMessage>
+            <filterItems>
+                <field>Contest__c.isTemplate__c</field>
+                <operation>equals</operation>
+                <value>True</value>
+            </filterItems>
+            <infoMessage>Select a contest template.</infoMessage>
+            <isOptional>false</isOptional>
+        </lookupFilter>
+        <referenceTo>Contest__c</referenceTo>
+        <relationshipLabel>Scheduled Contests</relationshipLabel>
+        <relationshipName>Scheduled_Contests</relationshipName>
+        <relationshipOrder>0</relationshipOrder>
+        <reparentableMasterDetail>false</reparentableMasterDetail>
+        <trackTrending>false</trackTrending>
+        <type>MasterDetail</type>
+        <writeRequiresMasterRead>false</writeRequiresMasterRead>
+    </fields>
+    <label>Scheduled Contest</label>
+    <listViews>
+        <fullName>All</fullName>
+        <columns>NAME</columns>
+        <columns>Contest_Name__c</columns>
+        <columns>Contest_Template__c</columns>
+        <columns>Contest_Start_Date__c</columns>
+        <columns>Contest_End_Date__c</columns>
+        <filterScope>Everything</filterScope>
+        <label>All</label>
+    </listViews>
+    <nameField>
+        <displayFormat>SCHED-{0000}</displayFormat>
+        <label>Scheduled Contest No</label>
+        <type>AutoNumber</type>
+    </nameField>
+    <pluralLabel>Scheduled Contests</pluralLabel>
+    <searchLayouts>
+        <customTabListAdditionalFields>Contest_Name__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Contest_Template__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Contest_Start_Date__c</customTabListAdditionalFields>
+        <customTabListAdditionalFields>Contest_End_Date__c</customTabListAdditionalFields>
+        <listViewButtons>Contest_Scheduler</listViewButtons>
+        <searchResultsCustomButtons>Contest_Scheduler</searchResultsCustomButtons>
+    </searchLayouts>
+    <sharingModel>ControlledByParent</sharingModel>
+    <validationRules>
+        <fullName>End_Date_greater_than_start_date</fullName>
+        <active>true</active>
+        <description>Validate that the end date is greater than the start date</description>
+        <errorConditionFormula>Contest_End_Date__c &lt;=  Contest_Start_Date__c</errorConditionFormula>
+        <errorDisplayField>Contest_End_Date__c</errorDisplayField>
+        <errorMessage>The Contest End Date must be greater than the Contest Start Date.</errorMessage>
+    </validationRules>
+    <validationRules>
+        <fullName>Start_Date_must_be_in_future</fullName>
+        <active>true</active>
+        <description>Validate that the start date is in the future</description>
+        <errorConditionFormula>Contest_Start_Date__c &lt;= NOW()</errorConditionFormula>
+        <errorDisplayField>Contest_Start_Date__c</errorDisplayField>
+        <errorMessage>Contest start date must be in the future</errorMessage>
+    </validationRules>
+    <webLinks>
+        <fullName>Contest_Scheduler</fullName>
+        <availability>online</availability>
+        <description>A button that links to the Contest Scheduler</description>
+        <displayType>massActionButton</displayType>
+        <height>600</height>
+        <linkType>page</linkType>
+        <masterLabel>Contest Scheduler</masterLabel>
+        <openType>sidebar</openType>
+        <page>ContestScheduler</page>
+        <protected>false</protected>
+        <requireRowSelection>false</requireRowSelection>
+    </webLinks>
+</CustomObject>

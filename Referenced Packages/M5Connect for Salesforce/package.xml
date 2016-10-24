@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Package xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>M5Connect for Salesforce</fullName>
+    <apiAccessLevel>Unrestricted</apiAccessLevel>
+    <description>M5Connect for Salesforce Managed Application</description>
+    <namespacePrefix>m5</namespacePrefix>
+    <types>
+        <members>M5ConnectforSalesforce</members>
+        <name>CustomApplication</name>
+    </types>
+    <types>
+        <members>Activity.CNAM__c</members>
+        <members>Activity.Call_Start_Time__c</members>
+        <members>Activity.CallerID__c</members>
+        <members>Activity.Number_Dialed__c</members>
+        <members>Activity.Summary__c</members>
+        <members>Activity.TN__c</members>
+        <members>Activity.of_activities__c</members>
+        <members>Campaign.Campaign_TN__c</members>
+        <members>Lead.of_Leads__c</members>
+        <name>CustomField</name>
+    </types>
+    <types>
+        <members>M5ConnectforSalesforce</members>
+        <name>CustomTab</name>
+    </types>
+    <types>
+        <members>M5ConnectforSalesforcecom</members>
+        <members>M5ConnectforSalesforcecom/M5ConnectforSalesforce</members>
+        <name>Dashboard</name>
+    </types>
+    <types>
+        <members>M5ConnectforSalesforce</members>
+        <members>M5ConnectforSalesforcecom</members>
+        <name>Document</name>
+    </types>
+    <types>
+        <members>M5ConnectforSalesforcecom</members>
+        <members>M5ConnectforSalesforcecom/AllCallsMTD</members>
+        <members>M5ConnectforSalesforcecom/AvgActivitesPerOpportunityStage</members>
+        <members>M5ConnectforSalesforcecom/CallTypesbyUser</members>
+        <members>M5ConnectforSalesforcecom/Callsover4MinutesMTD</members>
+        <members>M5ConnectforSalesforcecom/CompletedTasksbyMonth</members>
+        <members>M5ConnectforSalesforcecom/CompletedTasksbyUser</members>
+        <members>M5ConnectforSalesforcecom/QualityCallsMTD</members>
+        <name>Report</name>
+    </types>
+    <types>
+        <members>LeadswithActivities</members>
+        <name>ReportType</name>
+    </types>
+    <version>36.0</version>
+</Package>

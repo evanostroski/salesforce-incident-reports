@@ -1,0 +1,166 @@
+<apex:page controller="ConcurConnect.SetupController" sidebar="false" tabstyle="Setup__tab">
+  <apex:sectionHeader title="{!$Label.concurconnect__setup_title}" />
+
+  <apex:pageMessages />
+  
+  <apex:form >
+  
+    <!-- Authentication Section -->
+    
+    <apex:pageBlock title="{!$Label.concurconnect__setup_authsection_title}" rendered="{!displayAuthenticationSection}">
+      <apex:pageBlockSection >
+        <apex:outputPanel >
+          {!$Label.setup_authsection_text_1}
+          <br />
+          <br />
+          <!---{!$Label.setup_authsection_seckey_text}&nbsp;&nbsp;<apex:inputText id="seckeyText" maxlength="200" size="60" value="{!SSOtext}" />--->
+          <br />
+          <br />
+          {!$Label.setup_authsection_text_2}
+          <br />
+          <br />
+          <apex:commandbutton value="{!$Label.concurconnect__setup_authsection_button}" action="{!authorize}" />
+        </apex:outputPanel>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+    
+    
+    <!-- Feature Settings Section --> 
+    
+    <apex:pageblock title="{!$Label.concurconnect__setup_featuresection_title}" rendered="{!displayFeatureSettingsSection}"> 
+        
+      {!$Label.setup_authsection_seckey_text}&nbsp;&nbsp;<apex:inputText id="seckeyText" maxlength="200" size="60" value="{!SSOtext}" />
+        
+      <apex:commandButton value="{!$Label.concurconnect__setup_featuresection_button}" action="{!finishSetUp}" style="float:right;" />
+      <br/>
+      <br/>
+      
+      <!-- Attendee Fetch -->
+      
+      <apex:pageblockSection title="{!$Label.concurconnect__setup_featuresection_attendeefetch_title}">
+      
+        <!-- Breeze and Hong Kong -->    
+            
+        <apex:pageblocksectionItem rendered="{!userHasBreezeProduct || userHasHongKongProduct}">
+          <apex:outputpanel >
+            <!-- feature overview -->
+            {!$Label.setup_featuresection_attendeefetch_breezehk_text_1}
+            <br/>
+            <br/>
+            <!-- configuration overview -->
+            {!$Label.setup_featuresection_attendeefetch_breezehk_text_2}
+            <br/>
+            <br/>
+            <!-- help -->
+            <apex:outputLink value="javascript:void(window.open('http://www.concurtraining.com/customers/tech_pubs/WebServices/SearchAttendee_SB.htm', '{!$Label.concurconnect__setup_featuresection_attendeefetch_breezehk_help_windowtitle}', 'scrollbars=yes,width=1030,height=600'));">
+              {!$Label.concurconnect__setup_featuresection_attendeefetch_breezehk_help_linktext}
+            </apex:outputLink>
+          </apex:outputpanel>
+        </apex:pageblocksectionItem>
+      
+        <!-- CTE -->
+        
+        <apex:pageblocksectionItem rendered="{!userHasCteProduct}">
+          <apex:outputpanel >
+            <!-- feature overview -->
+            {!$Label.setup_featuresection_attendeefetch_cte_text_1}
+            <br/>
+            <br/>
+            <!-- configuration overview -->
+            {!$Label.setup_featuresection_attendeefetch_cte_text_2}            
+            <br/>
+            <br/>
+            <!-- help -->
+            <apex:outputLink value="javascript:void(window.open('http://www.concurtraining.com/customers/tech_pubs/WebServices/SearchAttendee_PP.htm', '{!$Label.concurconnect__setup_featuresection_attendeefetch_cte_help_windowtitle}', 'scrollbars=yes,width=1030,height=600'));">
+              {!$Label.concurconnect__setup_featuresection_attendeefetch_cte_help_linktext}
+            </apex:outputLink>
+          </apex:outputpanel>
+        </apex:pageblocksectionItem>
+      </apex:pageblockSection>
+      
+      <!-- Opportunity Fetch -->
+      
+      <apex:pageblocksection title="{!$Label.concurconnect__setup_featuresection_opportunityfetch_title}">
+      
+        <!-- Breeze and Hong Kong -->
+        
+        <apex:pageblockSectionItem rendered="{!userHasBreezeProduct || userHasHongKongProduct}">
+          <apex:outputPanel >
+            <!-- feature overview -->
+            {!$Label.setup_featuresection_opportunityfetch_breezehk_text_1}
+            <br/>
+            <br/>
+            <!-- configuration overview -->
+            {!$Label.setup_featuresection_opportunityfetch_breezehk_text_2}
+            <br/>
+            <br/>
+            <!-- help -->
+            <apex:outputLink value="javascript:void(window.open('http://www.concurtraining.com/customers/tech_pubs/WebServices/Opportunity_SB.htm', '{!$Label.concurconnect__setup_featuresection_opportunityfetch_breezehk_help_windowtitle}', 'scrollbars=yes,width=1030,height=600'));">
+              {!$Label.concurconnect__setup_featuresection_opportunityfetch_breezehk_help_linktext}
+            </apex:outputLink>
+          </apex:outputPanel>
+        </apex:pageblockSectionItem>
+        
+        <!-- CTE -->   
+             
+        <apex:pageblockSectionItem rendered="{!userHasCteProduct}">  
+          <apex:outputPanel >
+            <!-- feature overview -->
+            {!$Label.setup_featuresection_opportunityfetch_cte_text_1}
+            <br/>
+            <br/>
+            <!-- configuration overview -->
+            {!$Label.setup_featuresection_opportunityfetch_cte_text_2}
+            <br/>
+            <br/>
+            <!-- help -->
+            <apex:outputLink value="javascript:void(window.open('http://www.concurtraining.com/customers/tech_pubs/WebServices/Opportunity_PP.htm', '{!$Label.concurconnect__setup_featuresection_opportunityfetch_cte_help_windowtitle}', 'scrollbars=yes,width=1030,height=600'));">
+              {!$Label.concurconnect__setup_featuresection_opportunityfetch_cte_help_linktext}
+            </apex:outputLink>
+          </apex:outputPanel>
+        </apex:pageblockSectionItem>
+      </apex:pageblocksection>
+      
+      
+      <!-- Trip Integration -->
+      
+      <apex:pageblocksection title="{!$Label.concurconnect__setup_featuresection_tripintegration_title}" rendered="{!userHasBreezeProduct || userHasHongKongProduct || userHasCteProduct}">
+        <apex:pageblockSectionItem >
+          <apex:outputpanel >
+              <!-- feature overview -->
+              {!$Label.concurconnect__setup_featuresection_tripintegration_text}
+              <br/>
+              <br/>
+              <!-- help -->
+              <apex:outputLink value="javascript:void(window.open('http://www.concurtraining.com/customers/tech_pubs/WebServices/TripIntegration.htm', '{!$Label.concurconnect__setup_featuresection_tripintegration_help_windowtitle}', 'scrollbars=yes,width=1030,height=600'));">
+                {!$Label.concurconnect__setup_featuresection_tripintegration_help_linktext}
+              </apex:outputLink>
+          </apex:outputpanel>
+        </apex:pageblockSectionItem>
+      </apex:pageblocksection>
+    </apex:pageblock>
+    
+    
+    <!-- Setup Complete Section -->
+    
+    <apex:pageBlock rendered="{!displaySetupCompleteSection}">
+      <apex:pageBlockSection >
+        {!$Label.concurconnect__setup_completesection_text}
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+    
+    
+    <!-- Restart Section -->
+    
+    <apex:pageBlock rendered="{!displayRestartSection}">
+      <apex:pageBlockSection >
+        <apex:outputpanel >
+          {!$Label.concurconnect__setup_restartsection_text}
+          <br/><br/>
+          <apex:commandButton value="{!$Label.concurconnect__setup_restartsection_button}" action="{!reset}" />
+        </apex:outputpanel>
+      </apex:pageBlockSection>
+    </apex:pageBlock>
+    
+    </apex:form>
+</apex:page>

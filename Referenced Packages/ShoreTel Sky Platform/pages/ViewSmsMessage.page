@@ -1,0 +1,35 @@
+<apex:page controller="skyplatform.ReconcileSmsMessagesController" sidebar="true">
+    <apex:form id="form">
+
+        <apex:pageBlock id="topBlock" title="ShoreTel Sky SMS Message Stream Record" >
+           	<apex:pageMessages id="pm"/>
+
+				<apex:pageBlockButtons location="top" > 
+                	<apex:commandButton value="View in Standard Page Layout" action="{!viewAsTask}" />
+                	<apex:commandButton value="Save Changes" action="{!saveTaskChanges}" />
+                	<apex:commandButton value="Done" action="{!cancel}" />
+               </apex:pageBlockButtons> 
+
+           	<apex:pageBlockSection columns="1">
+				<apex:inlineEditSupport event="onmouseup" />
+           		<apex:outputField value="{!theCallRecord.skyplatform__Subject__c}" />
+           		<apex:outputField value="{!theCallRecord.skyplatform__Contact__c}" ><apex:inlineEditSupport disabled="true" /></apex:outputField>
+           		<apex:outputField value="{!theCallRecord.skyplatform__Lead__c}" ><apex:inlineEditSupport disabled="true" /></apex:outputField>
+           		<apex:outputField value="{!theCallRecord.skyplatform__Account__c}" ><apex:inlineEditSupport disabled="true" /></apex:outputField>
+           		<apex:outputField value="{!theCallRecord.skyplatform__User_Phone__c}" ><apex:inlineEditSupport disabled="true" /></apex:outputField>
+           		<apex:outputField value="{!theCallRecord.skyplatform__External_Phone__c}" ><apex:inlineEditSupport disabled="true" /></apex:outputField>
+           		<apex:outputField value="{!theCallRecord.skyplatform__Is_Imported__c}" ><apex:inlineEditSupport disabled="true" /></apex:outputField>
+           		<apex:outputField value="{!theCallRecord.skyplatform__Is_Personal__c}" ><apex:inlineEditSupport disabled="true" /></apex:outputField>
+           	</apex:pageBlockSection> 
+        </apex:pageBlock>
+        
+        <apex:pageBlock >
+        	<apex:pageBlockTable value="{!theCallRecord.Messages__r}" var="x">
+        		<apex:column value="{!x.skyplatform__Direction__c}"/>
+        		<apex:column value="{!x.skyplatform__Date_and_Time__c}"/>
+        		<apex:column value="{!x.skyplatform__Message_Body__c}"/>
+        	</apex:pageBlockTable>
+        </apex:pageBlock>
+           	               
+    </apex:form>
+</apex:page>

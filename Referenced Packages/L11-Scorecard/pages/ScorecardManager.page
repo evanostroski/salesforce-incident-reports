@@ -1,0 +1,60 @@
+<apex:page docType="html-5.0" showHeader="true" sidebar="false" controller="l11_sc.ManagerController" standardStylesheets="false" applyBodyTag="true" applyHtmlTag="true" cache="false" tabStyle="Scorecard_Manager__tab">
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"/>
+    <title>LevelEleven Manager - <apex:insert name="title"/></title>
+    <meta name="description" content=""/>
+    <meta name="viewport" content="width=device-width"/>
+    <meta http-equiv="pragma" content="no-cache"/>
+
+    <script type="text/javascript">
+      (function(){
+        if(!window.L11) window.L11 = {};
+        window.L11.resourceUrl = '{!URLFOR($Resource.manager)}';
+        window.L11.isSalesforce = true;
+        window.L11.scorecardUrl = '{!URLFOR($Page.ScorecardHome)}';
+        window.L11.scorecardManagerUrl = '{!URLFOR($Page.ScorecardManager)}';
+        window.L11.viewAllRecordsURL = '{!URLFOR($Page.ViewAllRecords)}';
+        window.L11.isSalesforce1 = !!(window.sforce && window.sforce.one);
+        window.L11.userId = '{!$User.Id}';
+        window.L11.UIThemeDisplayed = '{!$User.UIThemeDisplayed}' || null;
+
+        window.L11.user = {
+          Id: '{!$User.Id}',
+          FirstName: '{!JSENCODE($User.FirstName)}',
+          LastName: '{!JSENCODE($User.LastName)}',
+        };
+
+        var root = document.getElementsByTagName('html')[0];
+        root.setAttribute('class', root.getAttribute('class') + ' ' + (window.L11.isSalesforce1 ? 'is-sf1' : 'not-sf1'));
+      }());
+
+    </script>
+    <script type="text/javascript">
+      if (typeof window.SVGElement !== 'undefined') {
+        window.SVGElement.prototype.getElementsByClassName = window.SVGElement.prototype.getElementsByClassName || function() { return []; }
+      }
+    </script>
+
+    <c:JSExternals />
+    <c:DemoMode />
+    <c:PageSettings />
+    <c:ScorecardControllerAttacher />
+    <c:BuilderControllerAttacher />
+
+    <apex:outputPanel layout="none" rendered="{!!$Setup.ScorecardSettings__c.Local_Mode__c}">
+      <link rel="stylesheet" type="text/css" href="{!URLFOR($Resource.manager, '/manager/styles/main.css')}" />
+    </apex:outputPanel>
+
+    <div id="app" role="application"></div>
+
+    <c:GA />
+
+    <apex:outputPanel layout="none" rendered="{!$Setup.ScorecardSettings__c.Local_Mode__c}">
+      <script type="text/javascript" src="https://localhost:1337/manager/scripts/app.js"></script>
+    </apex:outputPanel>
+
+    <apex:outputPanel layout="none" rendered="{!!$Setup.ScorecardSettings__c.Local_Mode__c}">
+      <script type="text/javascript" src="{!URLFOR($Resource.manager, '/manager/scripts/app.js')}"></script>
+    </apex:outputPanel>
+
+</apex:page>

@@ -1,0 +1,432 @@
+<apex:page controller="rkpi2.SearchController" standardStylesheets="false" sidebar="false" tabStyle="RK_Search__tab" >
+    
+    <apex:includeScript value="https://code.jquery.com/jquery-1.11.2.min.js" />
+    <apex:includeScript value="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/js/bootstrap.min.js" />
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js" />
+    <apex:includeScript value="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/jquery-ui.min.js" />
+    <apex:includeScript value="{!URLFOR($Resource.rkpi2__rk_search_styles, 'rk_search_styles/rk_search_js.js')}" />
+    
+    <!-- Latest compiled and minified CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css" />
+    <!-- Optional theme -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap-theme.min.css" />
+    
+    <apex:stylesheet value="{!URLFOR($Resource.rkpi2__jqueryui, 'jqueryui/jquery-ui.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.rkpi2__rk_search_styles, 'rk_search_styles/rk_bootstrap.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.rkpi2__rk_search_styles, 'rk_search_styles/rk_search_styles.css')}" />
+    
+    <style>
+    	td, th {
+    		font-size: 11px;
+    	}
+    	.gridRow a{
+    		cursor: pointer;
+    	}
+    	.not-enabled {
+    		margin-top: 50px;
+    		margin-left: 100px;
+    		margin-right: 100px;
+    		margin-bottom: 100px;
+    		padding: 20px 20px 20px 20px;
+    		border:solid #ce1d09 medium;
+			background-color:#fdd2ce;
+			vertical-align:middle;
+    	}
+    </style>
+
+    <apex:outputPanel rendered="{! !searchEnabled }">
+    	<div class="not-enabled">
+    	<apex:image value="{!$Resource.rkpi2__alert}" /> RainKing Search is not enabled for your Organization.
+    	</div>
+    </apex:outputPanel>
+     <apex:outputPanel rendered="{! !userSearchEnabled && searchEnabled }">
+    	<div class="not-enabled">
+    	<apex:image value="{!$Resource.rkpi2__alert}" /> You must be a RainKing user in order to use RainKing Search.
+    	</div>
+    </apex:outputPanel>
+    
+    <apex:outputPanel rendered="{! searchEnabled && userSearchEnabled }">
+	    <script type="text/javascript">
+	        $j = jQuery.noConflict();
+	
+	        $j(document).ready(function ($) {
+	            
+	            var recentSearchRowCount = $j('.recent-searches tbody tr').length;
+	            var savedSearchRowCount = $j('.saved-searches tbody tr').length;
+	            
+	            recentSearchRowCount < 1 ? $j('.recent-searches .search_placeholder').show() : console.log(recentSearchRowCount);
+	            savedSearchRowCount < 1 ? $j('.saved-searches .search_placeholder').show() : console.log(savedSearchRowCount);
+	            
+	            //DASHBOARD - RUN SEARCH
+	            $j(".run-search").click(function(e){
+	                e.preventDefault();
+	                var runButton = $j(this);
+	                var searchId = runButton.attr("searchId");
+	                Visualforce.remoting.Manager.invokeAction(
+						'{!$RemoteAction.SearchController.runSearch}',
+		                searchId, 
+		                function(results, event){
+		                    location.href=results;
+		                });
+	            });
+	            
+	            //DASHBOARD - DELETE RECENT SEARCH
+	            $j(".delete-recent-search").click(function(e){
+	                var message = 'Are you sure you want to delete this search?';
+	                e.preventDefault();
+	                if (confirm(message)) {
+	                    recentSearchRowCount--;
+	                    var deleteButton = $j(this);
+	                    var searchId = deleteButton.attr("searchId");
+	                    
+	                    Visualforce.remoting.Manager.invokeAction(
+							'{!$RemoteAction.SearchController.deleteSearch}',
+	                    	searchId, 
+	                    	function(results, event){
+		                        deleteButton.closest('tr').fadeOut();
+		                        if (recentSearchRowCount == 0) {
+		                        	$j("#no-recent-search").show();;
+		                        }
+		                    });
+	                }
+	            });
+	            
+	            //DASHBOARD - DELETE SAVED SEARCH
+	            $j(".delete-saved-search").click(function(e){
+	                var message = 'Are you sure you want to delete this saved search?';
+	                e.preventDefault();
+	                if (confirm(message)) {
+	                    savedSearchRowCount--;
+	                    var deleteButton = $j(this);
+	                    var searchId = deleteButton.attr("searchId");
+	                    
+	                    Visualforce.remoting.Manager.invokeAction(
+							'{!$RemoteAction.SearchController.deleteSearch}',
+	                    	searchId, 
+	                    	function(results, event){
+		                        deleteButton.closest('tr').fadeOut();
+		                        if (savedSearchRowCount == 0) {
+		                        	$j("#no-saved-search").show();;
+		                        }
+		                    });
+	                }
+	            });
+	 			
+	 			$j("#keyword").keypress(function(event) {
+	 				if (event.keyCode == 13 && $j.trim($j(this).val()).length > 0) {
+				       	event.preventDefault();
+				        runTheQuickSearch();
+	 				} else if ($j.trim($j(this).val()).length > 0) {
+	 					$j("#run-quick-search").removeAttr('disabled');
+	 				} else {
+	 					$j("#run-quick-search").attr('disabled','disabled');
+	 				}
+	 			});
+	 			
+	 			$j('select[name=searchType]').change(function() {
+	 				if ($j('select[name=searchType]').val() == 1) {
+	 					$j("#keyword").attr("placeholder","company name");
+	  				} else {
+	 					$j("#keyword").attr("placeholder","last, first");
+	 				}
+	 				$j("#keyword").val('');
+	 				$j("#run-quick-search").attr('disabled','disabled');
+	 			});
+	 			
+	 			$j(".quick-search").submit( function( e ) {
+	 				var $visibleInput = $j( e.delegateTarget ).find( "input:visible" )
+	 				if( $visibleInput.val().length ) {
+		 				$j( this ).css({ opacity: 0.5 });
+		 				runTheQuickSearch();	
+	 				} else {
+	 					$visibleInput.focus();
+	 				}
+	 				
+	 				return false; 				 				
+	   			});  
+	 			
+	 			$j(".quick-search").on( "keyup", "input:visible", function( e ) {
+	 				$j( e.delegateTarget ).find( "button" ).prop( "disabled", ( $j( this ).val().length === 0 ) );
+	   			}); 
+	   			
+	   			$j( ".quick-search" ).on( "shown", ".nav-tabs a", function() {
+	   				$j( ".quick-search" ).find( "input:visible" ).trigger( "keyup" );
+	   			});
+	        });
+	        
+	        function runTheQuickSearch() {
+	        	//Build json
+	        	var json = {};
+  				var people = '/apex/SearchPeople';
+  				var company = '/apex/SearchCompany';
+  				
+  				if( $j( "[name='company_name']" ).is( ":visible" ) ) {
+  					json.search = "company";
+  				} else {
+  					json.search = "person";
+  					json.prospectHQOnly = "true";
+  				}
+				
+ 				json.geo = {
+ 					country: [],
+ 					state: [],
+ 					metro_area: [],
+ 					county: [],
+ 					city: [],
+ 					zip: [],
+ 					area_code: []
+ 				};
+
+ 				if( json.search == 'person' ) {
+ 					json.person_info = {
+ 						keywords: [],
+ 						technologies: [],
+ 						tech_categories: [],
+ 						tech_subcategories: [],
+ 						job_title: [],
+ 						job_details: {
+ 							departmentId: [],
+ 							gatekeeper: false,
+ 							businessUnitHead: false,
+ 							managementLevelIds: []
+ 						},
+ 						work_history: [],
+ 						higher_education: [],
+ 						person_name: {
+ 							firstname: '',
+ 							lastname: ''
+ 						}
+ 					};
+ 				}
+ 				
+ 				json.company_info = {
+ 					hqOnly: "true",
+ 					name: [],
+ 					keywords: [],
+ 					technologies: [],
+ 					tech_categories: [],
+ 					tech_subcategories: [],
+ 					sector_industry: [],
+ 					budget_revenue: {
+ 						revenue: {
+	 						min: '',
+	 						max: '',
+	 					},
+	 					it_budget: {
+	 						min: '',
+	 						max: ''
+	 					}
+	 				},
+	 				employees: {
+	 					total_employees: {
+	 						min: '',
+	 						max: ''
+	 					},
+	 					managers: {
+	 						min: '',
+	 						max: ''
+	 					},
+	 					it_employees: {
+	 						min: '',
+	 						max: ''
+	 					}
+	 				}
+ 				};  
+ 				
+ 				if( json.search == 'company' ) {
+ 					json.company_info.name.push( $j( "[name='company_name']" ).val() );
+ 				} else {
+ 					var names = $j( "[name='person_name']" ).val().split( "," );
+ 					json.person_info.person_name.firstname = $j.trim( names[ 1 ] );
+ 					json.person_info.person_name.lastname = $j.trim( names[ 0 ] );
+ 				}
+ 				
+ 				json.display = $j.extend( true, {}, json, {
+ 					geo: {
+ 						zipCodesUS: [],
+				        zipCodesEUCanada: [],
+				        areaCodesUSCanada: [],
+				        areaCodesEurope: []
+ 					}
+ 				});
+ 				
+ 				json.display.company_info.name = $.map( json.company_info.name, function( item ) {
+ 					return { label: item, value: item };
+ 				});
+ 				
+ 				delete Array.prototype.toJSON;
+  
+  				var final_json = JSON.stringify(json, null, "\t");
+
+				//Save Search
+                Visualforce.remoting.Manager.invokeAction(
+					'{!$RemoteAction.SearchController.saveSearch}',
+               		'', '', final_json, json.search, '', 
+               		function(response, event){
+	                    var search_id = response.Id;
+	                    
+	                    Visualforce.remoting.Manager.invokeAction(
+							'{!$RemoteAction.SearchController.runSearch}',
+	                    	search_id, 
+	                    	function(results, event){
+	                        	location.href = results;
+	                		});
+                    
+                }); 
+	        }
+	    </script> 
+	
+	    <div id="search-container" class="rk">
+	    
+	        <!-- Tab panes -->
+	        <div class="tab-content">
+	            <div role="tabpanel" class="tab-pane fade in  active" id="home" style="overflow-x:hidden;">
+	                <div class="container-fluid">
+	                    <div class="row">
+	                        <div class="col-xs-12 col-sm-3">
+	                            <section  class="widget new-search" data-name="New Search">
+	                                <header><span class="title">Start a New Search</span></header>
+	                                <article>
+	                                    <table class="table-hover">
+	                                        <tbody style="text-align: right">
+	                                            <tr class="gridRow" style="font-weight: bold;">
+	                                                <td style="text-align: left;width: 65px;" title="People Search"><apex:image value="{!$Resource.rkpi2__peopleIcon}" /></td>
+	                                                <td style="text-align: left"><apex:outputLink value="{!$Page.rkpi2__SearchPeople}">People</apex:outputLink></td>
+	                                            </tr>
+	                                            <tr class="gridRow" style="font-weight: bold;">
+	                                                <td style="text-align: left;width: 65px;" title="Company Search"><apex:image value="{!$Resource.rkpi2__companyIcon}" /></td>
+	                                                <td style="text-align: left"><apex:outputLink value="{!$Page.rkpi2__SearchCompany}">Company</apex:outputLink></td>
+	                                            </tr>
+	                                        </tbody>
+	                                        </table>
+	                                     </article>
+	                                <footer></footer>
+	                            </section>
+	                            
+	                            <div class="quicklookup-container" style="padding-bottom: 20px; padding-top:10px;">
+	                            	<section  class="widget new-search" data-name="New Search">
+	                                	<header><span class="title">Quick Lookup</span></header>
+	                               		<article class="widget-content">
+	                               			<form class="quick-search">
+		                               			<ul class="nav nav-tabs small">
+											        <li class="active"><a data-toggle="tab" href="#qs-company">Company</a></li>
+											        <li><a data-toggle="tab" href="#qs-person">People</a></li>
+											    </ul>
+											    <div class="tab-content no-padding">
+											    	<div class="tab-pane active" id="qs-company">
+											    		<input type="search" name="company_name" placeholder="Type a company name" class="input-block-level" />
+											    	</div>
+											    	<div class="tab-pane" id="qs-person">
+										    			<input type="search" name="person_name" placeholder="Type a name (last, first)" class="input-block-level" />
+											    	</div>
+											    </div>
+											    
+										    	<button type="submit" class="btn btn-warning" disabled="disabled">Search</button>
+											</form>
+	                                   	</article>
+	                                </section>    
+	                            </div>
+	                            
+	                            <section  class="widget new-search" data-name="New Search">
+	                                <header><span class="title">Import History</span></header>
+	                                <article>
+	                                    <table class="table-hover">
+	                                        <tbody style="text-align: right">
+	                                            <tr class="gridRow" style="font-weight: bold;">
+	                                                <td style="text-align: left;width: 65px;" title="View Leads transferred from RainKing to Salesforce"><apex:image value="{!$Resource.rkpi2__peopleIcon}" /></td>
+	                                                <td style="text-align: left"><a href="{! baseRkUrl }/prospects/sfLeadHistory" target="_blank">Lead History</a></td>
+	                                            </tr>
+	                                            <tr class="gridRow" style="font-weight: bold;">
+	                                                <td style="text-align: left;width: 65px;" title="View Contacts transferred from RainKing to Salesforce"><apex:image value="{!$Resource.rkpi2__peopleIcon}" /></td>
+	                                                <td style="text-align: left"><a href="{! baseRkUrl }/prospects/sfContactHistory" target="_blank">Contact History</a></td>
+	                                            </tr>
+	                                            <tr class="gridRow" style="font-weight: bold;">
+	                                                <td style="text-align: left;width: 65px;" title="View Accounts transferred from RainKing to Salesforce"><apex:image value="{!$Resource.rkpi2__companyIcon}" /></td>
+	                                                <td style="text-align: left"><a href="{! baseRkUrl }/company/sfAccountHistory" target="_blank">Account History</a></td>
+	                                            </tr>
+	                                        </tbody>
+	                                        </table>
+	                                     </article>
+	                                <footer></footer>
+	                            </section>
+	                            	                            
+	                        </div>
+	                        
+	                        <div id="centerColumn" class="col-xs-12 col-sm-4">
+	                            <section  class="widget recent-searches" data-name="actions">
+	                                <header><span class="title">Recent Searches</span></header>
+	                                <article>
+	                                    <table class="table-hover" style="table-layout:fixed;">
+	                                        <thead>
+	                                            <tr>
+	                                                <th width="40" style="text-align:center;">Type</th>
+	                                                <th style="text-align:left;padding-left:20px;">Last Run</th>
+	                                                <th width="70" style="text-align:center;">Records</th>
+	                                                <th width="50"></th>
+	                                            </tr>
+	                                        </thead>
+	                                        <tbody style="text-align: right">
+	                                            <apex:repeat value="{!recentSearches}" var="recent">
+		                                            <tr class="gridRow" value="{!recent.Id}">
+		                                                <td style="text-align: left;white-space: nowrap;"><a class="run-search" searchId="{! recent.Id }" title="People Search"><apex:image value="{!$Resource.rkpi2__peopleIcon}" rendered="{! recent.Search_Type__c == 'person'}"  /></a><a class="run-search" searchId="{! recent.Id }" title="Company Search"><apex:image value="{!$Resource.rkpi2__companyIcon}" rendered="{! recent.Search_Type__c == 'Company'}" alt="Company Search" /></a></td>
+		                                                <td style="border-left:solid 1px #dcdcdc;text-align: left;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"><a class="run-search" searchId="{! recent.Id }"><apex:outputField value="{!recent.rkpi2__Last_Run__c}"/></a></td>
+		                                                <td style="border-left:solid 1px #dcdcdc;text-align: center;white-space: nowrap;"><a class="run-search" searchId="{! recent.Id }"><apex:outputField value="{!recent.rkpi2__NumRecords__c}"/></a></td>
+		                                                <td style="border-left:solid 1px #dcdcdc;text-align: center;white-space: nowrap;">
+		                                                    <button class="run-search" searchId="{! recent.Id }" title="Run Search" >
+		                                                    	<apex:image value="{!$Resource.rkpi2__bullet_go}"/>
+		                                                    </button>
+		                                                </td>
+		                                            </tr>
+	                                            </apex:repeat>
+	                                        </tbody>
+	                                    </table>
+	                                    <div class="search_placeholder" id="no-recent-search">No Recent Searches</div>
+	                                </article>
+	                                <footer></footer>
+	                            </section>
+	                        </div>
+	                        <div class="col-xs-12 col-sm-5">
+	                            <section  class="widget saved-searches" data-name="actions">
+	                                <header><span class="title">Saved Searches</span></header>
+	                                <article>
+	                                    <table class="table-hover" style="table-layout:fixed;">
+	                                        <thead>
+	                                            <tr>
+	                                                <th width="40" style="text-align:center;">Type</th>
+	                                                <th style="text-align:left;padding-left:20px;">Name</th>
+	                                                <th style="text-align:left;padding-left:20px;">Last Run</th>
+	                                                <th width="70" style="text-align:center;">Records</th>
+	                                                <th width="80"></th>
+	                                            </tr>
+	                                        </thead>
+	                                        <tbody style="text-align: right">
+	                                        <apex:repeat value="{!savedSearches}" var="saved">
+	                                            <tr class="gridRow" value="{!saved.Id}">
+	                                                <td style="text-align: left"><a class="run-search" title="People Search" searchId="{! saved.Id }"><apex:image value="{!$Resource.rkpi2__peopleIcon}" rendered="{! saved.Search_Type__c == 'person'}" /></a><a class="run-search" title="Company Search" searchId="{! saved.Id }"><apex:image value="{!$Resource.rkpi2__companyIcon}" rendered="{! saved.Search_Type__c == 'Company'}" /></a></td>
+	                                                <td style="border-left:solid 1px #dcdcdc;text-align: left;overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"><a class="run-search" title="{!saved.Name}" searchId="{! saved.Id }"><apex:outputField value="{!saved.Name}" /></a></td>
+	                                                <td style="border-left:solid 1px #dcdcdc;text-align: left; overflow: hidden;white-space: nowrap;text-overflow: ellipsis;"><a class="run-search" searchId="{! saved.Id }"><apex:outputField value="{!saved.rkpi2__Last_Run__c}"/></a></td>
+	                                                <td style="border-left:solid 1px #dcdcdc;text-align: center; white-space: nowrap;"><a class="run-search" searchId="{! saved.Id }"><apex:outputField value="{!saved.rkpi2__NumRecords__c}"/></a></td>
+	                                                <td style="border-left:solid 1px #dcdcdc;text-align: center; white-space: nowrap;">
+	                                                    <button class="run-search" searchId="{! saved.Id }" title="Run Search" >
+	                                                    	<apex:image value="{!$Resource.rkpi2__bullet_go}" />
+	                                                    </button>
+	                                                    <button class="delete-saved-search" searchId="{! saved.Id }" title="Delete Search">
+	                                                    	<apex:image value="{!$Resource.rkpi2__delete}" />
+	                                                    </button>
+	                                                </td>                                            
+	                                            </tr>
+	                                        </apex:repeat>    
+	                                        </tbody>
+	                                    </table>
+	                                    <div class="search_placeholder" id="no-saved-search">No Saved Searches</div>
+	                                </article>
+	                                <footer></footer>
+	                            </section>
+	                        </div>
+	                    </div>
+	                </div>
+	            </div>
+	        </div>
+	    </div>
+	</apex:outputPanel>
+</apex:page>

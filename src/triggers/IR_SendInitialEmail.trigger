@@ -18,14 +18,24 @@ trigger IR_SendInitialEmail on Incident_Report__c (after insert) {
           'Data center(s) impacted: ' + incident.Affected_Data_Centers__c + '\n\n' +
           'Current status: Open \n\n' +
           'Impacted APIs: \n';
-        if(incident.Chat_Failure_Rate__c != '0' && incident.Chat_Failure_Rate__c != null) initialEmail.Email_Body__c += 'Chat\n';
-        if(incident.Comments_Failure_Rate__c != '0' && incident.Comments_Failure_Rate__c != null) initialEmail.Email_Body__c += 'Comments\n';
-        if(incident.Feed_Failure_Rate__c != '0' && incident.Feed_Failure_Rate__c != null) initialEmail.Email_Body__c += 'Feed\n';
-        if(incident.Gamification_Failure_Rate__c != '0' && incident.Gamification_Failure_Rate__c != null) initialEmail.Email_Body__c += 'Game Mechanics\n';
-        if(incident.Identity_Store_Failure_Rate__c != '0' && incident.Identity_Store_Failure_Rate__c != null) initialEmail.Email_Body__c += 'Identity Store\n';
-        if(incident.Login_Failure_Rate__c != '0' && incident.Login_Failure_Rate__c != null) initialEmail.Email_Body__c += 'Social Login\n';
-        if(incident.RaaS_Failure_Rate__c != '0' && incident.RaaS_Failure_Rate__c != null) initialEmail.Email_Body__c += 'RaaS\n';
-        if(incident.Share_Failure_Rate__c != '0' && incident.Share_Failure_Rate__c != null) initialEmail.Email_Body__c += 'Social Share\n';
+        if(incident.Chat_Failure_Rate__c != '0%' && incident.Chat_Failure_Rate__c != null) 
+            initialEmail.Email_Body__c += 'Chat: ' + incident.Chat_Failure_Rate__c + ' failure rate\n';
+        if(incident.Comments_Failure_Rate__c != '0%' && incident.Comments_Failure_Rate__c != null) 
+            initialEmail.Email_Body__c += 'Comments: ' + incident.Comments_Failure_Rate__c +' failure rate\n';
+        if(incident.Feed_Failure_Rate__c != '0%' && incident.Feed_Failure_Rate__c != null) 
+            initialEmail.Email_Body__c += 'Feed: ' + incident.Feed_Failure_Rate__c + ' failure rate\n';
+        if(incident.Gamification_Failure_Rate__c != '0%' && incident.Gamification_Failure_Rate__c != null) 
+            initialEmail.Email_Body__c += 'Game Mechanics: ' + incident.Gamification_Failure_Rate__c + ' failure rate\n';
+        if(incident.Identity_Store_Failure_Rate__c != '0%' && incident.Identity_Store_Failure_Rate__c != null) 
+            initialEmail.Email_Body__c += 'Identity Store: ' + incident.Identity_Store_Failure_Rate__c + ' failure rate\n';
+        if(incident.Login_Failure_Rate__c != '0%' && incident.Login_Failure_Rate__c != null) 
+            initialEmail.Email_Body__c += 'Social Login: ' + incident.Login_Failure_Rate__c + ' failure rate\n';
+        if(incident.RaaS_Failure_Rate__c != '0%' && incident.RaaS_Failure_Rate__c != null) 
+            initialEmail.Email_Body__c += 'RaaS: ' + incident.RaaS_Failure_Rate__c  + ' failure rate\n';
+        if(incident.Share_Failure_Rate__c != '0%' && incident.Share_Failure_Rate__c != null) 
+            initialEmail.Email_Body__c += 'Social Share: ' + incident.Share_Failure_Rate__c + ' failure rate\n';
+        if(incident.Webhooks_Failure_Rate__c != '0%' && incident.Webhooks_Failure_Rate__c != null) 
+            initialEmail.Email_Body__c += 'Webhooks: ' + incident.Webhooks_Failure_Rate__c + ' failure rate\n';
         
         initialEmail.Email_Body__c += '\nWe will be sending a follow-up email as soon as we have additional information. \n\n' +
           'Regards, \n' +

@@ -1,0 +1,222 @@
+<apex:page standardController="Lead" extensions="lmscons.TriggerManagementNotification" cache="false" action="{!Is_showPopup}">
+
+		<apex:includeScript value="{!URLFOR($Resource.lmscons__LMSSource, 'js/jquery.js')}"/>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+		<apex:includeScript value="{!URLFOR($Resource.lmscons__LMSSource, 'js/jquery-1.6.4.js')}"/>
+		
+		<apex:stylesheet value="{!URLFOR($Resource.lmscons__jquery1816min, 'jquery-ui.css')}" />
+		<apex:includeScript value="{!URLFOR($Resource.lmscons__jquery1816min, 'jquery-ui.min.js')}" />
+		
+	
+		
+		<apex:form >
+   			<apex:detail subject="{!lead.Id}" inlineEdit="true" rendered="{!is_showDetail}" showChatter="true"></apex:detail>
+		</apex:form>
+	
+		<div id="dialog-modal" title="{!$Label.TM_Notification}" style="display:none;" >
+	
+			<apex:form id="frm">
+	 		<apex:outputPanel id="NotificationContent">
+	 			
+	 			<apex:pageBlock mode="maindetail">
+	 			<apex:repeat value="{!messagesForNotification}" var="message">
+   					
+   					<apex:pageBlockSection collapsible="true" id="pageBlockSection" title="" columns="1">   
+    					
+    					<apex:outputField value="{!message.lmscons__Popup_Message__c}"/>  
+    					<apex:outputPanel layout="block" style="text-align: end;">
+	   						<apex:commandButton rendered="{!AND(message.lmscons__Object_Type__c != 'Module', message.lmscons__Object_Type__c != 'Quiz')}" value="{!$Label.TM_View_Now}" onclick="javascript: TM_viewNow(this);" reRender="null"></apex:commandButton>
+							<apex:commandButton rendered="{!OR(message.lmscons__Object_Type__c == 'Module', message.lmscons__Object_Type__c == 'Quiz')}" value="{!$Label.TM_Launch_Now}" onclick="TM_getlaunchParams(this);" reRender="null" ></apex:commandButton>
+				 			<apex:commandButton value="{!$Label.Close}" onclick="TM_wclose();" reRender="null"></apex:commandButton>
+	   					</apex:outputPanel>
+	   					
+	   					<apex:inputHidden id="triggerId" value="{!message.Id}"/>
+	   						
+	   				</apex:pageBlockSection>
+	   				
+   					
+   					<script> twistSection(document.getElementById('{!$Component.pageBlockSection}').getElementsByTagName('img')[0]) </script>
+  				
+  				</apex:repeat>
+  				<span id="linkedMyTraining" style="visibility: hidden;">
+  					<a href="{!ENTITY_LINK_MY_TRAINING}" class="feeditemtimestamp" target="_blank">myTraining</a>
+  				</span>
+  				<!-- <apex:outputText id="linkedMyTraining" value="{!ENTITY_LINK_MY_TRAINING}" escape="false" style="visibility: hidden;"/>
+	 			 --></apex:pageBlock>
+	 			
+	 			<script> 
+	 					jQuery('span[id$="Notification"]').ready(function()
+	 						{
+		 						jQuery("th[class^='labelCol']").remove();
+		 						jQuery('td.dataCol.first[colspan="2"]').css('vertical-align', 'bottom');
+		 						jQuery('div[id$="pageBlockSection"]').find('img').click();
+		 						if(jQuery('div[id$="pageBlockSection"]').find('img').size()==1){
+		 							jQuery('div[id$="pageBlockSection"]').find('img[class="hideListButton"]').hide();
+		 						}
+		 						
+	 						});
+	 			 </script>
+	 			
+	 		</apex:outputPanel>
+	 		 
+	 		
+	 		</apex:form>
+ 		</div>
+		
+		
+		
+		<apex:form >
+	 		<apex:outputPanel id="Notification">
+	 			
+		 		<apex:inputHidden id="showPopup" value="{!is_showPopup}"/>
+		 		<apex:inputHidden id="objectIdToRedirect" value="{!objectIdToRedirect}"/>
+		 		<apex:inputHidden id="ENTITY_LINK_POPUP_REDIRECT" value="{!ENTITY_LINK_POPUP_REDIRECT}" />
+		 		
+		 		<apex:inputHidden id="launchObjectId" value="{!launchModuleId}" />
+				<apex:inputHidden id="launchType" value="{!launchModuleType}" />
+				<apex:inputHidden id="launchTULId" value="{!launchTrULID}" />
+				<apex:inputHidden id="launchAssignments" value="{!launchAssignmetId}" />
+				<apex:inputHidden id="launchUserId" value="{!launchUserID}" />
+				<apex:inputHidden id="widthPopup" value="{!widthPopup}"/>
+			 	<apex:inputHidden id="heightPopup" value="{!heightPopup}"/>
+			 	
+		 		
+	 		</apex:outputPanel>
+	 		
+	 		
+			
+			<apex:actionFunction id="notifyPopup" action="{!notifyPopup}" name="notifyPopup" rerender="NotificationContent, linkedMyTraining" />
+	 		<apex:actionFunction id="getParamsToLaunch" action="{!paramForLaunch}" name="getParamsToLaunch"  oncomplete="TM_launchNow();" reRender="launchObjectId, launchType, launchTULId, launchAssignments, launchUserId" >
+	 		 		<apex:param name="firstParam" value="" assignTo="{!launchId}"/>
+	 		 </apex:actionFunction>
+	 		 
+	 		 
+	 		<apex:outputPanel id="null">
+			</apex:outputPanel>
+	 		 
+	 	</apex:form>
+ 		
+ 	
+ 		
+ 								
+		<script type='text/javascript'>
+				
+				var bool = true;
+				
+				function TM_popupOpen(){
+			
+					if(jQuery("input[id$='showPopup']").val() == 'true'){
+				
+						var id		= jQuery("input[id$='objectIdToRedirect']").val();
+						var ENTITY_LINK		= jQuery("input[id$='ENTITY_LINK_POPUP_REDIRECT']").val();
+						window.top.location = "{!$Page.TMNotifyLead}?Id="+id+"&showDetail=1";
+						
+																
+					}
+				};
+				
+				function TM_viewNow(link){
+						
+					//jQuery(link).parents('tr').find('a.feeditemtimestamp')[0].click();
+					jQuery("span[id$='linkedMyTraining']").find("a")[0].click();
+					TM_wclose();
+				}
+				
+				function TM_getlaunchParams(link){
+					
+					var ruleId = jQuery(link).parents("table").find("input[id$='triggerId']").val();
+					console.log(ruleId);
+					var ptl = getParamsToLaunch(ruleId);
+					
+				}
+				
+				
+				function TM_launchNow(){
+					console.log("launchNow");
+					var objId 			= jQuery('input[id$="launchObjectId"]').val();
+					var objType 		= jQuery('input[id$="launchType"]').val();
+					var tulId 			= jQuery('input[id$="launchTULId"]').val();
+					var assignmentId 	= jQuery('input[id$="launchAssignments"]').val();
+					var userId 			= jQuery('input[id$="launchUserId"]').val();
+				
+				console.log(objId);
+				console.log(objType);
+				console.log(tulId);
+				console.log(assignmentId);
+				console.log(userId);
+				
+					if(objType == "Quiz"){
+						objId 			= encodeURIComponent(objId);
+						userId			= encodeURIComponent(userId);
+						assignmentId	= encodeURIComponent(assignmentId);
+					
+						window.top.location='{!$Page.Quiz}?me='+objId+'&ue='+userId+'&ae='+assignmentId+'&Type='+objType;
+					}else {
+						window.open('{!$Page.ConsumerDirector}?action=LaunchContent&tuId='+tulId +'&Type='+objType+'&pid='+objId,'_blank');
+					}
+					
+					TM_wclose();
+				
+				}
+				
+				function TM_wclose(){
+					var id = jQuery("input[id$='objectIdToRedirect']").val();
+					jQuery("#dialog-modal").dialog('close');
+					//window.top.location = "/"+id ;
+					
+	 			}
+	 			
+	
+				function TM_init_Notify() {
+		
+					jQuery('#dialog-modal').dialog({
+						autoOpen: false,
+						width:  jQuery("input[id$='widthPopup']").val(),
+						height: jQuery("input[id$='heightPopup']").val(),
+						modal: true,
+						resizable: true
+					});
+
+					jQuery("#dialog-modal").dialog('open');
+					jQuery("div.ui-widget-overlay").css("background","#000000");
+		
+				}
+				
+				
+				function TM_startNotify(){
+					
+					var path = document.location.pathname
+					if(jQuery("input[id$='showPopup']").val() == 'true'){
+						if(path.indexOf("TMNotify") == -1){
+							TM_popupOpen();
+						}
+						if(path.indexOf("TMNotify") != -1){
+							notifyPopup();			
+							TM_init_Notify();
+						}
+						
+					}else{
+						return false;
+						
+					}
+				
+				}
+				
+				jQuery(document).ready(function(event){
+					
+					TM_startNotify();
+					
+				});
+			
+			
+			
+			
+			
+			
+				
+				
+		</script>
+						
+
+ 
+</apex:page>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Report xmlns="http://soap.sforce.com/2006/04/metadata">
+    <columns>
+        <field>ContestUser__c.User__c</field>
+    </columns>
+    <columns>
+        <field>ContestUser__c.Goal__c</field>
+    </columns>
+    <description>Contests with participant count</description>
+    <filter>
+        <criteriaItems>
+            <column>Contest__c.isDraft__c</column>
+            <operator>equals</operator>
+            <value>0</value>
+        </criteriaItems>
+    </filter>
+    <format>Summary</format>
+    <groupingsDown>
+        <dateGranularity>Day</dateGranularity>
+        <field>Contest__c.ContestName__c</field>
+        <sortOrder>Asc</sortOrder>
+    </groupingsDown>
+    <name>Participants Per Contest</name>
+    <params>
+        <name>co</name>
+        <value>1</value>
+    </params>
+    <reportType>CustomEntityCustomEntity$Contest__c$ContestUser__c</reportType>
+    <scope>organization</scope>
+    <showDetails>false</showDetails>
+    <timeFrameFilter>
+        <dateColumn>Contest__c.EndDate__c</dateColumn>
+        <interval>INTERVAL_CUSTOM</interval>
+    </timeFrameFilter>
+</Report>

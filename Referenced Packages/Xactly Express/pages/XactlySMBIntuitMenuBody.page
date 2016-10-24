@@ -1,0 +1,13 @@
+<apex:page controller="XactlyExpress.XactlySMBIntuitMenuDropDownController" showheader="false" sideBar="false" action="{!genBody}">
+<apex:outputText value="{!body}" escape="false" rendered="{!!reconnect}"/> 
+<apex:outputPanel rendered="{!reconnect}" layout="none"> 
+    <apex:outputText value="{!body}"  escape="false" />
+    <style>
+        #intuitPlatformAppMenuDropdownInner {
+            min-height: 94px !important;
+        }
+    </style>
+    <div style="position: relative; cursor: pointer; z-index: 0 ! important; margin-left: 32px !important;" onclick="waitOn();document.getElementById(document.getElementById('reconnectLinkId2').value).click();" id="intuitPlatformAppMenu" class="intuitPlatformReconnectButton">
+    </div>
+</apex:outputPanel>
+</apex:page>

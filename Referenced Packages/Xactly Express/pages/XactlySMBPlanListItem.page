@@ -1,0 +1,113 @@
+<apex:page controller="XactlyExpress.XactlySMBPlanListItemController" showHeader="false" standardStylesheets="false" sidebar="false">
+    <style>
+        body{
+        width: 245px;
+        min-width: 245px;
+        }
+    </style>
+    
+    <div class="planBox">
+        <div class="planBoxTitle"></div>
+        <div class="planBoxContent">
+            <table cellpadding="0px" cellspacing="0px" width="213px">
+                <tr>
+                    <td>
+                        <div class="planNameBox" onmouseout="{!IF(LEN(iterPlanXX.p.Name) >= 27,'hideBubble();','')}" onmouseover="{!IF(LEN(iterPlanXX.p.Name) >= 27,'showBubble(this, planName);','')}" >
+                            <apex:outputtext value="{!IF(LEN(iterPlanXX.p.Name) < 27, iterPlanXX.p.Name, LEFT(iterPlanXX.p.Name, 24) + '...')}"  />                            
+                        </div>
+                    </td>
+                    <td align="right">
+                     <apex:outputPanel styleClass="btnAction editBtn" layout="block">
+                         <div class="xactlyBtnRectWrapper enable" onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);"  style="float:left;margin-right:20px;" onclick="window.parent.location.href = String('{!$Page.XactlySMBPlanCreate}')+String('?id={!iterPlanXX.p.Id}')">
+                             <div class="xactlyBtnRect">
+                                 <div class="xactlyBtnRectBackground">
+                                     <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                         <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                             <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel"> {!$Label.ClickHereToEditThePlan}</div>
+                                         </div>
+                                     </div>
+                                 </div>
+                             </div>
+                         </div>
+                     </apex:outputPanel>
+                    </td>
+                </tr>
+                <tr><td><br /></td></tr>
+                <tr>
+                    <td class="planInfoLabel">
+                        <apex:outputtext value="{!$Label.xactlyexpress__Payees}" />:
+                    </td>
+                    <td class="planInfoValue" align="right">
+                        <apex:outputtext value="{!iterPlanXX.peopleCount}" />
+                    </td>
+                </tr>
+                <tr>
+                    <td class="planInfoLabel">
+                        <apex:outputtext value="{!$Label.xactlyexpress__LastCalcDate}" />:
+                    </td>
+                    <td class="planInfoValue" align="right">
+                        <apex:outputtext value="{!iterPlanXX.lastCalcDate}" />
+                    </td>
+                </tr>
+                <tr><td><br /></td></tr>
+                <tr>
+                    <td class="planInfoLabel">
+                        <apex:outputtext value="{!$Label.xactlyexpress__TotalPlannedSpend}" />:
+                    </td>
+                    <td class="planInfoValue" align="right">
+                        <apex:outputtext value="{!iterPlanXX.totalPlannedSpend}"/>
+                    </td> 
+                </tr>
+                <tr>
+                    <td>
+                        <br />
+                        <br />
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="2" class="planInfoLabel" align="center">
+                        <div>
+                            <apex:outputtext value="{!$Label.xactlyexpress__PlannedPayoutAttainment}">
+                                <apex:param value="{!currentSettings.componentsCap}" />
+                            </apex:outputtext>
+                            <apex:outputPanel rendered="{!NOT(problemLoadingCharts) && iterPlanXX.alertEstimation != null && iterPlanXX.alertEstimation != ''}">
+                                <span class="AUTOM_NO_ESTM_ASTR_Q1" style="color:#dd0000;margin-left:3px;cursor:pointer;width:10px;" onmouseout="window.parent.XactlyBubbleHide('xactlyBubble')" onmouseover="window.parent.XactlyBubble('xactlyBubble', '{!JSENCODE(iterPlanXX.alertEstimation)}', null, getTopOffset(this).left + 10, getTopOffset(this).top + 10);">*</span>
+                            </apex:outputPanel>
+                        </div>
+                        <div class="chartWrapper chartImg">
+                            <apex:outputpanel layout="none" rendered="{!NOT(problemLoadingCharts)}">
+                                <c:XactlySMBChart values="{!IF(iterPlanXX.dataArrayForFlex != '',iterPlanXX.dataArrayForFlex,' :#:0:#: ')}" cid="{!iterPlanXX.p.id}" type="Plan List" />
+                            </apex:outputpanel>
+                            <apex:outputpanel layout="none" rendered="{!problemLoadingCharts}">
+                                <div style="color: red; margin-top: 30px;">
+                                   {!$Label.ProblemloadingChart}<br />
+                                    <apex:outputpanel layout="none" rendered="{!tooMuchData}">{!$Label.xactlyexpress__AmountOfDataLimited}</apex:outputpanel><br />
+                                    <a style="color: #3B6080; font-size: 11px; font-weight: normal;" href="{!$Page.XactlySMBReviewPlan}?step=6&id={!iterPlanXX.p.id}" target="_blank">{!$Label.Seecharthere}</a>
+                                </div>
+                             </apex:outputpanel>
+                         </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <div class="planBoxFooter1"></div>
+    </div>
+
+    <input class="hidden" id="url_img_gauge_needle_1" value="{!URLFOR($Resource.XactlySMBResources, 'img/layout/express-needle.png')}" />
+    <input class="hidden" id="url_img_gauge_needle_2" value="{!URLFOR($Resource.XactlySMBResources, 'img/layout/express-needle2.png')}" />
+    <c:XactlySMBFooterScript isChatterEnabled="false" loadHeaderJs="false" loadPerformantJs="true" />
+    
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'components/css/XactlySMBCharts.css')}" /> 
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'pages/css/XactlySMBPlanList.css')}" />
+    <script>
+    	var nbrDecimal = '{!JSENCODE(nbrDecimal)}';
+    	var nbrSeparator = '{!JSENCODE(nbrSeparator)}';
+    	var planName = '{!JSENCODE(iterPlanXX.p.Name)}';
+    	function hideBubble(){ window.parent.XactlyBubbleHide('xactlyBubble'); }
+    	function showBubble(obj, text){ window.parent.XactlyBubble('xactlyBubble', text, null, getTopOffset(obj).left + 10, getTopOffset(obj).top + 10); }      	
+    </script>
+    <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources, 'components/js/XactlySMBCharts.js')}"></script>
+    <style>
+body { background: transparent !important; }
+    </style>
+</apex:page>

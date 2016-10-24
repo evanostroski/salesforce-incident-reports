@@ -1,0 +1,472 @@
+<apex:page id="manageDeals" controller="XactlyExpress.XactlySMBCalculatePayroll" sidebar="false" showHeader="false" standardStylesheets="false" action="{!init}" >
+    <c:XactlySMBCursor />
+    <title>{!$Label.Calculate}: {!$Label.CalculateWizardStep6}</title>
+    
+    <!-- PAGE WRAPPER -->
+    <div class="pageContent" id="pContent">
+        <apex:form id="theForm">
+            <!-- HEADER -->
+            <apex:outputPanel layout="block" styleClass="header">
+                <c:XactlySMBHeader isAdmin="{!isAdmin}"  isActive="{!isActive}" nbrSeparator="{!nbrSeparator}" nbrDecimal="{!nbrDecimal}" currentUserOrSlected="{!currentUserOrSlected}" emulatingUserURLAppend="{!emulatingUserURLAppend}" wqlabel="{!currentSettings.quotasPluralCap}" wclabel="{!currentSettings.creditsPluralCap}" wlabel="{!currentSettings.dealsPluralCap}" wtype="calculate" step="6"  hlabel="{!$Label.xactlyexpress__ManageFieldsInPayroll}" stepHelp="CalculatePayroll" showPrevious="true" showNext="false" showSave="true" showRefresh="true" showExport="false" selected="1" selectedLevel2="5"/>
+            </apex:outputPanel>
+
+            <div  class="error">
+            <!-- INSUFFICIENT PERMISSIONS -->
+                <apex:outputPanel rendered="{!!isAdmin || !isActive}">
+                    <c:XactlySMBErrorMsg error="{!$Label.xactlyexpress__InsufficientPermissions}" />
+                </apex:outputPanel>
+            </div> 
+            
+            <div id="shadowContainer" class="shadowContainer">
+           
+            <apex:outputpanel layout="block" id="chatter" styleClass="additionalContent" rendered="{!isAdmin && isActive}">
+                <c:XactlySMBChatterWall objectId="{!$User.Id}" showHeader="true" showWall="true" currentPage="{!$CurrentPage.Name}" chatterCurrentUserImageUrl="{!chatterCurrentUser_ImageUrl}" rendered="{!isChatterEnabled && isChatterLoaded}"/>
+            </apex:outputpanel>
+            
+            <!-- MAIN CONTENT -->
+            <apex:outputPanel layout="block" styleClass="mainContent" rendered="{!isAdmin && isActive}">
+                <!-- LEFT PANEL -->
+                <div class="leftPeriodsPanel">
+                    <div class="topCurvy"></div>
+                    <div id="spaceMenu"> 
+                     
+                        <div class="leftTitle">{!$Label.SelectYear}:</div>  
+                        <apex:selectList styleClass="leftSelect" value="{!selectedFiscalYear}" multiselect="false" size="1" onchange="waitOn();refreshPeriods();">
+                            <apex:selectOptions value="{!fiscalYearOptions}" />
+                        </apex:selectList>
+                        <apex:outputPanel id="periodsTable">
+                         <table class="periodsTable" cellspacing="0" cellpadding="0">
+                             <thead class="periodsTableHeaders">
+                                 <tr>
+                                     <th class="periodsHeaderCell periodsNotRightCell">{!$Label.Period}</th>
+                                     <th class="periodsHeaderCell periodsNotRightCell">{!$Label.Status}</th>
+                                     <th class="periodsHeaderCell" colspan="2">{!$Label.Payroll}</th> 
+                                 </tr>
+                             </thead>
+                             <tbody  class="periodsTableBody">
+                                 <tr class="periodUltimateRow">
+                                     <td class="periodsNotRightCell">&nbsp;</td>
+                                     <td class="periodsNotRightCell">&nbsp;</td>
+                                     <td>&nbsp;</td>
+                                     <td>&nbsp;</td>
+                                 </tr>       
+                                 <apex:variable var="aux" value="{!0}"/>                         
+                                 <apex:repeat value="{!periods}" var="per" id="periodGenerator">
+                                  <tr>
+                                      <td onclick="{!IF(per.prd.StartDate__c < initialPeriod.StartDate__c,'return false;','')} document.location.href='{!$Page.XactlySMBCalculatePayroll}?pid={!per.prd.Id}&yid={!URLENCODE(selectedFiscalYear)}';" class="periodsNormalCell periodsNotRightCell {!IF(per.prd.StartDate__c < initialPeriod.StartDate__c,'disabledOpacityButton','')}" style="{!IF(selectedPeriodId = per.prd.Id,'background-color:#E8E8E8;','')} {!IF(per.prd.StartDate__c < initialPeriod.StartDate__c,'','cursor:pointer;')}">{!per.PeriodName}</td>
+                                      <td onclick="{!IF(per.prd.StartDate__c < initialPeriod.StartDate__c,'return false;','')} document.location.href='{!$Page.XactlySMBCalculatePayroll}?pid={!per.prd.Id}&yid={!URLENCODE(selectedFiscalYear)}';" class="periodsNormalCell periodsNotRightCell {!IF(per.prd.StartDate__c < initialPeriod.StartDate__c,'disabledOpacityButton','')}" style="{!IF(selectedPeriodId = per.prd.Id,'background-color:#E8E8E8;','')} {!IF(per.prd.StartDate__c < initialPeriod.StartDate__c,'','cursor:pointer;')}">
+                                        <apex:outputPanel layout="none" rendered="{!per.prd.XactlyExpress__StartDate__c>=initialPeriod.XactlyExpress__StartDate__c}">
+                                            {!per.status}
+                                        </apex:outputPanel>
+                                        <apex:outputPanel layout="none" rendered="{!per.prd.XactlyExpress__StartDate__c < initialPeriod.XactlyExpress__StartDate__c}">
+                                            {!$Label.xactlyexpress__NotApplies}
+                                        </apex:outputPanel> 
+                                      </td>
+                                      <td class="periodsNormalCell {!IF(per.prd.StartDate__c < initialPeriod.StartDate__c,'disabledOpacityButton','')}" style="{!IF(selectedPeriodId = per.prd.Id,'background-color:#E8E8E8;','')}" valign="center">
+                                             <apex:outputPanel styleClass="periodsExportLink"  rendered="{!IF(AND(per.status=='Open',per.prd.XactlyExpress__StartDate__c!=currentPeriod.XactlyExpress__StartDate__c), true, false)}">
+                                                &nbsp;
+                                             </apex:outputPanel>
+                                             <apex:outputLink styleClass="periodsExportLink" value="{!$Page.XactlyExpress__XactlySMBPayrollFileExport}?pId={!per.prd.id}" onclick="{!IF(per.prd.XactlyExpress__StartDate__c==currentPeriod.XactlyExpress__StartDate__c,'alrtwrng();','')}" rendered="{!IF(AND(OR(per.status!='Open',per.prd.XactlyExpress__StartDate__c==currentPeriod.XactlyExpress__StartDate__c),per.prd.XactlyExpress__StartDate__c>=initialPeriod.XactlyExpress__StartDate__c), true, false)}">
+                                                 {!$Label.xactlyexpress__Export}
+                                             </apex:outputLink>
+                                      </td>
+                                      <td class=" {!IF(selectedPeriodId = per.prd.Id,'flechader','')} "><div style="font-size:0px;">&nbsp;</div></td>
+                                  </tr>  
+                                  <apex:variable var="aux" value="{!aux+1}"/>
+                                </apex:repeat>   
+                                 <tr class="periodUltimateRow">
+                                     <td class="periodsNotRightCell">&nbsp;</td>
+                                     <td class="periodsNotRightCell">&nbsp;</td>
+                                     <td>&nbsp;</td>
+                                     <td>&nbsp;</td>
+                                 </tr>                                             
+                             </tbody>                                     
+                         </table>    
+                    </apex:outputpanel>                       
+                    </div>
+                    <div class="bottomCurvy"></div>
+                    <br/>
+                    <br/>
+                    <apex:outputPanel styleClass="btnToLeft btnAction" rendered="{!IF(LiaSize > 0,true,false)}">
+                        <a href="javascript:;" onclick="window.open('{!$Page.XactlySMBLiabilitiesDetails}', '','location=0,status=0,scrollbars=1,width=550px,height=500px');">
+                          <div class="xactlyBtnRectWrapper enable" onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);" style="float:left;margin-left:16px;margin-right:30px;">
+                                                                        <div class="xactlyBtnRect">
+                                                                            <div class="xactlyBtnRectBackground">
+                                                                                <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                                                    <div class="rigthOffMouseBtn xactlyBtnRectRight">
+                                                                                        <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel">
+                                                                                               <apex:outputText value="{!$Label.xactlyexpress__liabilityDetails}">
+                                                                                                <apex:param value="{!currentSettings.liabilityCap}"/>
+                                                                                            </apex:outputText>
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>     
+                                                                          </div>
+                                                                        </div>
+                                                                </div>
+                                      
+                              
+                        </a>
+                    </apex:outputPanel>
+                </div>
+                
+                <!-- CONTENT -->   
+                <apex:outputPanel layout="block" styleClass="content">
+ 
+                   <!--  Errors --> 
+                   <apex:outputPanel id="errorMsg" layout="block" styleClass="errorScrollBox">
+                      <apex:outputpanel rendered="{!If(LEN(plansRecalculated)>0,true,false)}">
+                          <c:XactlySMBErrorMsg error="{!$Label.xactlyexpress__plansRecalculated}"/>
+                          <span class="btnToLeft btnAction" style="margin-left:430px;margin-top:-15px;position:absolute;">
+                              <a href="javascript:;" onclick="javascript: errorToShow = window.open('/apex/XactlySMBClosePeriodErrorDetails', 'Errors','location=0,status=0,scrollbars=1,width=570px,height=500px');errorToShow.error='{!JSENCODE(plansRecalculated)}';">
+                                  <span class="rightBtnOrange">
+                                      <span class="leftBtnOrange">
+                                          <span class="middleBtnOrange">
+                                              {!$Label.viewDetails}
+                                          </span>
+                                      </span>
+                                  </span> 
+                              </a>
+                          </span>
+                      </apex:outputpanel>
+                      <input value="{!IF(errorMsg != '', 'Error',syncImpl.Status)}" type="hidden" id="closeStatus"/>
+                  </apex:outputpanel>
+                   <apex:outputPanel id="errorMsg2" layout="block">
+                        <div style="{!if(errorMsg == '','display:none;','')}margin-left: 20px; margin-bottom: 5px;background-color:#FF0000; color: #FFFFFF; font-size: 16px; font-weight: bold; overflow: auto; max-height: 100px; width: 757px; padding: 4px;">
+                            <apex:outputText escape="false" styleClass="errorScrollBox"  value="{!errorMsg}"/>
+                        </div>
+                   </apex:outputPanel>
+                  <!--  STEP 1 -->
+
+                  <apex:inputHidden value="{!indexElementToRemove}" id="elementToRemove"/>                  
+                  <apex:outputPanel layout="block" styleClass="box stepBoxAdd" id="step1">
+                       <div class="img_repeat tm">
+                            <div class="img_no_repeat tl"></div>
+                            <div class="img_no_repeat tr"></div>
+                            <div style="clear:both"></div>
+                        </div> 
+                       <div class="roundedBox">
+                          <div class="boxHeader">
+                              <div class="stepActionNumber PNovaBlack60c5">
+                               A
+                              </div>
+                              <div class="titleWrapper">  
+                                  <div class="mainTitle PNovaSemiBold17c3">{!$Label.CheckList}</div>
+                                  <div class="detailedTitle HelveticaRegular12c3">{!$Label.CheckListDesc}</div>
+                              </div>
+                              <div style="clear:both"></div>
+                          </div>
+                          <div class="boxContent"> 
+                            <div class="openItemsDescription">{!$Label.OpenItems}:</div> <div class="openItemsNumber">{!$Label.WaitLoading}</div>
+                            <div style="clear:both;"></div>            
+                            <div id="checkList">        
+                                 <table class="processTable" cellspacing="0" cellpadding="0">
+                                     <thead class="processTableHeaders">
+                                         <tr>
+                                             <th class="processHeaderCell processNotRightCell">{!$Label.Process}</th>
+                                             <th class="processHeaderCell processNotRightCell" style="width: 300px;">{!$Label.Status}</th>
+                                             <th class="processHeaderCell">&nbsp;</th>
+                                         </tr>
+                                     </thead>
+                                     <tbody  class="processTableBody"> 
+                                         <tr>   
+                                             <td class="processNormalCell processNotRightCell">
+                                             <apex:outputtext value="{!$Label.xactlyexpress__CreditsProcessedAllPlans}">
+                                                <apex:param value="{!currentSettings.creditsPluralCap}" />
+                                             </apex:outputtext>
+                                             </td>
+                                             <td class="processNormalCell processNotRightCell"> 
+                                                   <span style="{!IF(recalculateCreditProccess, 'color:red;font-weight:bold;', '')}"> 
+                                                        {!IF(ISNULL(LastCreditProccess), $Label.NeverRun, IF(lastCreditAnyProccess.Status__c != 'Finished',lastCreditAnyProccess.Status__c  , IF(recalculateCreditProccess, $Label.NeedToRunAgain, IF(LastCreditProccess.ProcessID__c == lastCreditAnyProccess.Id, $Label.Done,$Label.NeedToRunAgain))))}
+                                                   </span>
+                                                   <apex:outputpanel layout="none" rendered="{!recalculateCreditProccess}">
+                                                      <input class="checkSelElement" type="checkbox" value="1"  style="display:none;"/>   
+                                                   </apex:outputpanel>
+                                                   <apex:outputpanel layout="none" rendered="{!NOT(recalculateCreditProccess)}">
+                                                      <input class="checkSelElement" type="checkbox" value="1" checked="checked" style="display:none;"/>   
+                                                   </apex:outputpanel>                                               
+                                                   <div class="checkDate">
+                                                       <apex:outputText value="
+                                                                 {0,date,MM/dd/yyyy HH:mm a}">
+                                                                 <apex:param value="{!LastCreditProccess.CreatedDate}" />
+                                                       </apex:outputText> 
+                                                   </div>
+                                             </td>
+                                             <td class="processNormalCell">&nbsp;                                                    
+                                             </td>
+
+                                         </tr>         
+                                         <tr>
+                                             <td class="processNormalCell processNotRightCell">{!$Label.CalculateProcessedAllPlans}</td>
+                                             <td class="processNormalCell processNotRightCell">
+                                                   <span style="{!IF(recalculateProccess, 'color:red;font-weight:bold;', '')}">
+                                                        {!IF(ISNULL(LastCalcualteProccess), $Label.NeverRun, IF(lastCalcualteAnyProccess.Status__c != 'Finished',lastCalcualteAnyProccess.Status__c  , IF(recalculateProccess, $Label.NeedToRunAgain, IF(LastCalcualteProccess.ProcessID__c == lastCalcualteAnyProccess.Id, $Label.Done,$Label.NeedToRunAgain))))}
+                                                   </span>
+                                                                                                     
+                                                   <apex:outputpanel layout="none" rendered="{!recalculateProccess}">
+                                                      <input class="checkSelElement" type="checkbox" value="1" style="display:none;" />   
+                                                   </apex:outputpanel>
+                                                   <apex:outputpanel layout="none" rendered="{!NOT(recalculateCreditProccess)}">
+                                                      <input class="checkSelElement" type="checkbox" value="1" checked="checked" style="display:none;" />   
+                                                   </apex:outputpanel>
+                                                   <div class="checkDate">
+                                                       <apex:outputText value="
+                                                                 {0,date,MM/dd/yyyy HH:mm a}">
+                                                                 <apex:param value="{!LastCalcualteProccess.CreatedDate}" />
+                                                       </apex:outputText>
+                                                   </div>
+                                             </td>
+                                             <td class="processNormalCell">&nbsp;
+                                             </td>
+                                         </tr>    
+                                          
+                                            <tr>   
+                                             <td class="processNormalCell processNotRightCell">{!$Label.PaymentProcessedforAllPlans}</td>
+                                             <td class="processNormalCell processNotRightCell"> 
+                                                   <span style="{!IF(paymentProcessState!=$Label.Done, 'color:red;font-weight:bold;', '')}"> 
+                                                       {!paymentProcessState}
+                                                   </span>
+                                                   <apex:outputpanel layout="none" rendered="{!IF(paymentProcessState!=$Label.xactlyexpress__Done,true,false)}">
+                                                      <input class="checkSelElement" type="checkbox" value="1"  style="display:none;"/>   
+                                                   </apex:outputpanel>
+                                                   <apex:outputpanel layout="none" rendered="{!IF(paymentProcessState =$Label.xactlyexpress__Done,true,false)}">
+                                                      <input class="checkSelElement" type="checkbox" value="1" checked="checked" style="display:none;"/>   
+                                                   </apex:outputpanel>                                               
+                                                   <div class="checkDate">
+                                                       <apex:outputText value="
+                                                                 {0,date,MM/dd/yyyy HH:mm a}">
+                                                                 <apex:param value="{!LastCreditProccess.CreatedDate}" />
+                                                       </apex:outputText> 
+                                                   </div>
+                                             </td>
+                                             <td class="processNormalCell">&nbsp;                                                    
+                                             </td>
+                                         </tr>                                    
+                                         <apex:variable var="checkCount" value="{!1}"/>
+                                         <apex:repeat value="{!checkList}" var="cl" id="checklistGenrerator">
+                                             <tr class="{!If(checkList.size=checkCount,'processUltimateRow','')}">
+                                                 <td class="proccessCheckElementCell {!If(checkList.size=checkCount,'','processNormalCell')} processNotRightCell">
+                                                    <apex:outputPanel layout="none" rendered="{!If(checkCount=1,'true','false')}" > 
+                                                        {!$Label.xactlyexpress__PaymentsReviewed}
+                                                    </apex:outputPanel>
+                                                    <apex:outputPanel layout="none" rendered="{!If(checkCount=1,'false','true')}" > 
+                                                        <apex:inputField id="elementName" value="{!cl.pcl.Name}" styleClass="checkNameElement" />
+                                                    </apex:outputPanel>
+                                                 </td> 
+                                                 <td class="proccessCheckElementCell {!If(checkList.size=checkCount,'','processNormalCell')} processNotRightCell">
+                                                    <apex:inputCheckbox id="elmChck" value="{!cl.check}"  onclick="refeshNumberOpenElement();" styleClass="checkSelElement" />
+                                                    &nbsp;  
+                                                    <div class="checkDate">
+                                                        <apex:outputText value="
+                                                              {0,date,MM/dd/yyyy HH:mm a}">
+                                                              <apex:param value="{!cl.checkedDate}" />
+                                                        </apex:outputText>
+                                                    </div>
+                                                 </td>
+                                                 <td class="{!If(checkList.size=checkCount,'','processNormalCell')}" align="center" valign="middle">
+                                                    <apex:outputPanel layout="none" rendered="{!If(checkCount=1,'false','true')}" > 
+                                                        <div class="inputCriteria" style="margin-right:20px;">
+                                                            <a href="javascript:;" style="color:#CE641B;font-size:7pt;font-weight:bolder;" onclick="rerenderNoCompare = false;removeItemOfList({!checkCount - 1});">
+                                                                <apex:outputText value="{!$Label.xactlyexpress__REMOVE}"/>
+                                                            </a> 
+                                                        </div>  
+                                                   </apex:outputPanel>        
+                                                 </td>
+                                             </tr> 
+                                             <apex:variable var="checkCount" value="{!checkCount + 1}"/>
+                                         </apex:repeat>
+                                         <tr>
+                                             <td colspan="3" style="padding-top:10px;">
+                                                 <hr style="margin-left:6px;"/>
+                                                 <apex:outputPanel layout="block"  style="margin-top:-1px;"> 
+                                                            <div class="xactlyBtnRectWrapper enable"  onclick="rerenderNoCompare = false;addCheckListElement();" onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);" style="float:left;">
+                                                                        <div class="xactlyBtnRect">
+                                                                            <div class="xactlyBtnRectBackground">
+                                                                                <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                                                    <div class="rigthOffMouseBtn xactlyBtnRectRight" >
+                                                                                        <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel">
+                                                                                             {!$Label.AddMoreItems}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>     
+                                                                          </div>
+                                                                        </div>
+                                                                </div>
+                                                            
+                                                 </apex:outputPanel> 
+                                             </td>
+                                         </tr>
+                                     </tbody>                                   
+                                 </table> 
+                            </div>     
+                            <div>
+                                <a href="javascript:;" onclick="hideShowList();">
+                                    <span class="buttonCurvy" style="margin-left:-12px;margin-top:10px;" onmouseover="jQuery(this).css('background-position','bottom');"  onmouseout="jQuery(this).css('background-position','top');">
+                                       <apex:outputText escape="false" style="padding-top:5px; text-align:center; width:100%;float: left;" styleClass="textToChange" value="{!$Label.HideList} &gt;&gt;"/>
+                                    </span>
+                                </a>
+                            </div>
+                            <div style="clear:both;"></div>
+                          </div>    
+                       </div>         
+                       <div class="img_repeat bm">
+                            <div class="img_no_repeat bl"></div>
+                            <div class="img_no_repeat br"></div>
+                        </div> 
+                  </apex:outputPanel>
+                
+                  <!--  STEP 2 -->
+                  <apex:outputPanel layout="block" styleClass="box stepBoxAdd" >
+                      <div class="img_repeat tm">
+                            <div class="img_no_repeat tl"></div>
+                            <div class="img_no_repeat tr"></div>
+                            <div style="clear:both"></div>
+                        </div> 
+                      <div class="roundedBox">
+                          <div class="boxHeader">
+                              <div class="stepActionNumber PNovaBlack60c5">
+                               B
+                              </div>
+                              <div class="titleWrapper">  
+                                  <div class="mainTitle PNovaSemiBold17c3">{!$Label.ClosePeriod}</div>
+                                  <div class="detailedTitle HelveticaRegular12c3">{!$Label.closePeriodDesc}</div>
+                              </div>
+                              <div class="extraTitleStuff">
+                              </div>
+                              <div style="clear:both"></div>
+                          </div>
+                          <div class="boxContent"> 
+                                <div class="btnToLeft btnAction {!IF(selectedPeriod.StartDate__c == currentPeriod.StartDate__c && !isReadOnlyAdmin, '', 'disabledOpacityButton')}" style="margin-top:2px;">
+                                                                    <div class="xactlyBtnRectWrapper enable" onmouseover="if({!isReadOnlyAdmin}) return false; xactlyBtnRectMouseOver(this);" onmouseout="if({!isReadOnlyAdmin}) return false;xactlyBtnRectMouseOut(this);" onclick="{!IF(selectedPeriod.StartDate__c == currentPeriod.StartDate__c && !isReadOnlyAdmin, 'confClosePeriod();', '')}" style="float:left;margin-left:16px;margin-right:30px;">
+                                                                        <div class="xactlyBtnRect">
+                                                                            <div class="xactlyBtnRectBackground">
+                                                                                <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                                                    <div class="rigthOffMouseBtn xactlyBtnRectRight" style="{!IF(selectedPeriod.StartDate__c == currentPeriod.StartDate__c, '', 'cursor:default;')}">
+                                                                                        <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel">
+                                                                                             {!$Label.closeCurrentPeriod}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>     
+                                                                          </div>
+                                                                        </div>
+                                                                </div>
+                                </div>
+                                <div class="descriptionButtomText"  style="margin-top:4px;">[{!$Label.ClosePeriodInfo}]</div>
+                                <div class="progressBar">
+                                   <img id="progressBar" class="img-progressBar" style="display: none;" src="{!URLFOR($Resource.XactlySMBResources, 'img/icons/progressBar.gif')}" />
+                                </div>
+                                <div style="clear:both;"></div>
+                          </div>    
+                      </div>         
+                      <div class="img_repeat bm">
+                          <div class="img_no_repeat bl"></div>
+                        <div class="img_no_repeat br"></div>
+                      </div> 
+                  </apex:outputPanel>
+                
+                  <!--  STEP 3 -->
+                  <apex:outputPanel layout="block" styleClass="box stepBoxAdd">
+                      <div class="img_repeat tm">
+                            <div class="img_no_repeat tl"></div>
+                            <div class="img_no_repeat tr"></div>
+                            <div style="clear:both"></div>
+                        </div> 
+                      <div class="roundedBox">
+                          <div class="boxHeader">
+                              <div class="stepActionNumber PNovaBlack60c5">
+                               C
+                              </div>
+                              <div class="titleWrapper">  
+                                  <div class="mainTitle PNovaSemiBold17c3">{!$Label.ExportPayrollFile}</div>
+                                  <div class="detailedTitle HelveticaRegular12c3">{!$Label.ExportPayrollFileDesc}</div>
+                              </div>
+                              <div class="extraTitleStuff">
+                              </div>
+                              <div style="clear:both"></div>
+                          </div>
+                          <div class="boxContent"> 
+                               <div class="btnToLeft btnAction {!IF(selectedPeriod.StartDate__c <= currentPeriod.StartDate__c, '', 'disabledOpacityButton')}" style="float:left;margin-top:5px;">
+                                    <a href="{!IF(selectedPeriod.XactlyExpress__StartDate__c <= currentPeriod.XactlyExpress__StartDate__c, $Page.XactlyExpress__XactlySMBPayrollFileExport + '?pId=' + selectedPeriodId, 'javascript:;')}"  onclick="{!IF(selectedPeriod.XactlyExpress__StartDate__c==currentPeriod.XactlyExpress__StartDate__c,'alrtwrng();','')}"  style="{!IF(selectedPeriod.StartDate__c <= currentPeriod.StartDate__c, '', 'cursor:default;')}">
+                                      <div class="xactlyBtnRectWrapper enable" onmouseover="xactlyBtnRectMouseOver(this);" onmouseout="xactlyBtnRectMouseOut(this);" style="float:left;margin-left:16px;margin-right:30px;">
+                                                                        <div class="xactlyBtnRect">
+                                                                            <div class="xactlyBtnRectBackground">
+                                                                                <div class="middleOffMouse xactlyBtnRectMiddle" >
+                                                                                    <div class="rigthOffMouseBtn xactlyBtnRectRight">
+                                                                                        <div class="xactlyBtnRectTextWrapper xactlyBtnRectLabel">
+                                                                                             {!$Label.ExportPayrollFile}
+                                                                                        </div>
+                                                                                    </div>
+                                                                                </div>     
+                                                                          </div>
+                                                                        </div>
+                                                                </div>
+                                                   </a>
+                                        
+                               </div> 
+                               <apex:outputLink styleClass="descriptionButtomText {!IF(selectedPeriod.XactlyExpress__StartDate__c <= currentPeriod.XactlyExpress__StartDate__c, '', 'disabledOpacityButton')}"  value="{!IF(selectedPeriod.XactlyExpress__StartDate__c <= currentPeriod.XactlyExpress__StartDate__c, $Page.XactlyExpress__XactlySMBPayrollFileExport + '?pId=' + selectedPeriodId, 'javascript:;')}" onclick="{!IF(selectedPeriod.XactlyExpress__StartDate__c==currentPeriod.XactlyExpress__StartDate__c,'alrtwrng();','')}" style="{!IF(selectedPeriod.XactlyExpress__StartDate__c <= currentPeriod.XactlyExpress__StartDate__c, '', 'cursor:default !important;')}">
+                                   <apex:image styleClass="img-excelIcon" url="{!URLFOR($Resource.XactlyExpress__XactlySMBResources, 'img/icons/excelIcon.png')}" />
+                               </apex:outputLink>
+                               <div style="clear:both;"></div>
+                          </div>    
+                      </div>         
+                    <div class="img_repeat bm">
+                        <div class="img_no_repeat bl"></div>
+                        <div class="img_no_repeat br"></div>
+                    </div> 
+                  </apex:outputPanel>    
+                                
+                </apex:outputPanel>                                
+                <div style="clear:both"></div>
+            </apex:outputPanel><!-- END CONTENTWRAPPER -->
+            
+            </div>
+            <input class="hidden" id="label_ClosedPeriodSuccessfully" value="{!$Label.ClosedPeriodSuccessfully}" />
+            <input class="hidden" id="label_opnPrdWarning" value="{!$Label.opnPrdWarning}" />
+            <input class="hidden" id="label_saveDataBeforeclosePeriod" value="{!$Label.saveDataBeforeclosePeriod}" />
+            <input class="hidden" id="page_XactlySMBManageDraws" value="{!$Page.XactlySMBManageDraws}" />
+            <input class="hidden" id="label_itemsOpenBeforeClosePeriod" value="{!$Label.itemsOpenBeforeClosePeriod}" />
+            <input class="hidden" id="label_Queued" value="{!$Label.Queued}" />
+            <input class="hidden" id="label_CantClosePeriodStillCalcRunning" value="{!$Label.CantClosePeriodStillCalcRunning}" />
+            <input class="hidden" id="label_NeverRun" value="{!$Label.NeverRun}" />
+            <input class="hidden" id="label_CantClosePeriodNoCalc" value="{!$Label.CantClosePeriodNoCalc}" />
+            <input class="hidden" id="label_CantClosePeriodReCalcNeeded" value="{!$Label.CantClosePeriodReCalcNeeded}" />
+            <input class="hidden" id="label_needItemsNames" value="{!$Label.needItemsNames}" />
+            <input class="hidden" id="label_ShowList" value="{!$Label.ShowList}" />
+            <input class="hidden" id="label_HideList" value="{!$Label.HideList}" />            
+            <input class="hidden" id="value_checkPeriod" value="{!if(newPeriod!=null,true,false)}" />
+            <input class="hidden" id="value_liabilities" value="{!if(LiaSize > 0,true,false)}" />
+            <input class="hidden" id="label_CurrentLiabilityManual" value="{!$Label.CurrentLiabilityManual}" />
+            <input class="hidden" id="label_currentSettings_liabilityPlural" value="{!currentSettings.liabilityPlural}" />
+            <input class="hidden" id="page_currentSettings_liabilityPlural" value="{!JSENCODE($Page.XactlySMBAuditExport)}" />
+            <!-- FOOTER  --> 
+            <c:XactlySMBFooter isReadOnlyAdmin="{!isReadOnlyAdmin}" packageVersion="{!packageVersion}" showPrevious="true" showNext="false" showSave="true" showRefresh="true" showExport="false"/>
+            
+            <apex:actionFunction name="reloadPeriods" action="{!periodsRefresh}"/>
+            <apex:actionFunction name="save" action="{!save}" rerender="step1, errorMsg2" oncomplete="storeValues();rerenderNoCompare = true;waitOff();refeshNumberOpenElement();savePageHandler.enableBottomBar();"/>
+            <apex:actionFunction name="refresh" action="{!refresh}"/>
+            <apex:actionFunction name="refreshPeriods" action="{!periodsRefresh}" rerender="periodsTable" oncomplete="rerenderNoCompare = true;waitOff();storeValues();" />
+            <apex:actionFunction name="addCheckElementFN" action="{!addCheckElement}" rerender="step1" oncomplete="rerenderNoCompare = true;refeshNumberOpenElement();waitOff();" />
+
+            <apex:actionFunction name="removeCheckElementFN" action="{!removeCheckElement}" rerender="step1" oncomplete="rerenderNoCompare = true;refeshNumberOpenElement();waitOff();" />
+            <apex:actionFunction name="closePeriod" action="{!closePeriod}" rerender="errorMsg" oncomplete="closePeriodRefresh();showAll('false');checkLiabilities();" />
+            
+            <apex:actionfunction id="chatterLoader" name="loadChatter" action="{!loadChatter}" rerender="chatter" oncomplete="waitOff();initChatter();jQuery('.innerOcultar a').click();"/>
+        </apex:form>
+    </div> 
+        
+    <a href="javascript:;" id="openPopup"></a>
+
+    <div style="display: none;">
+        <div id="fooPopup_px" class="jqpopup_cross"></div>
+        <div class="jqpopup_header" id="fooPopup_ph"></div>
+        <div id="fooPopup_pm" class="jqpopup_message"></div>
+        <div id="'fooPopup'_pc" class="jqpopup_content"></div>
+        <div id="fooPopup_pf" class="jqpopup_footer"></div>
+        <div id="fooPopup_ps" class="jqpopup_resize"></div>
+        <div id="fooPopup_pl" class="jqpopup_center"></div>
+    </div>
+    <c:XactlySMBFooterScript isChatterEnabled="{!isChatterEnabled}" loadPerformantJs="true" loadHeaderJs="true" />
+    <script type="text/javascript" src="{!URLFOR($Resource.XactlySMBResources, 'pages/js/XactlySMBCalculatePayroll.js')}"></script>
+    <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'pages/css/XactlySMBCalculatePayroll.css')}" />
+     <c:XactlySMBFeedbackTab />
+</apex:page>

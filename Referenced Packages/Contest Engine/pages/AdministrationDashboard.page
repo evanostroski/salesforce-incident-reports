@@ -1,0 +1,89 @@
+<apex:page sidebar="false" controller="ePrize_Zemzu.AdministrationDashboardController" tabStyle="eprizesupport__tab">
+  <apex:composition template="ePrize_Zemzu__CompetePageTemplate">
+    <apex:define name="pageTitle">LevelEleven Support</apex:define>
+    <apex:define name="contentMain">
+      <div id="thePage" style="display: none;" class="u-flex u-flexCol u-lg-flexRow">
+
+          <div class="Compete-col u-lg-size1of2">
+            <a href="/apex/Contests" class="Compete-helpContent u-block u-paddingAm u-marginBm">
+              <div class="Compete-helpLink">
+                View All Contests
+              </div>
+              <div class="help-details">
+                See a list of all current and ended contests in your org.
+              </div>
+            </a>
+            <a href="/apex/InstallSplash" class="Compete-helpContent u-block u-paddingAm u-marginBm">
+              <div class="Compete-helpLink">
+                Setup Wizard
+              </div>
+              <div class="help-details">
+                Go through the setup wizard to add/remove permissions for LevelEleven Administrators and LevelEleven Participants &amp; Observers.
+              </div>
+            </a>
+            <a href="/apex/BuilderOverview" class="Compete-helpContent u-block u-paddingAm u-marginBm">
+              <div class="Compete-helpLink">
+                Assign LevelEleven Builders
+              </div>
+              <div class="help-details">
+                Assign managers to be LevelEleven Builders, and then assign specific users to those managers. Managers who are setup as LevelEleven Builders can only see contests that they built or are part of. In addition, when they get to wizard step 4 when creating a contest, they will only see users that have been assigned to them. Note: LevelEleven Builders must be given the Contest Builder permission set.
+              </div>
+            </a>
+            <a target="_blank" href="http://appexchange.salesforce.com/listingDetail?listingId=a0N300000055dIBEAY" class="Compete-helpContent u-block u-paddingAm u-marginBm">
+              <div class="Compete-helpLink">
+                AppExchange Listing
+              </div>
+              <div class="help-details">
+                Visit our AppExchange listing if you need to upgrade to our latest version.
+              </div>
+            </a>
+          </div>
+
+          <div class="Compete-colAlt u-lg-size1of2">
+            <a target="_blank" href="mailto:gethelp@leveleleven.com" class="Compete-helpContent u-block u-paddingAm u-marginBm">
+              <div class="Compete-helpLink">
+                Get Support
+              </div>
+              <div class="help-details">
+                Have a question for our team? Send an email to gethelp@leveleleven.com and someone will get back to you shortly.
+              </div>
+            </a>
+            <a href="/apex/CustomContestConfiguration" class="Compete-helpContent u-block u-paddingAm u-marginBm">
+              <div class="Compete-helpLink">
+                Custom Contest Configuration
+              </div>
+              <div class="help-details">
+                Select any additional standard or custom objects you would like to make available in a Custom Contest. Note: you must create a custom trigger that integrates with LevelEleven for this to work.
+              </div>
+            </a>
+            <a href="/apex/AdvancedSettings" class="Compete-helpContent u-block u-paddingAm u-marginBm">
+              <div class="Compete-helpLink">
+                Advanced Settings
+              </div>
+              <div class="help-details">
+                Manage advanced settings for LevelEleven.
+              </div>
+            </a>
+            <a href="/apex/FeatureKeys" class="Compete-helpContent u-block u-paddingAm u-marginBm">
+              <div class="Compete-helpLink">
+                Manage Feature Keys
+              </div>
+              <div class="help-details">
+                Enter new feature keys or manage existing, installed feature keys.
+              </div>
+            </a>
+            <a target="_blank" href="http://support.leveleleven.com/articles/leveleleven-101-weekly-training-webinar" class="Compete-helpContent u-block u-paddingAm">
+              <div class="Compete-helpLink">
+                LevelEleven 101
+              </div>
+              <div class="help-details">
+                If you're new to LevelEleven, or just want a basic refresher on the functionality and features of our platform, view the LevelEleven 101 - Weekly Trainings!
+              </div>
+            </a>
+          </div>
+
+      </div>
+      <apex:includeScript value="{!$Resource.ePrize_Zemzu__app}"/>
+    </apex:define>
+  </apex:composition>
+</apex:page>

@@ -1,0 +1,2 @@
+<apex:page action="{!getAccessToken}" controller="ConcurConnect.OAuthCallbackController">
+</apex:page>

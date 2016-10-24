@@ -1,0 +1,305 @@
+<apex:page showHeader="false" sidebar="false" standardStylesheets="false" title="Payment Details" controller="XactlyExpress.XactlySMBPaymentDetails"  action="{!redirectWhenAccessIsDenied}">
+<c:XactlySMBCursor />
+    <apex:form id="theForm" >
+        <div class="header"></div>
+        <div class="content">
+            <div id="centerContainer">
+                <div style="float: right; margin: 29px 4px 0 0;">
+                    <apex:outputPanel rendered="{!selectedCategory != 'holdDetails'}">
+                    <label>
+                        <apex:inputCheckbox value="{!show0Earned}" onchange="waitOn(); showZeroEarned();" />
+                        <apex:outputtext value=" {!$Label.xactlyexpress__showDealsWithNoEarnings}" />
+                    </label>
+                    </apex:outputPanel>
+                </div>
+                <div style="float: left; margin-top: 25px;margin-bottom:5px;">                     
+                    <div style="float: left;">
+                        <span style="font-family: 'ProximaNovaSemiBold' !important;font-size: 22px;color: rgb(216, 128, 69); margin-left: 10px;">{!IF(selectedCategory == 'holdDetails', $Label.HoldDetails, IF(selectedCategory == 'releasedView', $Label.ReleaseDetails, $Label.paymentDetails))}</span> 
+                      <apex:outputpanel layout="none" rendered="{!FiltersVisible}">  &nbsp;for</apex:outputpanel>
+                    </div>
+                      <apex:outputpanel layout="none" rendered="{!FiltersVisible}"> 
+                    <apex:outputpanel layout="block" style="float:left;margin-top:5px;margin-left:5px;">
+                        <apex:outputPanel layout="block" id="dropdownsFilter" styleclass="dropdownsFilter">
+                     
+                            <apex:outputPanel rendered="{!isAdmin}">
+                                <apex:selectList value="{!crrntUserId}"  size="1" multiSelect="false" onchange="reloadAll();waitOn();detailsHandler.switchDivsDisplay();">
+                                    <apex:selectOptions value="{!salesPersonsOptions}"/> 
+                                </apex:selectList>
+                            </apex:outputpanel>
+                            <apex:outputPanel rendered="{!isManager}">
+                                <apex:selectList value="{!crrntUserId}"  size="1" multiSelect="false" onchange="reloadAll();waitOn();detailsHandler.switchDivsDisplay();">
+                                       <apex:selectOptions value="{!managerSubordinates}"/> 
+                                </apex:selectList>
+                            </apex:outputpanel>
+                     
+                            <apex:selectList value="{!crrntPlanId}" size="1" multiSelect="false" onchange="reloadDropDownsPlan();waitOn();detailsHandler.switchDivsDisplay();">
+                                <apex:selectOptions value="{!planOptions}"/>
+                            </apex:selectList>   
+                            
+                            <apex:selectList value="{!crrntPaymentId}" size="1" multiSelect="false" onchange="reloadDropDownsPayment();waitOn();detailsHandler.switchDivsDisplay();">
+                                <apex:selectOptions value="{!paymentOptions}"/>
+                            </apex:selectList>
+                            
+                            <apex:selectList value="{!crrntPeriodId}" size="1" multiSelect="false" onchange="reloadDropDownsPeriods();waitOn();detailsHandler.switchDivsDisplay();">
+                                <apex:selectOptions value="{!periodOptions}"/>
+                            </apex:selectList>
+                                    
+                            <apex:selectList value="{!crrntFiscalYearId}" size="1" multiSelect="false" onchange="reloadDropDownsFiscalYear();waitOn();detailsHandler.switchDivsDisplay();">
+                                <apex:selectOptions value="{!fiscalYearOptions}"/>
+                            </apex:selectList>  
+                            
+                        </apex:outputPanel>
+                    </apex:outputPanel>     
+                </apex:outputPanel>                   
+                </div>
+                <div style="clear: both;"></div>
+                <div style="clear: both; margin-bottom: 2px;"></div>
+                
+                <apex:outputPanel id="errorMsg" layout="block">
+                    <c:XactlySMBErrorMsg error="{!errorMsg}"/> 
+                </apex:outputPanel>
+                
+ 
+                 
+                <div style="border-radius:6px;-moz-border-radius:6px;-wiebkit-border-radius:6px;font-size: 10pt;background-color: #7C7B79;padding:5px 10px 10px 10px;width:auto" id="mainCornerDiv" class="mainCornerDiv">
+                    <div style="font-weight:bold;color:white;margin-top:2px;margin-bottom:12px;float:left;margin-top:10px;">
+                        <apex:outputtext value="{!$Label.xactlyexpress__DealLevelResults}" >
+                            <apex:param value="{!currentSettings.dealsCap}"/> 
+                        </apex:outputtext>
+                    </div>
+                    <apex:outputPanel layout="none" rendered="{!IF(neitherRelease=false,true,false)}">
+                    <div style="font-weight:bold;color:white;margin-bottom:5px;float:left;margin-left:88%;position:absolute;margin-top:10px;width:11%;"> 
+                        {!$Label.GoToPage}
+                        
+                        <apex:selectList multiselect="false" size="1" value="{!currentPage}" onchange="goToPage();">
+                            <apex:selectOptions value="{!pages}" />
+                        </apex:selectList>
+                    </div>
+                    </apex:outputPanel>
+                    <div style="clear: both;"></div> 
+                  
+                    <div style="width:100%;height: 440px;overflow: auto;" id="mainDiv" class="mainDiv">
+                       
+                    <apex:outputPanel layout="none" rendered="{!IF(neitherRelease!=false,true,false)}">
+                    <div style="text-align: center;color:#ffffff;">{!$Label.xactlyexpress__releasesHaveNotBeenReprocessed}</div>
+                    </apex:outputPanel>
+                        <apex:outputPanel layout="block" id="mainTableCont" rendered="{!IF(LEN(errorMsg)>0 && neitherRelease=false,false,true)}">
+                            <table style="min-width: 1100px;width:100%;">  
+                                <thead> 
+                                    <tr>
+                                        <apex:repeat value="{!headerToShow}" var="h">
+                                         <apex:outputpanel layout="none" rendered="{!h.display}">
+                                            <th>
+                                                <apex:outputpanel style="white-space: nowrap">
+                                                    <apex:outputpanel rendered="{!IF(sortBy == h.id, true, false)}">
+                                                        <div class="inteactionIconSprite {!IF(sortByDesc == true,'arrowDown','arrowUp')}"></div>
+                                                    </apex:outputpanel>
+                                                    <apex:commandLink onclick="waitOn();" oncomplete="waitOff();loadBubbles();detailsHandler.colorizeRow();selectCurrent();" value="{!h.name}"  action="{!groupsAndFilter}" rerender="mainTableCont" styleclass="areaTitle">
+                                                        <apex:param name="sortBy" value="{!h.id}"/> 
+                                                    </apex:commandLink>
+                                                </apex:outputpanel>
+                                            </th>
+                                         </apex:outputpanel>
+                                        </apex:repeat>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <apex:variable var="rowCount" value="{!0}"/>
+                                    <apex:repeat value="{!dealToShow}" var="r">
+                                     <apex:outputpanel layout="none" rendered="{!r.display}">
+                                        <tr id="{!r.id}" onclick="loadDetail(this,'{!r.Id}');" class="{!IF(rowCount = 0, 'odd','even')}" style="{!IF(r.Id != '', 'cursor:pointer','')}">
+                                            <apex:repeat value="{!r.cells}" var="cll"> 
+                                                <apex:outputpanel layout="none" rendered="{!cll.display}">
+                                                    <td class="leftAligned">
+                                                        <div>
+                                                            <div>
+                                                                <apex:outputPanel style="white-space: nowrap" styleclass="{!IF(OR(AND(!ISNULL(cll.splitPerc),cll.splitPerc != 100,cll.splitPerc != 0,r.split),AND(!ISNULL(cll.convPerc),cll.convPerc != 1)),'trigger ','')}{!IF(AND(AND(!ISNULL(cll.splitPerc),cll.splitPerc != 100,cll.splitPerc != 0,r.split),AND(!ISNULL(cll.convPerc),cll.convPerc != 1)),'longBubble','')}">{!cll.value}<apex:outputPanel rendered="{!IF(OR(AND(!ISNULL(cll.splitPerc),cll.splitPerc != 100,cll.splitPerc != 0,r.split),AND(!ISNULL(cll.convPerc),cll.convPerc != 1)),'true','false')}">*</apex:outputPanel></apex:outputPanel>
+                                                                <apex:outputPanel layout="block" style="display:none;margin-bottom:20px;" styleclass="bubble_html" rendered="{!IF(OR(AND(!ISNULL(cll.splitPerc),cll.splitPerc != 100,cll.splitPerc != 0,r.split),AND(!ISNULL(cll.convPerc),cll.convPerc != 1)),'true','false')}">
+                                                                    <apex:outputPanel style="float:left;" layout="block" rendered="{!IF(AND(!ISNULL(cll.convPerc),cll.convPerc != 1,cll.ctype=='Currency'),'true','false')}">
+                                                                        <apex:outputText value="{!$Label.xactlyexpress__conversionInformation}" style="color:#4C4C4C;font-size:12pt;font-weight: bold;"/><br/>
+                                                                        <apex:outputPanel layout="none" rendered="{!IF(AND(!ISNULL(cll.splitPerc),cll.splitPerc != 100,cll.splitPerc != 0),'true','false')}">
+                                                                            <table cellspacing="0" cellpadding="0" border="0" style="margin-left:15px;">
+                                                                                <tr>
+                                                                                    <td class="tdPopupLeft"><apex:outputText value="{!$Label.xactlyexpress__orgininalValue}"/>:</td>
+                                                                                    <td class="tdPopupRight">{!cll.originalValueBoth} {!cll.oldCurrency}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td class="tdPopupLeft"><apex:outputText value="{!$Label.xactlyexpress__conversionPerc}"/>:</td>
+                                                                                    <td class="tdPopupRight">{!cll.convesionPerc}% {!cll.oldCurrency} {!$Label.to} {!cll.newCurrency}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td class="tdPopupLeft"><apex:outputText value="{!$Label.xactlyexpress__resultingValue}"/>:</td>
+                                                                                    <td class="tdPopupRight">{!cll.valueBoth} {!cll.newCurrency}</td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </apex:outputPanel>
+                                                                        <apex:outputPanel layout="none" rendered="{!IF(AND(!ISNULL(cll.splitPerc),cll.splitPerc != 100,cll.splitPerc != 0),'false','true')}">
+                                                                            <table cellspacing="0" cellpadding="0" border="0" style="margin-left:15px;">
+                                                                                <tr>
+                                                                                    <td class="tdPopupLeft"><apex:outputText value="{!$Label.xactlyexpress__orgininalValue}"/>:</td>
+                                                                                    <td class="tdPopupRight">{!cll.originalValueConversion} {!cll.oldCurrency}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td class="tdPopupLeft"><apex:outputText value="{!$Label.xactlyexpress__conversionPerc}"/>:</td>
+                                                                                    <td class="tdPopupRight">{!cll.convesionPerc}% {!cll.oldCurrency} {!$Label.to} {!cll.newCurrency}</td>
+                                                                                </tr>
+                                                                                <tr>
+                                                                                    <td class="tdPopupLeft"><apex:outputText value="{!$Label.xactlyexpress__resultingValue}"/>:</td>
+                                                                                    <td class="tdPopupRight">{!cll.value} {!cll.newCurrency}</td>
+                                                                                </tr>
+                                                                            </table>
+                                                                        </apex:outputPanel>
+                                                                        <apex:outputPanel layout="none" rendered="{!IF(cll.showAlertConvChange == true,'true','false')}">
+                                                                            <apex:outputText style="font-size:7pt;color:red;" value="*{!$Label.xactlyexpress__conversionAlertBubble}"/>
+                                                                        </apex:outputPanel>
+                                                                    </apex:outputPanel>
+                                                                    <apex:outputPanel style="float:left;{!IF(AND(!ISNULL(cll.convPerc),cll.convPerc != 1,cll.ctype=='Currency'),'border-left:1px solid #E5E5E5;margin-left:10px;padding-left:10px;','')}'" layout="block" rendered="{!IF(AND(!ISNULL(cll.splitPerc),cll.splitPerc != 100,cll.splitPerc != 0),'true','false')}">
+                                                                        <apex:outputText value="{!$Label.xactlyexpress__splitInformation}" style="color:#4C4C4C;font-size:12pt;font-weight: bold;"/><br/>
+                                                                        <table cellspacing="0" cellpadding="0" border="0" style="margin-left:15px;">
+                                                                            <tr>
+                                                                                <td class="tdPopupLeft"><apex:outputText value="{!$Label.xactlyexpress__orgininalValue}"/>:</td>
+                                                                                <td class="tdPopupRight">{!cll.originalValueSpolit}</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td class="tdPopupLeft"><apex:outputText value="{!$Label.xactlyexpress__splitPerc}"/>:</td>
+                                                                                <td class="tdPopupRight">{!cll.splitPercentage}%</td>
+                                                                            </tr>
+                                                                            <tr>
+                                                                                <td class="tdPopupLeft"><apex:outputText value="{!$Label.xactlyexpress__resultingValue}"/>:</td>
+                                                                                <td class="tdPopupRight">{!cll.value}</td>
+                                                                            </tr>
+                                                                        </table>                                                                
+                                                                    </apex:outputPanel>
+                                                                    <div style="clear:both"></div>
+                                                                </apex:outputPanel>
+                                                            	<apex:outputPanel rendered="{!AND(cll.id=='payment', NOT(ISBLANK(r.convObj)), r.convObj.exists==true)}">
+                                                            		<span class="trigger" style="cursor:pointer;color:red;">&nbsp;*&nbsp;</span> 
+																	<div class="bubble_html" style="display:none;">
+																		<div class="PNovaSemiBold14c3" style="float:left;font-size:15px;color: #9D9EA1;margin-bottom: 5px;">{!$Label.xactlyexpress__conversionInformation}</div>
+																		<div style="clear:both;"></div>
+																		<div class="HelveticaRegular10" style="float:left;margin-left: 15px;margin-bottom: 5px;width: 200px;">{!$Label.xactlyexpress__orgininalValue}</div>
+																		<div class="myNumber" style="float:right;color:#437397;font-size:11px;">{!r.convObj.fromValue} {!r.convObj.fromCode}</div> 
+																		<div style="clear:both;"></div> 
+																		<div class="HelveticaRegular10" style="float:left;margin-left: 15px;margin-bottom: 5px;width: 200px;">Conversion Rate</div>
+																		<div class="myNumber" style="float:right;color:#437397;font-size:11px;"> 1  {!r.convObj.fromCode} = {!r.convObj.conversionRate} {!r.convObj.toCode}</div> 
+																		<div style="clear:both;"></div> 
+																		<div class="HelveticaRegular10" style="float:left;margin-left: 15px;margin-bottom: 5px;width: 200px;">{!$Label.xactlyexpress__resultingValue}</div>
+																		<div class="myNumber" style="float:right;color:#437397;font-size:11px;"> {!r.convObj.toValue}&nbsp;{!r.convObj.toCode} </div>
+																	</div>
+                                                            	</apex:outputPanel>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+                                                </apex:outputpanel>  
+                                            </apex:repeat> 
+                                        </tr>
+                                        <apex:variable var="rowCount" value="{!(rowCount * -1) + 1}"/>
+                                     </apex:outputpanel>    
+                                    </apex:repeat>
+                                </tbody>
+                            </table>
+                        </apex:outputPanel> 
+                        <apex:inputHidden id="dealId" value="{!selectedDealId}"/>
+                    </div>
+                    <div style="clear: both;">&nbsp;</div>
+                    <span>{!messageLimitAlert}</span>
+                </div>
+                       
+                <!-- DRAGBAR --> 
+                <div style="width:100%;position:absolute;display:none;" id="dragBar">
+                    <img class="img-dragToResize" src="{!URLFOR($Resource.XactlySMBResources, 'img/layout/dragToResize.jpg')}" style="border:none" />
+                </div>
+                
+                <br/>
+
+                <div style="clear: both;">&nbsp;</div>
+                   
+                <div id="detailDiv" class="detailDiv" style="display:none;top:2;">
+                    <div class="btnToCenter btnAction" style="float:right;margin-right:15px;">   
+                        <div class="separateBtn">
+                            <a href="javascript:;" onclick="detailsHandler.switchDivsDisplay();">
+                                <div class="rightBtnOrange">
+                                    <div class="leftBtnOrange">
+                                        <div style="color: white;" class="middleBtnOrange">
+                                            >>
+                                        </div>
+                                    </div>
+                                </div>
+                            </a>                
+                        </div>
+                    </div>
+                    <div style="float: right;color:#426E83;font-weight: bold;font-size:10pt;padding-top:5px;">{!$Label.closeDetails}</div>
+                    <div style="clear: both; margin-bottom: 2px;"></div>
+                      
+                    <div style="font-size: 10pt;background-color: #C26F2D;padding:5px 10px 10px 10px" id="detailCornerDiv" class="detailCornerDiv">
+                        <div style="font-weight:bold;color:white;margin-bottom:5px;">{!$Label.holdandReleaseInformation}</div>
+                        <apex:outputPanel layout="block" style="width:100%;height: 145px;overflow: auto;" id="detailTableCont" styleClass="detailTableCont">            
+                            <table style="min-width: 980px;width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>{!$Label.Edit}</th>
+                                        <th>{!$Label.PeriodReleasedLabel}</th>
+                                        <th>{!$Label.Event}</th>
+                                        <th>{!$Label.DealHeldAmount}</th>
+                                        <th>{!$Label.EventHeldAmount}</th>
+                                        <th>{!$Label.Released}</th>
+                                        <th>{!$Label.Adjustment}</th>
+                                        <th>{!$Label.PendingReleased}</th>
+                                        <th>{!$Label.Balance}</th>
+                                    </tr>
+                                </thead> 
+                                <tbody>
+                                    <apex:variable var="rowCount" value="{!0}"/>
+                                    <apex:repeat value="{!releaseList}" var="rel"> 
+                                        <tr class="{!IF(rowCount = 0, 'odd','even')}">
+                                            <td style="width:10px;" class="disabledOpacityButton"><img class="img-adjustPaymentIcon" src="{!URLFOR($Resource.XactlySMBResources, 'img/icons/adjustPaymentIcon.png')}" /></td>
+                                            <td>{!rel.Period}</td>
+                                            <td class="leftAligned">{!rel.Event}</td>
+                                            <td class="leftAligned">{!rel.Amount}</td>
+                                            <td class="leftAligned">{!rel.eventHeldAmount}</td>
+                                            <td class="leftAligned">{!rel.Released}</td>
+                                            <td class="leftAligned">{!rel.Adjustment}</td>
+                                            <td class="leftAligned">{!rel.PendingRelease}</td>
+                                            <td class="leftAligned">{!rel.Balance}</td>
+                                        </tr>
+                                        <apex:variable var="rowCount" value="{!(rowCount * -1) + 1}"/>
+                                    </apex:repeat>
+                                </tbody>
+                            </table>
+                        </apex:outputPanel>
+                    </div>
+                </div>
+                <div style="clear: both;"></div>    
+                <div id="commentBox"></div>
+                <div id="liaCommentBox"></div>
+               
+            </div>
+            <b>
+            <apex:outputText style="margin-left:10px;color:#dd0000;" value="{!limitWarning}" />
+            </b>
+            <div style="clear: both;">&nbsp;</div>
+            </div>
+            
+            <apex:actionFunction name="reloadDropDownsFiscalYear" action="{!reloadDropDownsFiscalYear}" oncomplete="waitOff();loadBubbles();" rerender="mainTableCont, dropdownsFilter"/>
+            <apex:actionFunction name="reloadDropDownsPeriods" action="{!reloadDropDownsPeriods}" oncomplete="waitOff();loadBubbles();" rerender="mainTableCont, dropdownsFilter"/>
+            <apex:actionFunction name="reloadDropDownsPlan" action="{!reloadDropDownsPlan}" oncomplete="waitOff();loadBubbles();" rerender="mainTableCont, dropdownsFilter"/>
+            <apex:actionFunction name="reloadAll" action="{!groupsAndFilter}" oncomplete="waitOff();loadBubbles();" rerender="mainTableCont, dropdownsFilter"/>
+            <apex:actionFunction name="showZeroEarned" action="{!showZeroEarned}" oncomplete="waitOff();loadBubbles();" rerender="mainTableCont, dropdownsFilter"/>
+            <apex:actionFunction name="reloadDropDownsPayment" action="{!reloadDropDownsPayment}" oncomplete="waitOff();loadBubbles();" rerender="mainTableCont, dropdownsFilter"/>
+
+            <apex:actionFunction name="goToPageAF" action="{!goToPage}" rerender="mainTableCont" oncomplete="loadBubbles();waitOff();"/>
+            <apex:actionFunction name="loadDetailAF" action="{!loadDetail}" rerender="detailTableCont" oncomplete="waitOff();detailsHandler.switchDivsDisplay(212);"/>
+        </apex:form>
+
+        <div class="hidden">
+            <input class="hidden" id="orgName" value="{!URLENCODE($Organization.Name)}" />
+            <input class="hidden" id="orgId" value="{!URLENCODE($Organization.Id)}" />
+            <input class="hidden" id="currentUserProfile" value="{!URLENCODE(currentUserProfile)}" />
+            <input class="hidden" id="currentUserName" value="{!URLENCODE($User.FirstName + ' ' + $User.LastName)}" />
+        </div>
+
+        <c:XactlySMBFooterScript isChatterEnabled="false" loadHeaderJs="false" loadPerformantJs="true" />
+        <apex:stylesheet value="{!URLFOR($Resource.XactlyExpress__XactlySMBResources ,'pages/css/XactlySMBPaymentDetails.css')}" />
+        <script type="text/javascript" language="javascript" src="{!URLFOR($Resource.XactlySMBResources, 'pages/js/XactlySMBPaymentDetails.js')}"></script>
+
+</apex:page>

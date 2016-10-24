@@ -1,0 +1,985 @@
+<apex:page standardController="lmscons__Trigger_Rule__c" extensions="lmscons.TriggerManagementController" docType="html-5.0">
+
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	
+	
+	<apex:includescript value="{!URLFOR($Resource.lmscons__LMSSearch, 'js/jquery.1.11.min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.lmscons__LMSSearch, 'js/jquery.tmpl.min.js')}"/>
+	<apex:includeScript value="{!URLFOR($Resource.lmscons__lmslightbox, 'js/init.js')}"/>
+ 
+	<apex:stylesheet value="{!URLFOR($Resource.lmscons__lmslightbox, 'css/lms-lightbox.css')}"/>
+	
+<style>
+
+    #conditions{
+        /*width: 530px;*/            
+    }
+    
+    #conditions thead tr{
+                    
+    }
+    
+    #conditions th{
+                    
+    }
+       
+    
+     #conditions th.th-operator, #conditions td.th-operator{
+		width: 125px;                    
+    }
+    
+    #conditions th.ht-value, #conditions td.ht-value{
+		width: 140px;                    
+    }
+    
+    #conditions th.th-AND, #conditions td.th-AND{
+		width: 40px;   
+		text-align:center;     
+		vertical-align: middle;            
+    }
+    
+    #conditions th.th-lookup, #conditions td.th-lookup{
+		/*width: 20px;*/   
+		text-align: center; 
+		padding-left: 5px;
+		vertical-align: middle;                
+    }
+    
+    #conditions td{
+                    
+    }
+    
+    #conditions input.lookup-btn{
+		width: 20px;
+		height: 20px;  
+		border: 0;
+		background-color: #F8F8F8;
+		background-image: url(/img/func_icons/util/lookup20.gif); 
+		background-position: top left;               
+    }
+    
+    #conditions input.lookup-btn:hover{		
+		background-position: top right;               
+    }       
+    
+    #conditions td span.dateInput input{
+		width: 50%;                    
+    }       
+	
+	#conditions select{
+		height: 19px;
+		margin: 0;
+		padding: 0;		
+		width: 100%;
+		
+		box-sizing:content-box;
+		-ms-box-sizing:content-box;
+		-moz-box-sizing:content-box;
+		-webkit-box-sizing:content-box; 
+	}
+	
+	#conditions input{
+		height: 17px;
+		margin: 0;
+		padding: 0;		
+		width: 99%;
+		
+		box-sizing:content-box;
+		-ms-box-sizing:content-box;
+		-moz-box-sizing:content-box;
+		-webkit-box-sizing:content-box; 
+	}
+	
+	.error{
+		color: red;
+		font-weight: bold;
+		border: 0px !important;		  
+	}
+    
+    #loType{width: 150px;}
+    #loTypeSelect{margin-left: 10px;}
+    
+    .requiredBlockCustom{
+        clear: both;
+		border-left: 3px solid #c03;
+		display: block;
+    }
+   
+        #Select					{width: 15%;}
+        .dataTable 				{background: white;}
+        .selectLo				{vertical-align: middle !important; font-weight:bold;}
+        #FieldLevel				{margin-top: 20px;}
+		#left, #Center, #Right	{float:left;}
+		.labels					{font-weight:bold;}
+		.selectValues			{width:200px;}
+		.Operator				{width:150px;}
+		.clearAll				{clear: both;}
+		a img					{margin: 2px !important;}
+		.and					{float:right;padding:3px 0 0 5px;}
+		.spanLabels				{float:left;width:203px;}
+		.spanLabel				{float:left;width:153px;}
+		
+		.RoleCriteria{
+			height: 200px;
+			width: 200px;
+			font-size: 1em;
+		}
+		.roleSpanLabels{
+			float:left;
+			width:203px;
+			text-align:center;
+		}
+		
+		.roleSpanLabelsSelect{
+			float:left;
+			width:203px;
+			text-align:center;
+		}
+		
+		.buttons{
+			float: left;
+			vertical-align: middle;
+			padding-top: 85px !important;
+		}
+		.NotificationMessages{
+			width: 470px;
+			height: 150px;
+		}
+		#popup div.btn-content{
+			padding: 5px 10px 20px 10px;
+			height: 23px;
+			float: right;
+    		bottom: 0;
+    		right: 0;
+		}
+		
+		#popup div.btn-content button]{
+			float: right;
+			width: 55px;
+			height: 23px;
+		}
+		
+		.m-data {
+		    border-top: 0px;		    
+		    margin-bottom: 0px;
+		}
+		
+		
+</style>
+
+<script>
+	
+	jQuery(document).ready(function(){
+		
+		if({!isUserValid} == false){
+			jQuery("form[id$='first']").hide();
+			jQuery("input[class='btn']").attr('disabled', 'disabled');
+		}
+	});
+	
+	var PICK_LIST_VALUES_DELIMITER = '{!PICK_LIST_VALUES_DELIMITER}';
+</script>
+
+<div class="b-overlay"></div>
+<div class="b-lightbox" id="popup">
+	<div class="b-title-bar">
+		<div class="b-title"></div>
+		<div class="b-close-btn"><a href="javascript:Closelightbox()">{!$Label.SearchCatalog_Close}</a></div>
+	</div>
+	<div class="b-content"></div>	
+</div>
+
+<script id="picklist-check-tmpl" type="text/x-jquery-tmpl">
+	<table class="m-data" width="100%">
+		<thead>
+			<tr>
+				<th><input type="checkbox" name="checkAll"/></th>
+				<th>${fieldName}</th>
+			</tr>
+		</thead>
+		<tbody>
+		{{each dataItems}}
+			<tr>
+				<td>
+					{{if checked == true }}
+      					<input type="checkbox" checked="checked" name="${title}"/>
+    				{{else}}
+						<input type="checkbox" name="${title}"/>
+					{{/if}}
+				</td>
+
+				<td>${title}</td>
+			</tr>
+		{{/each}}
+		</tbody>
+	</table>
+	<div class='btn-content'>		
+		<button id="ok-btn">{!$Label.MyTraining_Ok}</button>		
+		<button id="cancel-btn">{!$Label.Cancel}</button>		
+	</div>
+	<input type="hidden" id="input-id" value="${inputId}"/>
+</script>
+
+
+
+<apex:sectionHeader title="{!$Label.TM_Learning_Trigger}" subtitle="{!$Label.TM_New_Learning_Trigger}" />
+<br />
+<apex:pageMessages rendered="{!showApexPageMessages}"/>
+
+<apex:form id="first" rendered="{!countPages == 0}">
+        <apex:pageBlock title="{!$Label.TM_Learning_Trigger_Edit}" mode="edit" id="mainBlock">
+            <apex:pageBlockButtons id="pbbsMainButtons" style="float: right;">
+                <apex:commandButton value="{!$Label.Pagination_Next}" action="{!nextPage}" style="width: 50px; margin-right: 10px;"/>
+                <apex:commandButton id="editSave" value="{!$Label.Save}" action="{!save}"  rendered="{!updateButton}" style="width: 50px; margin-right: 10px;"/>
+                <apex:commandLink value="{!$Label.Cancel}" action="{!cancel}" style="text-decoration: none;"/>
+            </apex:pageBlockButtons>
+        <apex:pageBlockSection title="{!$Label.TM_Step_LearningTrigger}" columns="1">
+            <apex:inputField value="{!triggerRule.Name}" required="true"/>
+            
+            <apex:inputField value="{!triggerRule.lmscons__Description__c}" style="width: 300px; height: 50px;"/>
+            
+            <apex:selectRadio value="{!objectType}"  id="objectType" layout="pageDirection" label="{!$Label.TM_Assign_By}" onchange="changeObjectItems(this)">
+                <apex:selectOptions value="{!ObjectItems}"/><br/>
+            </apex:selectRadio>
+         
+         <script>
+         	
+         	var objectStart;
+         	jQuery("div[id$='mainBlock']").ready(function(){
+         	
+         		objectStart =  jQuery("table[id$='objectType']").find("input[checked='checked']").val();
+         	
+         	});
+         	
+         	
+         	function changeObjectItems(object){
+         		
+         		var objectSeleckted = jQuery(object).val();
+         		if(objectSeleckted != objectStart){
+         			jQuery("td[id*='pbbsMainButtons']").find("input[id$='editSave']").attr('class', 'btnDisabled').attr('disabled',true);
+         		}else {
+         			jQuery("td[id*='pbbsMainButtons']").find("input[id$='editSave']").attr('class', 'btn').attr('disabled',false);
+         		};
+         	}
+         
+         </script>            
+        
+        </apex:pageBlockSection>
+ 
+        </apex:pageBlock>
+    </apex:form>
+  
+    <apex:form id="second" rendered="{!countPages == 1}">
+        <apex:pageBlock title="{!$Label.TM_Learning_Trigger_Edit}" mode="edit" id="mainBlock">
+            <apex:pageBlockButtons id="pbbsMainButtons" style="float: right;">
+                <apex:commandButton value="{!$Label.Pagination_Previous}" action="{!previousPage}" onclick="javascript:roleSaveValues();javascript:profileSaveValues()" style="margin-right: 10px;"/>
+                <apex:commandButton value="{!$Label.Pagination_Next}" action="{!nextPage}" onclick="javascript:roleSaveValues();javascript:profileSaveValues()" style="width: 50px; margin-right: 10px;"/>
+                <apex:commandButton value="{!$Label.Save}" action="{!save}"  onclick="javascript:roleSaveValues();javascript:profileSaveValues()" rendered="{!updateButton}" style="width: 50px; margin-right: 10px;"/>
+                <apex:commandLink value="{!$Label.Cancel}" action="{!cancel}" style="text-decoration: none;"/>
+            </apex:pageBlockButtons>
+        
+            <apex:pageBlockSection title="{!$Label.TM_Step_Specify_Assignment_Criteria}" columns="1">
+            
+            <apex:outputText value="{!$Label.TM_FieldLevel_Assignment_Criteria} ({!objectTypeLabel}):"/>            
+                            
+		
+			<apex:outputPanel id="frm">
+				
+				<apex:outputText styleClass="error" value="{!conditionManager.error}" rendered="{!conditionManager.error != null}"/>
+						
+				<table id="conditions" cellspacing="4">
+					<thead>
+						<tr>
+							<th class="th-field">{!$Label.TM_Field}</th>
+							<th class="th-operator">{!$Label.TM_Operator}</th>
+							<th class="th-value">{!$Label.TM_Value}</th>
+							<th class="th-lookup"></th>
+							<th class="th-AND"></th>
+						</tr>
+					</thead>
+							
+					<tbody>		
+					<apex:repeat value="{!conditionManager.conditions}" var="condition">
+						<tr id="condition-{!condition.conditionIndex}">
+							 
+							<!-- Field -->
+						 	<td class="th-field"> 
+					        	<apex:selectList value="{!condition.fieldName}" multiselect="false" size="1" onchange="onFieldChange(this);" id="field">
+						            <apex:selectOptions value="{!condition.fields}"/>
+						        </apex:selectList>
+						        <apex:outputText styleClass="error" value="{!condition.fieldNameError}" rendered="{!condition.fieldNameError != null}"/>
+					        </td>
+					        
+					        <!-- Operation -->
+						 	<td class="th-operator"> 
+					        	<apex:selectList value="{!condition.operation}" multiselect="false" size="1" onchange="onValueChange(this);" id="operation">
+						            <apex:selectOptions value="{!condition.operations}"/>
+						        </apex:selectList>
+						        <apex:outputText styleClass="error" value="{!condition.operationError}" rendered="{!condition.operationError != null}"/>
+						    </td>
+					        
+					        
+					        <!-- Value -->
+						 	<td class="th-value"> 
+						        <!-- Picklist values -->
+						        <apex:outputPanel rendered="{!condition.value.isPicklist}">	
+						        	<apex:inputText value="{!condition.value.currentValue}" id="picklist-val"></apex:inputText>
+						        	<apex:selectList style="display: none;" multiselect="false" size="1" onchange="onValueChange(this);">
+							            <apex:selectOptions value="{!condition.value.pickListValues}"/>
+							        </apex:selectList>		       
+						        </apex:outputPanel>
+						        
+						        
+						        <!-- Text values -->
+						        <apex:outputPanel rendered="{!condition.value.isString || condition.value.isReference || condition.value.isDateTimeOrTime || condition.value.isDate}">	
+						        	<apex:inputText value="{!condition.value.currentValue}"></apex:inputText>	        		        			       		        	
+						        </apex:outputPanel>
+						        
+						        
+						        <!-- Number values -->
+						        <apex:outputPanel rendered="{!condition.value.isNumber}">	
+						        	<apex:inputText value="{!condition.value.currentValue}" onkeypress="checkNumberInput(this);"></apex:inputText>	        		        			       		        	
+						        </apex:outputPanel>
+						        
+						        
+						        <!-- Boolean values -->
+						        <apex:outputPanel rendered="{!condition.value.isBoolean}">	
+						        	<apex:selectList value="{!condition.value.currentValue}" multiselect="false" size="1" onchange="onValueChange(this);">
+							            <apex:selectOptions value="{!condition.value.booleanValues}"/>
+							        </apex:selectList>        		        			       		        	
+						        </apex:outputPanel>
+						        
+					        	<br/>
+					        	<apex:outputText styleClass="error" value="{!condition.currentValueError}" rendered="{!condition.currentValueError != null}"/>
+				        	</td>
+				        	
+				        	<td class="th-lookup">
+				        		<apex:outputPanel rendered="{!condition.value.isPicklist}">
+				        			<input type="button" class="lookup-btn" onclick="onLookupClick(this);"/>
+				        		</apex:outputPanel>	
+				        	</td>
+				        	
+				        	<td class="th-AND">{!$Label.TM_AND}</td>
+				        	
+			 			</tr>
+			    	</apex:repeat>
+			    	
+			    	</tbody>
+			    	<script>
+			    		jQuery('#conditions tbody tr:last td:last').text('');
+			    		jQuery('#conditions td.th-field option').each(function(){jQuery(this).attr('title', this.value)});			    		
+			    	</script>
+		 		</table> 
+		 		
+		    	<apex:actionFunction action="{!fieldChangeAction}" name="fieldChangeAction" rerender="frm" oncomplete="setInputsEnable(true);">    		
+			        <apex:param name="conditionIndex" assignTo="{!conditionIndex}" value="" />
+			        <apex:param name="selectedValue" assignTo="{!selectedField}" value="" />	       	       
+			    </apex:actionFunction>
+		    	
+		    	
+		    	<script>
+		    		
+		    		var setInputsEnable = function(value){
+		    			jQuery('#conditions input, #conditions select').prop('disabled', !value);
+		    		}
+		    	
+		    		var onFieldChange = function(selectList){
+		    		
+		    			setInputsEnable(false);
+		    		
+		    			var parentDiv = jQuery(selectList).parents('tr[id*="condition"]')[0];
+		    			var parentDivId = parentDiv.id;
+		    			var conditionIndex = parentDivId.substr(parentDivId.search('condition-')+10);
+		    			var selectedValue = jQuery('option:selected', selectList)[0].value;
+		    		
+		    			fieldChangeAction(conditionIndex, selectedValue);	
+		    		};
+		    		
+		    		var onLookupClick = function(lookupInput){
+		    			console.log('onLookupClick');
+		    			
+		    			var tr = jQuery(lookupInput).parents('#conditions tr');
+		    			console.log(tr);
+		    			var picklistInput = jQuery('input[id*="picklist-val"]', tr)[0];
+		    			console.log(picklistInput);
+		    			onPicklistValuesFocuse(picklistInput);
+		    			
+		    		}
+		    		
+		    		var onPicklistValuesFocuse = function(input){
+		    			var data = {
+		    				inputTag : input,
+		    				availableValues : jQuery(input).next('select').find('option'),
+		    				fieldName : jQuery(input).parents('#conditions tr').find('select:first option:selected').text()
+		    			};
+		    			
+		    			console.log(data);
+		    			
+		    			showPopup(data);
+		    		};
+		    		
+		    		var selectPopupTitle = '{!$Label.TM_select_popup_title}';
+		    		
+		    		var showPopup = function(data){
+		    		
+		    			var inputVal = jQuery(data.inputTag).val();
+		    			var options = jQuery(data.availableValues).toArray();
+		    			var dataItems = new Array();		    					    					    			 
+		    			
+		    			for(var i=0; i<options.length; i++){
+		    				dataItems.push({
+		    					checked	: inputVal.indexOf(options[i].value + PICK_LIST_VALUES_DELIMITER) != -1,
+		    					title 	: options[i].value
+		    				});									    			
+		    			}		
+		    			
+		    			var model = {
+		    				dataItems : dataItems,
+		    				fieldName : data.fieldName,
+		    				inputId : data.inputTag.id
+		    			};
+		    			
+		    			var width = 600;
+		    			var height = 400;
+		    			
+						var popup = jQuery('#popup').css({
+							width: width,
+							height: height,
+							'margin-left' : 0,
+							'margin-top' : 0,
+							'overflow':'auto',
+							left : (screen.width/2)-(width/2),
+							top : ((screen.height/2)-(height/2))*0.7
+						});
+						
+		    			jQuery('.b-title', popup).text(selectPopupTitle); 
+		    			jQuery('.b-content', popup).html(jQuery('#picklist-check-tmpl').tmpl(model)).focus();
+		    			
+		    			jQuery('input[name*="checkAll"]', popup).prop('checked', jQuery('#popup tbody input:checkbox').length == jQuery('#popup tbody input:checkbox:checked').length);
+		    			
+		    			jQuery('tbody input:checkbox', popup).on('change', function(){
+		    				jQuery('input[name*="checkAll"]', popup).prop('checked', jQuery('tbody input:checkbox', popup).length == jQuery('tbody input:checkbox:checked', popup).length);
+		    			});
+		    			
+		    			jQuery('input[name*="checkAll"]', popup).on('change', function(){
+		    				console.log('clicked');
+		    				console.log(jQuery(this).is(':checked'));						    						 										    			
+		    				jQuery('tbody input[type="checkbox"]', popup).prop("checked", jQuery(this).is(':checked'));		    						    			
+		    				
+		    			});
+		    			
+		    			jQuery('#ok-btn', popup).click(function(){
+		    				
+		    				var inputId = jQuery('#input-id', popup).val();
+		    				var checkedInputs = jQuery('tbody input[type="checkbox"]:checked', popup).toArray();
+		    				
+		    				var str = '';
+		    				for(var i=0; i<checkedInputs.length; i++){
+		    					console.log(checkedInputs[i]);
+		    					console.log(checkedInputs[i].name);
+		    					str += checkedInputs[i].name + PICK_LIST_VALUES_DELIMITER; 
+		    				}
+		    				
+		    				jQuery('input[id*="' + inputId + '"]').val(str);
+		    				Closelightbox();
+		    				
+		    			});
+		    			
+		    			jQuery('#cancel-btn', popup).click(function(){
+		    				Closelightbox();
+		    			});
+		    			
+		    			Lightbox();			    					    			    			    		
+		    		}
+		    		
+		    					    
+		    		var onOperationChange = function(operationList){
+		
+		    		};  
+		    		
+		    		var onValueChange = function(valueField){
+		
+		    		};
+		    		
+		    		var checkNumberInput = function(input) {
+		    			//input.value = input.value.replace(/[a-z]/g, ""); // prevent enter letters.
+					}
+		    		
+		    	</script>
+		    	
+			</apex:outputPanel>
+            
+           <!-- ######################## -->		
+			<!-- Section 2 -->	
+			<!-- ######################## -->
+			
+            <apex:outputPanel id="roles">
+            <table>
+            	<tr><apex:outputText styleClass="error" value="{!fieldCriteriaError}" rendered="{!fieldCriteriaError != null}"/><br/></tr>
+            	<tr><apex:outputText value="{!$Label.TM_Role_Criteria}"/><br/><br/></tr>
+            	<tr>
+            		<apex:inputField value="{!triggerRule.lmscons__Assign_to_all_Roles__c}" id="AssignToAllRoles" onclick="checkboxClick(this);" />
+            		<apex:outputLabel value="{!$Label.TM_Assign_To_All_Roles}" for="AssignToAllRoles"/>
+            		<apex:inputHidden value="{!triggerRule.lmscons__Assign_to_all_Roles__c}" id="Assign_to_all_Roles"/>	
+            	</tr>
+            	<tr>
+            	<apex:outputPanel id="roleTableSearch" styleClass="clearAll" layout="block"><br/>
+            		<apex:outputLabel value="{!$Label.Search} :" for="searchNameRole"/>
+            		<apex:inputText value="{!searchNameRole}" id="searchNameRole"/>
+            		<apex:commandButton value="{!$Label.Search}" action="{!nameForSearchRole}" reRender="roleAvailable" style="margin-right: 10px;"/>
+            	</apex:outputPanel>
+            	</tr>
+            	<tr id="roleTable" class="clearAll">
+            		<td class = "roleSpanLabels">
+						<span class = "roleSpanLabels">
+							<apex:outputText styleClass="labels" value="{!$Label.TM_Available_Roles}"/><br/>
+							<apex:outputPanel id="roleAvailable">
+								<apex:selectList value="{!rolesToAdd}" styleClass="RoleCriteria" id="rolesToAdd" size="12" multiselect="true">
+					        		<apex:selectOptions value="{!roles}"/>        
+					    		</apex:selectList>
+					    	</apex:outputPanel>
+						</span>
+					</td>
+					<td class = "buttons">
+						<apex:outputpanel layout="block" >
+							<apex:outputText value="{!$Label.Add}" /><br/>
+								<apex:outputLink value="javascript:copySelected(document.getElementById('{!$Component.rolesToAdd}'),document.getElementById('{!$Component.rolesToRemove}'));">
+									<img title="{!$Label.Add}" class="rightArrowIcon" alt="{!$Label.Add}" src="/s.gif"/>
+								</apex:outputLink><br/>
+								<apex:outputLink value="javascript:copySelected(document.getElementById('{!$Component.rolesToRemove}'),document.getElementById('{!$Component.rolesToAdd}'));">
+									<img title="{!$Label.Remove}" class="leftArrowIcon" alt="{!$Label.Remove}" src="/s.gif"/>
+								</apex:outputLink><br/>
+							<apex:outputText value="{!$Label.Remove}" />
+						</apex:outputpanel>
+					</td>
+					
+					<td class = "roleSpanLabelsSelect">
+						<apex:outputText styleClass="labels" value="{!$Label.TM_Selected_Roles}"/><br/>
+						<apex:outputPanel id="roleSelected">
+							<apex:selectList value="{!rolesToRemove}" styleClass="RoleCriteria" id="rolesToRemove" size="12" multiselect="true">
+				        		<apex:selectOptions value="{!rolesSelectedList}" />        
+				    		</apex:selectList>
+						</apex:outputPanel>
+					</td>
+				</tr>
+			</table>
+		</apex:outputPanel>
+			<!-- ######################## -->		
+			<!-- Section 3 -->	
+			<!-- ######################## -->
+			<apex:outputPanel id="profiles">
+				<table>
+					<tr><apex:outputText value="{!$Label.TM_Profile_Criteria}"/><br/><br/></tr>
+					<tr>
+						<apex:inputField value="{!triggerRule.lmscons__Assign_to_all_Profiles__c}"  id="AssignToAllProfiles" onclick="checkboxClick(this);"/>
+						<apex:outputLabel value="{!$Label.TM_Assign_To_All_Profiles}" for="AssignToAllProfiles"/>
+						<apex:inputHidden value="{!triggerRule.lmscons__Assign_to_all_Profiles__c}" id="Assign_to_all_Profiles"/><br/>
+					</tr>
+					<tr>
+		            	<apex:outputPanel id="profileTableSearch" styleClass="clearAll" layout="block"><br/>
+		            		<apex:outputLabel value="{!$Label.Search} :" for="searchNameProfile"/>
+		            		<apex:inputText value="{!searchNameProfile}" id="searchNameProfile"/>
+		            		<apex:commandButton value="{!$Label.Search}" action="{!nameForSearchProfile}" reRender="profileAvailable" style="margin-right: 10px;"/>
+		            	</apex:outputPanel>
+	            	</tr>
+					<tr id="profileTable" class="clearAll" style="padding-top:15px">
+						<td class = "roleSpanLabels">
+							<apex:outputText styleClass="labels" value="{!$Label.TM_Available_Profiles}"/><br/>
+							<apex:outputPanel id="profileAvailable">
+								<apex:selectList value="{!profilesToAdd}" styleClass="RoleCriteria" id="profilesToAdd" size="12" multiselect="true">
+					        		<apex:selectOptions value="{!profiles}" />        
+					    		</apex:selectList>
+					    	</apex:outputPanel>
+						</td>
+						
+						<td class = "buttons">
+							<apex:outputpanel layout="block" >
+								<apex:outputText value="{!$Label.Add}" /><br/>
+									<apex:outputLink value="javascript:copySelected(document.getElementById('{!$Component.profilesToAdd}'),document.getElementById('{!$Component.profilesToRemove}'));">
+										<img title="{!$Label.Add}" class="rightArrowIcon" alt="{!$Label.Add}" src="/s.gif"/>
+									</apex:outputLink><br/>
+									<apex:outputLink value="javascript:copySelected(document.getElementById('{!$Component.profilesToRemove}'),document.getElementById('{!$Component.profilesToAdd}'));">
+										<img title="{!$Label.Remove}" class="leftArrowIcon" alt="{!$Label.Remove}" src="/s.gif"/>
+									</apex:outputLink><br/>
+								<apex:outputText value="{!$Label.Remove}" />
+							</apex:outputpanel>
+						</td>
+						
+						<td class = "roleSpanLabelsSelect">
+							<apex:outputText styleClass="labels" value="{!$Label.TM_Selected_Profiles}"/><br/>
+							<apex:outputPanel id="profileSelected">
+								<apex:selectList value="{!profilesToRemove}" styleClass="RoleCriteria" id="profilesToRemove" size="12" multiselect="true">
+					        		<apex:selectOptions value="{!profilesSelectedList}" />        
+					    		</apex:selectList>
+							</apex:outputPanel>
+						</td>
+					</tr>
+				</table>	
+			</apex:outputPanel>
+			
+			<script>	
+				
+			jQuery("form[id$='second']").ready(function(){
+				
+				if(jQuery("input[id$='Assign_to_all_Profiles']").val() == 'true'){
+					jQuery("input[id$='AssignToAllProfiles']").prop("checked",true);
+					jQuery("tr[id$='profileTable']").hide();
+					jQuery("div[id$='profileTableSearch']").hide();
+					replacing(false, 'profile');
+				}
+				if(jQuery("input[id$='Assign_to_all_Roles']").val() == 'true'){
+					jQuery("input[id$='AssignToAllRoles']").prop("checked",true);
+					jQuery("tr[id$='roleTable']").hide();
+					jQuery("div[id$='roleTableSearch']").hide();
+					replacing(false, 'role');
+				}
+				
+			});
+			
+			function replacing(bool, type){
+				
+					if(jQuery("input[id$='AssignToAllProfiles']").prop("checked") == true && type == 'profile'){
+					
+						jQuery("select[id$='profilesToAdd'] option").attr("selected", true);
+						jQuery("input[id$='Assign_to_all_Profiles']").val(true);
+						
+						idProfilesToAdd = jQuery("select[id$='profilesToAdd']").attr("id");
+						idProfilesToRemove = jQuery("select[id$='profilesToRemove']").attr("id");
+
+						optionToAdd = document.getElementById(idProfilesToAdd);
+						optionToRemove = document.getElementById(idProfilesToRemove);
+
+						copySelected(optionToAdd,optionToRemove);
+
+					}else if(bool && type == 'profile'){
+						jQuery("select[id$='profilesToRemove'] option").attr("selected", true);
+						jQuery("input[id$='Assign_to_all_Profiles']").val(false);
+						
+						idProfilesToAdd = jQuery("select[id$='profilesToAdd']").attr("id");
+						idProfilesToRemove = jQuery("select[id$='profilesToRemove']").attr("id");
+						
+						optionToAdd = document.getElementById(idProfilesToAdd);
+						optionToRemove = document.getElementById(idProfilesToRemove);
+						
+						copySelected(optionToRemove, optionToAdd);
+					}	
+					
+					if(jQuery("input[id$='AssignToAllRoles']").prop("checked") == true && type == 'role'){
+					
+						jQuery("select[id$='rolesToAdd'] option").attr("selected", true);
+						jQuery("input[id$='Assign_to_all_Roles']").val(true);
+						
+						idRolesToAdd = jQuery("select[id$='rolesToAdd']").attr("id");
+						idRolesToRemove = jQuery("select[id$='rolesToRemove']").attr("id");
+
+						optionToAdd = document.getElementById(idRolesToAdd);
+						optionToRemove = document.getElementById(idRolesToRemove);
+
+						copySelected(optionToAdd,optionToRemove);
+
+					}else if(bool && type == 'role'){
+						jQuery("select[id$='rolesToRemove'] option").attr("selected", true);
+						jQuery("input[id$='Assign_to_all_Roles']").val(false);
+						
+						idRolesToAdd = jQuery("select[id$='rolesToAdd']").attr("id");
+						idRolesToRemove = jQuery("select[id$='rolesToRemove']").attr("id");
+						
+						optionToAdd = document.getElementById(idRolesToAdd);
+						optionToRemove = document.getElementById(idRolesToRemove);
+						
+						copySelected(optionToRemove, optionToAdd);
+					}
+			}
+			
+			
+			function checkboxClick(check){
+				
+				var id = check.id;
+				if(id.search('AssignToAllProfiles') != -1){
+					
+					jQuery("tr[id$='profileTable']").toggle();
+					jQuery("div[id$='profileTableSearch']").toggle();
+					
+					if(jQuery("input[id$='Assign_to_all_Profiles']").val()=="true"){
+						jQuery("input[id$='Assign_to_all_Profiles']").val(false);
+					}else{
+						jQuery("input[id$='Assign_to_all_Profiles']").val(true);
+					}
+					
+					replacing(true, 'profile');
+				
+				}else if(id.search('AssignToAllRoles') != -1){
+
+					jQuery("tr[id$='roleTable']").toggle();
+					jQuery("div[id$='roleTableSearch']").toggle();
+					
+					if(jQuery("input[id$='Assign_to_all_Roles']").val()=="true"){
+						jQuery("input[id$='Assign_to_all_Roles']").val(false);
+					}else{
+						jQuery("input[id$='Assign_to_all_Roles']").val(true);
+					}
+					replacing(true, 'role');
+				}
+			}
+			
+			
+			var NONE_VALUE = '{!NONE_VALUE}';
+			var NONE_LABEL = '{!NONE_LABEL}';
+			
+			function deleteOption(object,index) {
+			  	object.options[index] = null;
+			 }
+			
+			 function addOption(object,text,value) {
+				  var optionName = new Option(text, value)
+				  object.options[object.length] = optionName;
+			 }
+			
+			 function copySelected(fromObject,toObject) {
+			
+			  	if (toObject.options.length == 1 && toObject.options[0].value == NONE_VALUE && fromObject.options.selectedIndex != -1) {
+			   		deleteOption(toObject,0)
+			  	}
+			  	for (var i=0, l=fromObject.options.length;i<l;i++) {
+			   		if (fromObject.options[i].selected  && fromObject.options[i].value != NONE_VALUE) {
+			    		addOption(toObject,fromObject.options[i].text,fromObject.options[i].value);
+			   		}
+			  	}
+			  	for (var i=fromObject.options.length-1;i>-1;i--) {
+			   		if (fromObject.options[i].selected) {
+			    		deleteOption(fromObject,i);
+			   		}
+			  	}
+			  	if(fromObject.options.length == 0) {
+			   		addOption(fromObject, NONE_LABEL, NONE_VALUE)
+			  	}
+			  	
+			  	if(toObject.options.length == 0) {
+			   		addOption(toObject, NONE_LABEL, NONE_VALUE)
+			  	}
+			  	
+			  	sortSelect(toObject);
+			 }
+			
+			function sortSelect(selElem) {
+				var tmpAry = new Array();
+				for (var i=0;i<selElem.options.length;i++) {
+				tmpAry[i] = new Array();
+				tmpAry[i][0] = selElem.options[i].text;
+				tmpAry[i][1] = selElem.options[i].value;
+				}
+				tmpAry.sort();
+				while (selElem.options.length > 0) {
+				selElem.options[0] = null;
+				}
+				for (var i=0;i<tmpAry.length;i++) {
+				var op = new Option(tmpAry[i][0], tmpAry[i][1]);
+				selElem.options[i] = op;
+				}
+				return;
+			}
+			
+			
+			 function roleSaveValues() {
+				  var SelectRight = document.getElementById(jQuery('[id$=rolesToRemove]').attr('id'));
+				  var arrayValues = [];
+				  for (var i=0; i < SelectRight.options.length; i++){
+				    if(SelectRight.options[i].value != NONE_VALUE) {
+				  	   arrayValues.push(SelectRight.options[i].value);
+				    }
+				  }
+				  StatusString = arrayValues.join(';');
+				  jQuery("input[id$='selectedRole']").val(StatusString);
+			 } 
+				 
+			function profileSaveValues() {
+				  var SelectRight = document.getElementById(jQuery('[id$=profilesToRemove]').attr('id'));
+				  var arrayValues = [];
+				  for (var i=0; i < SelectRight.options.length; i++){
+				    if(SelectRight.options[i].value != NONE_VALUE) {
+				  	   arrayValues.push(SelectRight.options[i].value);
+				    }
+				  }
+				  StatusString = arrayValues.join(';');
+				  jQuery("input[id$='selectedProfile']").val(StatusString);
+			 } 
+						 
+			
+			</script>
+			
+			<apex:outputPanel style="display:none">
+			<table><tr><td>
+  				<apex:inputText value="{!selectedValueRole}" id="selectedRole"/>
+  				<apex:inputText value="{!selectedValueProfile}" id="selectedProfile"/>
+ 			</td></tr></table>
+            </apex:outputPanel>
+            <!--  -->
+            
+            <!--  -->
+                                               
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+    
+      <apex:form id="third" rendered="{!countPages == 2}">
+        <apex:pageBlock title="{!$Label.TM_Learning_Trigger_Edit}" mode="edit" id="mainBlock">
+            <apex:pageBlockButtons id="pbbsMainButtons" style="float: right;">
+                <apex:commandButton value="{!$Label.Pagination_Previous}" action="{!previousPage}" immediate="true" style="margin-right: 10px;"/>
+                <apex:commandButton value="{!$Label.Pagination_Next}" action="{!nextPage}" style="width: 50px; margin-right: 10px;"/>
+                <apex:commandButton value="{!$Label.Save}" action="{!save}"  rendered="{!updateButton}" style="width: 50px; margin-right: 10px;"/>
+                <apex:commandLink value="{!$Label.Cancel}" action="{!cancel}" style="text-decoration: none;"/>
+            </apex:pageBlockButtons>
+        
+       <apex:pageBlockSection title="{!$Label.TM_Step_Select_Learning_Type}" columns="2">
+       			
+       			<apex:pageBlockSectionItem >
+       				 	<apex:outputLabel value="{!$Label.TM_Select_Learning_Type}" />
+       					<apex:selectList value="{!learningType}" multiselect="false" size="1" id="loType" required="true" styleClass="requiredBlockCustom">
+                                <apex:selectOptions value="{!learningTypeList}"/>
+                        </apex:selectList>
+               </apex:pageBlockSectionItem>
+       
+        </apex:pageBlockSection>
+ 
+        </apex:pageBlock>
+    </apex:form>
+    
+      <apex:form id="fourth" rendered="{!countPages == 3}">
+        <apex:pageBlock title="{!$Label.TM_Learning_Trigger_Edit}" mode="edit" id="mainBlock">
+            <apex:pageBlockButtons id="pbbsMainButtons" style="float: right;">
+                <apex:commandButton value="{!$Label.Pagination_Previous}" action="{!previousPage}" immediate="true"  style="margin-right: 10px;"/>
+                <apex:commandButton value="{!$Label.Pagination_Next}" action="{!nextPage}" style="width: 50px; margin-right: 10px;"/>
+                <apex:commandButton value="{!$Label.Save}" action="{!save}"  rendered="{!updateButton}" style="width: 50px; margin-right: 10px;"/>
+                <apex:commandLink value="{!$Label.Cancel}" action="{!Cancel}" style="text-decoration: none;"/>
+            </apex:pageBlockButtons>
+        
+        <apex:pageBlockSection title="{!$Label.TM_Step_Select_Learning}" columns="1">
+                
+       	 <apex:inputField value="{!ruleObjectLearning.lmscons__Module__c}" 		 rendered="{!objectLo == 1}" required="true"/>
+         <apex:inputField value="{!ruleObjectLearning.lmscons__Quiz__c}" 		 rendered="{!objectLo == 2}" required="true"/>
+         <apex:inputField value="{!ruleObjectLearning.lmscons__Course__c}" 		 rendered="{!objectLo == 3}" required="true"/>
+         <apex:inputField value="{!ruleObjectLearning.lmscons__Learning_Path__c}" rendered="{!objectLo == 4}" required="true"/>
+         <apex:inputField value="{!ruleObjectLearning.lmscons__Curriculum__c}"	 rendered="{!objectLo == 5}" required="true"/>  
+                    
+        </apex:pageBlockSection>
+ 
+        </apex:pageBlock>
+         
+          
+    </apex:form>
+    
+     <apex:form id="fifth" rendered="{!countPages == 4}">
+        <apex:pageBlock title="{!$Label.TM_Learning_Trigger_Edit}" mode="edit" id="mainBlock">
+            <apex:pageBlockButtons id="pbbsMainButtons" style="float: right;">
+                <apex:commandButton value="{!$Label.Pagination_Previous}" action="{!previousPage}" style="margin-right: 10px;"/>
+                <apex:commandButton value="{!$Label.Save}" action="{!save}"  style="width: 50px; margin-right: 10px;" />
+                <apex:commandLink value="{!$Label.Cancel}" action="{!cancel}" style="text-decoration: none;"/>
+            </apex:pageBlockButtons>
+        
+        <apex:pageBlockSection title="{!$Label.TM_Step_RealTime_Notifications}" columns="1">
+            
+            
+    <table>       
+     	<tr>
+     		<td class="data2Col " colspan="2"><span id="j_id0:mainform:j_id38:NotificationManagementSection:j_id169">
+   				<div class="message infoM2" role="alert">
+        			<table border="0" cellpadding="0" cellspacing="0" class="messageTable" style="padding:0px;margin:0px;">
+            			<tbody>
+            			<tr valign="top">
+                			<td>
+                    			<img alt="Info" class="msgIcon" src="/s.gif" title="Info" />
+                			</td>
+                			<td class="messageCell">
+                				<div id="j_id0:mainform:j_id38:NotificationManagementSection:j_id169:j_id170:j_id172" class="messageText">
+                					<span id="j_id0:mainform:j_id38:NotificationManagementSection:j_id169:j_id170:j_id173"><h4></h4></span>
+                                	{!$Label.TM_Dynamic_fields_available}<br/>
+									{!$Label.TM_Dynamic_fields_example}<br/>
+								</div>
+                			</td>
+           				</tr>
+            			</tbody>
+                	</table>
+                </div></span>
+            </td>
+        </tr>
+    </table>
+    
+    <apex:inputField value="{!triggerRule.lmscons__Show_Popup__c}"/>    
+ 
+ 	    <apex:inputField id="popup-message" value="{!triggerRule.lmscons__Popup_Message__c}"/>
+		<apex:inputField value="{!triggerRule.lmscons__Popup_Width__c}" id="popup-width" />
+   	  	<apex:inputField value="{!triggerRule.lmscons__Popup_Height__c}" id="popup-height" />
+	  	
+	  <apex:pageBlocksectionItem >
+	  	<apex:outputLabel value="" for="preview"/>  
+	    <button id="preview">{!$Label.TM_Preview}</button>
+   	  </apex:pageBlocksectionItem>
+  
+    
+    
+    <script>   
+    
+    	var previewPopupTitile = '{!$Label.TM_popup_message_preview}';
+    
+    	$('input[id*="popup-width"], input[id*="popup-height"]').keypress(function(e) {
+		    var a = [];
+		    var k = e.which;
+		
+		    for (i = 48; i < 58; i++)
+		        a.push(i);
+		
+		    if (!(a.indexOf(k)>=0))
+		        e.preventDefault();
+		});
+		    			
+		jQuery('#preview').click(function(){
+			
+			var defaultWidth = 600;
+			var defaultHeight = 400;
+			
+			var width 	= parseInt(jQuery('input[id*="popup-width"]').val())  || defaultWidth;			
+			var height 	= parseInt(jQuery('input[id*="popup-height"]').val()) || defaultHeight;					
+			
+			if(width<400) width=defaultWidth;
+			if(width>1024) width=defaultWidth;
+			if(height<200) height=defaultHeight;
+			if(height>800) height=defaultHeight;
+			
+			console.log('screen.width = %s screen.height = %s', screen.width, screen.height);
+			console.log('width = %s height = %s', width, height);
+			console.log('(screen.width/2)-(width/2) = %s', (screen.width/2)-(width/2));
+			console.log('(screen.height/2)-(height/2) = %s', (screen.height/2)-(height/2));
+			
+			var popup = jQuery('#popup').css({
+				width: width,
+				height: height,
+				'margin-left' : 0,
+				'margin-top' : 0,
+				'overflow':'auto',
+				left : (screen.width/2)-(width/2),
+				top : ((screen.height/2)-(height/2))*0.7
+			});
+			
+			
+			jQuery('.b-title', popup).text(previewPopupTitile);
+			jQuery('.b-content', popup).html(jQuery('iframe[id*="popup-message"], iframe[title*="popup-message"]').contents().find('body').html());
+			
+			
+			Lightbox();
+			return false;			
+		});	
+    </script>
+    
+    <br/> 
+    <apex:inputField value="{!triggerRule.lmscons__Send_Chatter_Message__c}"/> 
+    <apex:inputField value="{!triggerRule.lmscons__Chatter_Message__c}" styleClass="NotificationMessages"/>  
+        
+        </apex:pageBlockSection>
+ 
+        </apex:pageBlock>
+        
+      
+    </apex:form>
+    
+ 	
+</apex:page>

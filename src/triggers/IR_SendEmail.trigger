@@ -5,7 +5,6 @@ trigger IR_SendEmail on IR_Email__c (after insert) {
     // to avoid blocking/timeouts on the trigger
     System.debug('SendIREmail Trigger called');
     IR_Email__c[] emails = Trigger.new;
-    IR_Dispatch.enqueueJob(emails);
 
     // Update Incident Description
     for(IR_Email__c email :emails) {
@@ -15,6 +14,10 @@ trigger IR_SendEmail on IR_Email__c (after insert) {
                                        Description__c
                                        FROM Incident_Report__c WHERE id = :email.Incident_Report__c];
         incident.Description__c = email.Email_Body__c;
-        update incident;                                               
+        update incident;
+
+        System.debug(incident.Name + ' updated with ' + incident.Description__c);
     }
+    
+    IR_Dispatch.enqueueJob(emails);
 }

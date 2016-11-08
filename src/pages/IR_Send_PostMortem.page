@@ -1,13 +1,47 @@
 <apex:page controller="IR_SendPostMortem" >
-  <apex:form >
-      <apex:pageBlock >
-          Issue Description: 
-          <apex:inputTextArea value="{!issueDescText}" />
-          Root Cause:
-          <apex:inputTextArea value="{!rootCauseText}" />
-          Preventative Measures:
-          <apex:inputTextArea value="{!preventativeText}" />
-          <apex:commandButton action="{!save}" value="save"/>
-      </apex:pageBlock>
-  </apex:form>
+    <script>
+    var desc = "";
+    var root = "";
+    var prev = "";
+    	function updatePreview() {
+            var body = 'Issue Description:\n' + desc + '\n\n' +
+                'Event start date and time: \n\n' +
+                'Event end date and time:\n\n' +
+                'Data center(s) impacted: \n\n' +
+                'Current status: Closed \n\n' +
+                'Impacted APIs: \n' + 
+                '\nRoot Cause:\n' + root + '\n' +
+                '\nPreventative Measures:\n' + prev;
+        
+        	document.getElementById('previewBox').innerHTML = body;
+        }
+    	function updateDesc(input) {
+        	desc = input.value;
+            updatePreview();
+        }
+    	function updateRoot(input) {
+        	root = input.value;
+            updatePreview();
+        }
+    	function updatePrev(input) {
+        	prev = input.value;
+            updatePreview();
+        }
+    
+    </script>
+    <apex:form >
+        <apex:pageBlock title="Send Post Mortem Email">
+            <apex:pageBlockSection >
+                <apex:inputTextArea style="width: 200px; height: 100px" value="{!issueDescText}" label="Description" onchange="updateDesc(this);" onkeyup="updateDesc(this);"/>
+                <apex:inputTextArea style="width: 200px; height: 100px" value="{!rootCauseText}" label="Root Cause" onchange="updateRoot(this);" onkeyup="updateRoot(this);"/>
+                <apex:inputTextArea style="width: 200px; height: 100px" value="{!preventativeText}" label="Preventative Measures" onchange="updatePrev(this);" onkeyup="updatePrev(this);"/>
+                <apex:commandButton action="{!save}" value="Save and Send"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+    </apex:form>
+    <apex:pageBlock title="Preview">
+        <apex:pageBlockSection >
+            <textarea style="width: 400px; height: 300px" id="previewBox"></textarea>
+        </apex:pageBlockSection>
+    </apex:pageBlock>
 </apex:page>

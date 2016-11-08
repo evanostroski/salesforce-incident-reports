@@ -1,9 +1,30 @@
 <apex:page controller="IR_SendUpdate">
-  <apex:form >
-      <apex:pageBlock title="Congratulations {!$User.FirstName}">
-          Update text: <apex:inputTextArea value="{!updateText}" />
-          <br />
-          <apex:commandButton action="{!save}" value="save"/>
-      </apex:pageBlock>
-  </apex:form>
+    <script>
+    	function updatePreview(inputText) {
+        	var body = 'We would like to provide the following update regarding the current service interruption:  \n\n' +
+          	inputText.value + '\n\n' +
+                'Event start date and time: ' + '\n\n' +
+                'Data center(s) impacted: ' + '\n\n' +
+                'Current status: Open \n\n' +
+                'Impacted APIs: \n';
+        
+        	document.getElementById('previewBox').innerHTML = body;
+        }
+    </script>
+    <apex:form >
+        <apex:pageBlock title="Send Update Email">
+            <apex:pageBlockSection >
+                <apex:inputTextArea style="width: 400px; height: 200px" value="{!updateText}" label="Update Message" onchange="updatePreview(this);" onkeyup="updatePreview(this);" /> 
+                <br />
+                <apex:commandButton action="{!save}" value="Save and Send"/>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        
+    </apex:form>
+        <apex:pageBlock title="Preview">
+            <apex:pageBlockSection >
+                <textarea style="width: 400px; height: 300px" id="previewBox"></textarea>
+            </apex:pageBlockSection>
+        </apex:pageBlock> 
+    
 </apex:page>

@@ -21,6 +21,10 @@
         <type>Default</type>
     </actionOverrides>
     <actionOverrides>
+        <actionName>Follow</actionName>
+        <type>Default</type>
+    </actionOverrides>
+    <actionOverrides>
         <actionName>List</actionName>
         <type>Default</type>
     </actionOverrides>
@@ -330,7 +334,7 @@
     </validationRules>
     <validationRules>
         <fullName>End_Time_Required_on_Resolved</fullName>
-        <active>false</active>
+        <active>true</active>
         <errorConditionFormula>OR( 
 AND(ISPICKVAL( Status__c , &apos;Open&apos;), NOT(ISNULL( End_Time__c ))) ,
 AND(ISPICKVAL( Status__c , &apos;Resolved&apos;), ISNULL( End_Time__c )), AND(ISPICKVAL( Status__c , &apos;Closed&apos;) , ISNULL( End_Time__c )))</errorConditionFormula>
@@ -349,10 +353,9 @@ AND(ISPICKVAL( Status__c , &apos;Resolved&apos;), ISNULL( End_Time__c )), AND(IS
 {!REQUIRESCRIPT(&quot;/soap/ajax/20.0/apex.js&quot;)}
 
 var t = {!ISPICKVAL(Incident_Report__c.Status__c, &apos;Closed&apos;)};
-alert(t + &apos; &apos; + typeof t);
 
 if( t ) {
-window.open(&apos;/apex/Send_PostMortem?id={!Incident_Report__c.Id}&apos;);
+window.open(&apos;/apex/IR_Send_PostMortem?id={!Incident_Report__c.Id}&apos;);
 } else {
 alert (&quot;Status must be Closed in order to send Post Mortem&quot;);
 }</url>
@@ -369,10 +372,9 @@ alert (&quot;Status must be Closed in order to send Post Mortem&quot;);
 {!REQUIRESCRIPT(&quot;/soap/ajax/20.0/apex.js&quot;)}
 
 var t = {!ISPICKVAL(Incident_Report__c.Status__c, &apos;Open&apos;)};
-alert(t + &apos; &apos; + typeof t);
 
 if( t ) {
-window.open(&apos;/apex/Send_Update?id={!Incident_Report__c.Id}&apos;);
+window.open(&apos;/apex/IR_Send_Update?id={!Incident_Report__c.Id}&apos;);
 } else {
 alert (&quot;Status must be Open in order to send Update&quot;);
 }</url>

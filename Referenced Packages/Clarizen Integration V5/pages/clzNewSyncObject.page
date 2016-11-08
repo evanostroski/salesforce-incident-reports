@@ -1,4 +1,0 @@
-<apex:page standardController="clzV5__Clarizen_Synch__c">
-    Clarizen Sync Object is created by the Clarizen Synchronization process.
-    You cannot create or update it manually.
-</apex:page>

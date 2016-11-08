@@ -1,7 +1,0 @@
-<apex:page controller="lmscons.EUI_LearningLandingController" title="{!$Label.MyTraining_title_My_Training}" action="{!Load}" sidebar="false" tabStyle="Learning__tab">
-	<apex:composition template="lmscons__EUI_CompositionTemplate">
-		<apex:define name="body">
-			<apex:outputLink value="/apex/EUI_MyTraining">{!$Label.MyTraining_title_My_Training}</apex:outputLink>
-	</apex:define>
-	</apex:composition>
-</apex:page>

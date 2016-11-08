@@ -1,2 +1,0 @@
-<apex:page standardController="skyplatform__Message_Stream__c" extensions="skyplatform.CloseMessageStreamController" action="{!close}" sidebar="true">
-</apex:page>

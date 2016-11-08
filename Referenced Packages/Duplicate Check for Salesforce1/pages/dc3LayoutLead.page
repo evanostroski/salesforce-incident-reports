@@ -1,3 +1,0 @@
-<apex:page standardController="Lead" docType="html-5.0" sidebar="false" showHeader="false">
-	<c:dc3Layout recordId="{!Lead.Id}"/>
-</apex:page>

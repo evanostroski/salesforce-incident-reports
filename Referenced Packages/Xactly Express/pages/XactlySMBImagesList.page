@@ -1,3 +1,0 @@
-<apex:page cache="true" sidebar="false" showHeader="false" standardStylesheets="false" contentType="atext/plain; charset=utf-8">
-{!URLFOR($Resource.XactlyExpress__DefaultImportImage, 'DefaultImportImage/ninjabadge.png')};{!URLFOR($Resource.XactlyExpress__DefaultImportImage, 'DefaultImportImage/astrocopy.png')};{!URLFOR($Resource.XactlyExpress__DefaultImportImage, 'DefaultImportImage/presclubcopy.png')};{!URLFOR($Resource.XactlyExpress__DefaultImportImage, 'DefaultImportImage/starcopy.png')};{!URLFOR($Resource.XactlyExpress__DefaultImportImage, 'DefaultImportImage/tophatcopy.png')}
-</apex:page>

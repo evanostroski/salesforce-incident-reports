@@ -1,6 +1,0 @@
-<apex:page controller="XactlyExpress.XactlySMBExportCreditResult" sidebar="false" showHeader="false" standardStylesheets="false" action="{!redirectWhenAccessIsDenied}">
-    <span style="display:none;">{!status}</span>
-    <script>
-        document.location.href = '{!JSENCODE($Page.XactlySMBCalculatePayroll)}';
-    </script>
-</apex:page>

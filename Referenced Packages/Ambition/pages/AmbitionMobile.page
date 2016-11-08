@@ -1,3 +1,0 @@
-<apex:page sidebar="false">
-    <apex:canvasApp developerName="AmbitionCanvas" namespacePrefix="ambition" height="1000px" width="100%"/>
-</apex:page>

@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<ApexPage xmlns="http://soap.sforce.com/2006/04/metadata">
-    <apiVersion>22.0</apiVersion>
-    <availableInTouch>false</availableInTouch>
-    <confirmationTokenRequired>false</confirmationTokenRequired>
-    <description>This page provides the IDs of the XML files containing the meta-data of each plan of the Plan Store, allowing
-the XactlySMBPlanLibrary controller to download such files via callouts.</description>
-    <label>XactlySMBPlanLibraryRepository</label>
-</ApexPage>

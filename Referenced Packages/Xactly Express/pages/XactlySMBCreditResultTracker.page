@@ -1,6 +1,0 @@
-<apex:page controller="XactlyExpress.XactlySMBCreditResultTracker" showHeader="false" sidebar="false" standardStylesheets="false" action="{!track}" contentType="text/xml">
-<root>
-    <status>{!status}</status>
-    <ncredits>{!creditsAdded}</ncredits>
-</root>
-</apex:page>

@@ -1,3 +1,0 @@
-<apex:page standardController="clzV5__Clarizen_Template__c">
-    Clarizen Template Object is managed only in Clarizen. You cannot create, delete or update it in Salesforce.
-</apex:page>

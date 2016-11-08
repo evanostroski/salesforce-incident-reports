@@ -1,3 +1,0 @@
-<apex:page controller="XactlyExpress.XactlySMBCalculateManagePaymentsMHR" cache="true" sidebar="false" showHeader="false" standardStylesheets="false" contentType="text/csv#ReleaseResults.csv">
-<apex:outputtext escape="false" value="{!csvContent}"/>
-</apex:page>

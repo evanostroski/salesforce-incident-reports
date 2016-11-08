@@ -1,3 +1,0 @@
-<apex:page tabStyle="Marketo__tab">
-  <c:SendMarketoEmail />
-</apex:page>

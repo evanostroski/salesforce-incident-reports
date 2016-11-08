@@ -1,3 +1,0 @@
-<apex:page standardController="clzV5__Clarizen_Project__c">
-    <CLZV6:ClarizenView />
-</apex:page>

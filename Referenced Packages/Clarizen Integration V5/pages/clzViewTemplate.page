@@ -1,8 +1,0 @@
-<apex:page standardController="clzV5__Clarizen_Template__c">
-<style type="text/css">
-       #topButtonRow, #bottomButtonRow {
-            display:none;
-       }
- </style>
-    <apex:detail relatedList="false" inlineEdit="false"/>
-</apex:page>

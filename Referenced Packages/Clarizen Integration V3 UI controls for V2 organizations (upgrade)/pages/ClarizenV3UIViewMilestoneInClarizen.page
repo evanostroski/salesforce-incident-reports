@@ -1,3 +1,0 @@
-<apex:page standardController="clzV5__Clarizen_Milestone__c">
-    <CLZV6:ClarizenView />
-</apex:page>

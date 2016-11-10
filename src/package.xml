@@ -2,7 +2,6 @@
 <Package xmlns="http://soap.sforce.com/2006/04/metadata">
     <types>
         <members>IR_Dispatch</members>
-        <members>IR_EmailTriggerTest</members>
         <members>IR_MarketoAuth</members>
         <members>IR_MarketoBatch</members>
         <members>IR_SendPostMortem</members>
@@ -12,28 +11,23 @@
     <types>
         <members>IR_Send_PostMortem</members>
         <members>IR_Send_Update</members>
-        <members>Send_PostMortem</members>
-        <members>Send_Update</members>
         <name>ApexPage</name>
     </types>
     <types>
         <members>IR_SendEmail</members>
         <members>IR_SendInitialEmail</members>
         <members>IR_SendResolvedEmail</members>
-        <members>SendIREmail</members>
         <name>ApexTrigger</name>
     </types>
     <types>
         <members>IR_Comment__c</members>
         <members>IR_Email__c</members>
         <members>IR_Settings__c</members>
-        <members>Incident_Report__c</members>
         <name>CustomObject</name>
     </types>
     <types>
         <members>IR_Comment__c-IR Comment Layout</members>
         <members>IR_Email__c-IR Email Layout</members>
-        <members>Incident_Report__c-Incident Report Layout</members>
         <name>Layout</name>
     </types>
     <version>36.0</version>

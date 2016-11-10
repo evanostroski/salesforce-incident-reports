@@ -11,6 +11,7 @@
         	document.getElementById('previewBox').innerHTML = body;
         }
     </script>
+    <script> var previousOnload = window.onload; window.onload = function() { if (previousOnload) { previousOnload(); } updatePreview({value: "UPDATE MESSAGE"}); } </script>   
     <apex:form >
         <apex:pageBlock title="Send Update Email">
             <apex:pageBlockSection >

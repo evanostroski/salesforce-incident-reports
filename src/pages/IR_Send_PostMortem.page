@@ -1,5 +1,5 @@
 <apex:page controller="IR_SendPostMortem" >
-    <script>
+	<script>
     var desc = "";
     var root = "";
     var prev = "";
@@ -27,15 +27,20 @@
         	prev = input.value;
             updatePreview();
         }
-    
+    	
     </script>
+    <script> var previousOnload = window.onload; window.onload = function() { if (previousOnload) { previousOnload(); } updatePreview(); } </script>
+    
     <apex:form >
         <apex:pageBlock title="Send Post Mortem Email">
             <apex:pageBlockSection >
-                <apex:inputTextArea style="width: 200px; height: 100px" value="{!issueDescText}" label="Description" onchange="updateDesc(this);" onkeyup="updateDesc(this);"/>
-                <apex:inputTextArea style="width: 200px; height: 100px" value="{!rootCauseText}" label="Root Cause" onchange="updateRoot(this);" onkeyup="updateRoot(this);"/>
-                <apex:inputTextArea style="width: 200px; height: 100px" value="{!preventativeText}" label="Preventative Measures" onchange="updatePrev(this);" onkeyup="updatePrev(this);"/>
-                <apex:commandButton action="{!save}" value="Save and Send"/>
+                <apex:inputTextArea style="width: 400px; height: 100px" value="{!issueDescText}" label="Description" onchange="updateDesc(this);" onkeyup="updateDesc(this);"/>
+                <apex:inputTextArea style="width: 400px; height: 100px" value="{!rootCauseText}" label="Root Cause" onchange="updateRoot(this);" onkeyup="updateRoot(this);"/>
+                <apex:inputTextArea style="width: 400px; height: 100px" value="{!preventativeText}" label="Preventative Measures" onchange="updatePrev(this);" onkeyup="updatePrev(this);"/>
+                
+            </apex:pageBlockSection>
+            <apex:pageBlockSection >
+            	<apex:commandButton action="{!save}" value="Save and Send"/>
             </apex:pageBlockSection>
         </apex:pageBlock>
     </apex:form>

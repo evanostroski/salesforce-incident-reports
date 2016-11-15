@@ -1,14 +1,27 @@
 <apex:page controller="IR_SendUpdate">
     <script>
-    	function updatePreview(inputText) {
-        	var body = 'We would like to provide the following update regarding the current service interruption:  \n\n' +
-          	inputText.value + '\n\n' +
-                'Event start date and time: ' + '\n\n' +
-                'Data center(s) impacted: ' + '\n\n' +
+        function printImpactedAPIs() {
+            var text = '';
+            if ('{!report.RaaS_Failure_Rate__c}' != '') { text += '\nRaaS: {!report.RaaS_Failure_Rate__c}'; }
+            if ('{!report.Chat_Failure_Rate__c}' != '') { text += '\nChat: {!report.Chat_Failure_Rate__c}'; }
+            if ('{!report.Comments_Failure_Rate__c}' != '') { text += '\nComments: {!report.Comments_Failure_Rate__c}'; }
+            if ('{!report.Feed_Failure_Rate__c}' != '') { text += '\nFeed: {!report.Feed_Failure_Rate__c}'; }
+            if ('{!report.Gamification_Failure_Rate__c}' != '') { text += '\nGamification: {!report.Gamification_Failure_Rate__c}'; }
+            if ('{!report.Identity_Store_Failure_Rate__c}' != '') { text += '\nIdentity Store: {!report.Identity_Store_Failure_Rate__c}'; }
+            if ('{!report.Login_Failure_Rate__c}' != '') { text += '\nLogin: {!report.Login_Failure_Rate__c}'; }
+            if ('{!report.Share_Failure_Rate__c}' != '') { text += '\nShare: {!report.Share_Failure_Rate__c}'; }
+            if ('{!report.Webhooks_Failure_Rate__c}' != '') { text += '\nWebhooks: {!report.Webhooks_Failure_Rate__c}'; }
+            return text;
+        }
+        function updatePreview(inputText) {
+            var body = 'We would like to provide the following update regarding the current service interruption:  \n\n' +
+            inputText.value + '\n\n' +
+                'Event start date and time: {!report.Start_Time__c} \n\n' +
+                'Data center(s) impacted:  {!report.Affected_Data_Centers__c} \n\n' +
                 'Current status: Open \n\n' +
-                'Impacted APIs: \n';
+                'Impacted APIs: ' + printImpactedAPIs() + '\n';
         
-        	document.getElementById('previewBox').innerHTML = body;
+            document.getElementById('previewBox').innerHTML = body;
         }
     </script>
     <script> var previousOnload = window.onload; window.onload = function() { if (previousOnload) { previousOnload(); } updatePreview({value: "UPDATE MESSAGE"}); } </script>   

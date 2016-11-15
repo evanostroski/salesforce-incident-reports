@@ -1,33 +1,47 @@
 <apex:page controller="IR_SendPostMortem" >
-	<script>
+    <script>
     var desc = "";
     var root = "";
     var prev = "";
-    	function updatePreview() {
-            var body = 'Issue Description:\n' + desc + '\n\n' +
-                'Event start date and time: \n\n' +
-                'Event end date and time:\n\n' +
-                'Data center(s) impacted: \n\n' +
-                'Current status: Closed \n\n' +
-                'Impacted APIs: \n' + 
-                '\nRoot Cause:\n' + root + '\n' +
-                '\nPreventative Measures:\n' + prev;
+        function printImpactedAPIs() {
+            var text = '';
+            if ('{!report.RaaS_Failure_Rate__c}' != '') { text += '\nRaaS: {!report.RaaS_Failure_Rate__c}'; }
+            if ('{!report.Chat_Failure_Rate__c}' != '') { text += '\nChat: {!report.Chat_Failure_Rate__c}'; }
+            if ('{!report.Comments_Failure_Rate__c}' != '') { text += '\nComments: {!report.Comments_Failure_Rate__c}'; }
+            if ('{!report.Feed_Failure_Rate__c}' != '') { text += '\nFeed: {!report.Feed_Failure_Rate__c}'; }
+            if ('{!report.Gamification_Failure_Rate__c}' != '') { text += '\nGamification: {!report.Gamification_Failure_Rate__c}'; }
+            if ('{!report.Identity_Store_Failure_Rate__c}' != '') { text += '\nIdentity Store: {!report.Identity_Store_Failure_Rate__c}'; }
+            if ('{!report.Login_Failure_Rate__c}' != '') { text += '\nLogin: {!report.Login_Failure_Rate__c}'; }
+            if ('{!report.Share_Failure_Rate__c}' != '') { text += '\nShare: {!report.Share_Failure_Rate__c}'; }
+            if ('{!report.Webhooks_Failure_Rate__c}' != '') { text += '\nWebhooks: {!report.Webhooks_Failure_Rate__c}'; }
+            return text;
+        }
         
-        	document.getElementById('previewBox').innerHTML = body;
+        function updatePreview() {
+            var body = 'Issue Description:\n' + desc + '\n\n' +
+                'Event start date and time: {!report.Start_Time__c}\n\n' +
+                'Event end date and time: {!report.End_Time__c}\n\n' +
+                'Data center(s) impacted: {!report.Affected_Data_Centers__c}\n\n' +
+                'Current status: Resolved \n\n' +
+                'Impacted APIs: ' + printImpactedAPIs() + '\n\n' + 
+                'Root Cause:\n' + root + '\n\n' +
+                'Preventative Measures:\n' + prev;
+        
+            document.getElementById('previewBox').innerHTML = body;
         }
-    	function updateDesc(input) {
-        	desc = input.value;
+        function updateDesc(input) {
+            desc = input.value;
             updatePreview();
         }
-    	function updateRoot(input) {
-        	root = input.value;
+        function updateRoot(input) {
+            root = input.value;
             updatePreview();
         }
-    	function updatePrev(input) {
-        	prev = input.value;
+        function updatePrev(input) {
+            prev = input.value;
             updatePreview();
         }
-    	
+        
     </script>
     <script> var previousOnload = window.onload; window.onload = function() { if (previousOnload) { previousOnload(); } updatePreview(); } </script>
     
@@ -40,7 +54,7 @@
                 
             </apex:pageBlockSection>
             <apex:pageBlockSection >
-            	<apex:commandButton action="{!save}" value="Save and Send"/>
+                <apex:commandButton action="{!save}" value="Save and Send"/>
             </apex:pageBlockSection>
         </apex:pageBlock>
     </apex:form>

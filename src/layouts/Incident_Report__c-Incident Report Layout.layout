@@ -101,10 +101,6 @@
         <layoutColumns>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Status__c</field>
-            </layoutItems>
-            <layoutItems>
-                <behavior>Required</behavior>
                 <field>Affected_Data_Centers__c</field>
             </layoutItems>
         </layoutColumns>

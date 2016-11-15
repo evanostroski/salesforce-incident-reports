@@ -9,9 +9,26 @@ trigger IR_SendResolvedEmail on Incident_Report__c (after update) {
     
     Incident_Report__c[] newInc = Trigger.new;
     Incident_Report__c[] oldInc = Trigger.old;
+    
 	
     for(Integer i = 0; i < newInc.size(); i++) {
-        if(oldInc[i].End_Time__c == null && newInc[i].End_Time__c != null) {
+    	Boolean resolvedSent = false;
+    
+    	Incident_Report__c[] transfer = [SELECT Id, Name, (SELECT Type__c FROM IR_Emails__r) 
+    									FROM Incident_Report__c
+    									WHERE Id = :newInc[i].Id];
+   		List<IR_Email__c> emailList = transfer[0].IR_Emails__r;
+    	System.debug('***EMAIL LIST SIZE: ' + emailList.size() + '***');
+    
+    	for(Integer j = 0; j < emailList.size(); j++) {
+    		System.debug('***EMAIL TYPE IS ' + emailList[j].Type__c + '***');
+    		if(emailList[j].Type__c == 'Resolved') {
+    			System.debug('***RESOLVED EMAIL ALREADY SENT!***');
+    			resolvedSent = true;
+    		}
+    	}
+    	
+        if(oldInc[i].End_Time__c == null && newInc[i].End_Time__c != null && !resolvedSent) {
             Incident_Report__c incident = newInc[i];
             
             // CREATE RESOLVED

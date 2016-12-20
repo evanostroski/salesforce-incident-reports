@@ -277,29 +277,6 @@
         <type>DateTime</type>
     </fields>
     <fields>
-        <fullName>Status__c</fullName>
-        <externalId>false</externalId>
-        <label>Status</label>
-        <picklist>
-            <picklistValues>
-                <fullName>Open</fullName>
-                <default>true</default>
-            </picklistValues>
-            <picklistValues>
-                <fullName>Resolved</fullName>
-                <default>false</default>
-            </picklistValues>
-            <picklistValues>
-                <fullName>Closed</fullName>
-                <default>false</default>
-            </picklistValues>
-            <sorted>false</sorted>
-        </picklist>
-        <required>false</required>
-        <trackTrending>false</trackTrending>
-        <type>Picklist</type>
-    </fields>
-    <fields>
         <fullName>Webhooks_Failure_Rate__c</fullName>
         <externalId>false</externalId>
         <globalPicklist>Failure_Rates</globalPicklist>
@@ -313,7 +290,6 @@
         <fullName>All</fullName>
         <columns>NAME</columns>
         <columns>OBJECT_ID</columns>
-        <columns>Status__c</columns>
         <filterScope>Everything</filterScope>
         <label>All</label>
     </listViews>
@@ -334,7 +310,7 @@
     </validationRules>
     <validationRules>
         <fullName>End_Time_Required_on_Resolved</fullName>
-        <active>true</active>
+        <active>false</active>
         <errorConditionFormula>OR( 
 AND(ISPICKVAL( Status__c , &apos;Open&apos;), NOT(ISNULL( End_Time__c ))) ,
 AND(ISPICKVAL( Status__c , &apos;Resolved&apos;), ISNULL( End_Time__c )), AND(ISPICKVAL( Status__c , &apos;Closed&apos;) , ISNULL( End_Time__c )))</errorConditionFormula>
@@ -346,18 +322,18 @@ AND(ISPICKVAL( Status__c , &apos;Resolved&apos;), ISNULL( End_Time__c )), AND(IS
         <availability>online</availability>
         <displayType>button</displayType>
         <linkType>javascript</linkType>
-        <masterLabel>Send Post Mortem</masterLabel>
+        <masterLabel>Create Post Mortem Email</masterLabel>
         <openType>onClickJavaScript</openType>
         <protected>false</protected>
         <url>{!REQUIRESCRIPT(&quot;/soap/ajax/20.0/connection.js&quot;)}
 {!REQUIRESCRIPT(&quot;/soap/ajax/20.0/apex.js&quot;)}
 
-var t = {!ISPICKVAL(Incident_Report__c.Status__c, &apos;Closed&apos;)};
+var t = {!NOT(ISNULL(Incident_Report__c.End_Time__c))};
 
 if( t ) {
 window.open(&apos;/apex/IR_Send_PostMortem?id={!Incident_Report__c.Id}&apos;);
 } else {
-alert (&quot;Status must be Closed in order to send Post Mortem&quot;);
+alert (&quot;End Time must be set to send Post Mortem&quot;);
 }</url>
     </webLinks>
     <webLinks>
@@ -365,18 +341,18 @@ alert (&quot;Status must be Closed in order to send Post Mortem&quot;);
         <availability>online</availability>
         <displayType>button</displayType>
         <linkType>javascript</linkType>
-        <masterLabel>Send Update</masterLabel>
+        <masterLabel>Create Update Email</masterLabel>
         <openType>onClickJavaScript</openType>
         <protected>false</protected>
         <url>{!REQUIRESCRIPT(&quot;/soap/ajax/20.0/connection.js&quot;)}
 {!REQUIRESCRIPT(&quot;/soap/ajax/20.0/apex.js&quot;)}
 
-var t = {!ISPICKVAL(Incident_Report__c.Status__c, &apos;Open&apos;)};
+var t = {!ISNULL( Incident_Report__c.End_Time__c )};
 
 if( t ) {
 window.open(&apos;/apex/IR_Send_Update?id={!Incident_Report__c.Id}&apos;);
 } else {
-alert (&quot;Status must be Open in order to send Update&quot;);
+alert (&quot;You cannot send an update after End Time is set&quot;);
 }</url>
     </webLinks>
 </CustomObject>

@@ -23,11 +23,13 @@
         <members>IR_Comment__c</members>
         <members>IR_Email__c</members>
         <members>IR_Settings__c</members>
+        <members>Incident_Report__c</members>
         <name>CustomObject</name>
     </types>
     <types>
         <members>IR_Comment__c-IR Comment Layout</members>
         <members>IR_Email__c-IR Email Layout</members>
+        <members>Incident_Report__c-Incident Report Layout</members>
         <name>Layout</name>
     </types>
     <version>36.0</version>
